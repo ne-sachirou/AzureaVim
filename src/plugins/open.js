@@ -56,7 +56,11 @@ AzureaVim.prototype.open = function() {
         url = this.unshorten.unshorten(this.status_urls[this.command[2]], true);
         break;
     default:
-        url = this.unshorten.unshorten(this.status_urls[0], true) || 'https://twitter.com/' + this.screen_name + '/status/' + this.status_id;
+        if (this.status_urls[0]) {
+            url = this.unshorten.unshorten(this.status_urls[0], true);
+        } else {
+            url = 'https://twitter.com/' + this.screen_name + '/status/' + this.status_id;
+        }
         break;
     }
     System.openUrl(url);

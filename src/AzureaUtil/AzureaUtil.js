@@ -141,12 +141,12 @@ function clearTimeout(id) { // @param Strings:
 
 
 function setInterval(fun,  // @param Function:
-                         ms) { // @param Number:
-                               // @return Strings:
+                     ms) { // @param Number:
+                           // @return Strings:
     var id = Math.floor(Math.random() * new Date().getTime()).toString(36);
     
     timeinterval_list[id] = [new Date().getTime() + ms, fun, ms];
-    return id
+    return id;
 }
 
 

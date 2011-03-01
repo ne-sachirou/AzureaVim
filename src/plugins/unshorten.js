@@ -16,7 +16,7 @@ AzureaVim.prototype.unshorten = function() { // @return String: unshortened URL
 }
 
 
-AzureaVim.prototype.unshorten.services = [],
+AzureaVim.prototype.unshorten.services = [];
 AzureaVim.prototype.unshorten.cashe = {
     'http://c4se.tk/': 'http://c4se.sakura.ne.jp/'
 };
