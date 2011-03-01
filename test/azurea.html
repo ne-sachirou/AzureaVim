@@ -1,0 +1,73 @@
+<!docutype html>
+<html lang="ja">
+  <head>
+    <meta charset="utf-8"/>
+    <title>Azurea</title>
+    <style>
+    #notify {
+      height: 1em;
+      background-color: #ccc;
+    }
+    
+    #view {
+      background-color: #ccc;
+    }
+    
+    #view .selected {
+      background-color: #fcc;
+    }
+    
+    #console {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      width: 35em;
+      border: 1px solid #fcc;
+    }
+    
+    #console_view {
+      height: 20em;
+      width: 30em;
+    }
+    </style>
+  </head>
+  <body>
+    <div>
+      <div id="notify"></div>
+      <textarea cols="30" rows="5" id="TextArea"></textarea>
+      <span id="in_reply_to_status_id">0</span>
+      <button id="send">send</button>
+      <ul id="view"></ul>
+    </div>
+    <div id="console">
+      <div id="console_view"></div>
+      <textarea cols="50" rows="10" id="console_input"></textarea>
+      <button id="console_eval">eval</button>
+      <button id="console_clear">clear</button>
+      <div>
+        <input type="checkbox" id="console_shiftkey"/>Shift
+        <input type="checkbox" id="console_ctrlkey"/>Ctrl
+        <input type="checkbox" id="console_altkey"/>Alt
+        <input type="text" id="console_otherkey" size="5"/>
+        <button id="console_press_key">PressKey</button>
+      </div>
+      <div>
+        <input type="text" id="cosole_gesture" size="10"/>
+        <button id="console_dogesture">DoGesture</button>
+      </div>
+    </div>
+    <script src="uupaa.js"></script>
+    <script>
+    uu.click(uu.id('console_eval'), function() {
+        uu.id('console_view').innerHTML = uu.id('console_view').innerHTML +
+                                          '<br/>' +
+                                          eval(uu.id('console_input').value);
+    });
+    uu.click(uu.id('console_clear'), function() {
+        uu.id('console_view').innerHTML = '';
+    });
+    </script>
+    <script src="azurea.js"></script>
+    <script src="../feature.js"></script>
+  </body>
+</html>

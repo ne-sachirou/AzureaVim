@@ -1,0 +1,159 @@
+*AzureaVim
+AzureaVimは、Azureaにコマンド風操作を加えるAzureaScript拡張です。
+
+#contents
+
+*インストール
+AzureaのAzureaScriptインストール法に、従って下さい。
+一般に、Azureaインストールフォルダに有るScriptsフォルダ直下に、AzureaVim.jsを置く丈です。
+
+*使用法
+必要な情報を指定する為の動作と、コマンドを送る動作の、二つから成ります。
+先ず、指定するtweetを選択し、:キーを押します。
+次に、:から始まるコマンドを送信します。
+
+*コマンド一覧
+AzureaVimは、後述する通りプラグインでコマンドを拡張出来ます。此所には、デフォルトのコマンドを記述します。
+-:open
+--:open
+--:o
+--:url
+-:view
+--:view
+--:v
+--:home
+--:user
+-:retweet
+--:retweet
+--:rt
+-:replay
+--:reply
+--:r
+--:@
+--:quotetweet
+--:qt
+--:mrt
+-:settings
+--:settings
+--:setting
+--:set
+--:get
+
+**:open
+ブラウザでurlを開くコマンドです。
+
+:openは以下のoption1を取ります。
+-:open
+-:open status
+-:open favstar
+-:open fav = :open favstar
+-:open f = :open favstar
+-:open favotter
+-:open favlook
+-:open twistar
+-:open favolog
+-:open twilog
+-:open user
+-:open url
+:openは、statusにurlが含まれれば、最初に出現するurlを、含まなければ、statusを開きます。
+
+:open userは、以下のoption2を取ります。
+-:open user
+-:open user '''ユーザー名'''
+
+:open urlは以下のoption2を取ります。
+-:open url
+-:open url '''番号'''
+
+以下の短縮コマンドが有ります。
+-:o = :open
+-:url = :open url
+
+**:view
+Azurea内のviewを移動するコマンドです。
+
+:viewは以下のoption1を取ります。
+-:view home
+-:view timeline = :view home
+-:view h = :view home
+-:view mention
+-:view reply = :view mention
+-:view r = :view mention
+-:view m = :view mention
+-:view @ = :view mention
+-:view message
+-:view dm = :view message
+-:view d = :view message
+-:view user
+-:view u = :view user
+-:view favorite
+-:view fav = :view favorite
+-:view f = :view favorite
+-:view following
+-:view follow = :view following
+-:view followers
+-:view follower = :view followers
+-:view followed = :view followers
+
+以下の短縮コマンドが有ります。
+-:v = :view
+-:home = :view home
+-:user = :view user
+
+**:retweet
+Retweetするコマンドです。
+
+以下の短縮コマンドが有ります。
+-:rt = :retweet
+
+**:reply
+特定のパターンでreplayを記述するコマンドです。
+
+:replyは以下のoption1を取ります。
+-:reply
+-:reply template
+-:reply all
+-:reply quote
+-:reply qt = :reply quote
+-:reply mrt
+-:reply masirosiki = :reply mrt
+
+:reply templateは以下のoption2を取ります。
+-:reply template '''テンプレート文字列'''
+テンプレート文字列は、コマンドのパースに適応する為に、空白を含まないか、""で囲む必要が有ります。
+
+以下の短縮コマンドが有ります。
+-:r = :reply
+-:@ = :reply
+-:quotetweet = :reply quote
+-:qt = :reply quote
+-:mrt = :reply mrt
+
+**:settings
+Azureaの設定を閲覧・操作するコマンドです。
+以下の短縮コマンドが有ります。
+-:setting = :settings
+-:set = :settings
+-:get = :settings (但しfigureの=以下は強制的に無視されます。)
+
+*プラグイン
+AzureaVimは、別途jsファイルのプラグインを取って、自身を拡張する事が出来ます。
+ActivaXObjectを使用しています。Azurea.iniの、ScriptsセクションのAllowActiveXObjectが、AllowActiveXObject=1と成っている必要が有ります。AllowActiveXObjectが無効の場合、単純にプラグインを読み込みません。
+AzureaVimは安全性を保証しません。AllowActiveXObjectを使用したくない場合は、プラグインを使用しないか、AzureaVim.js本体に事前にプラグインを書き込む、等の方策を取って下さい。
+
+**プラグインのインストール
+AzureaVim.jsインストールフォルダに、AzureaVimフォルダを作り、其所にjsファイルを置いて下さい。
+Azurea自体は、Scriptsフォルダ直下のjsファイルのみを、起動時に読み込みます。AzureaVimフォルダ内のjsが、Azurea本体に直接読み込まれる事は有りません。
+AzureaVimは、AzureaVim内のjs以外のファイルは読み込みません。
+或るプラグインの読み込み時にエラーが出た場合は、其のプラグインの読み込み丈を停止し、他のプラグインを読み込みます。
+
+**プラグインAPI
+***AzureaVim.prototype
+
+
+***AzureaVim.commands_list
+
+
+**プラグイン一覧
+-translate.js
+-shindan.js

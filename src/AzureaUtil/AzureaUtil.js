@@ -1,0 +1,227 @@
+// https://gist.github.com/841702
+AzureaUtil = {};
+AzureaUtil.mixin = {};
+AzureaUtil.event = {};
+AzureaUtil.time = {};
+
+(function() {
+
+function mixin(hash1,       // @param Hash:
+               hash2,       // @param Hash:
+               overwrite) { // @param Boolean=true:
+    var key;
+    
+    if (typeof overwrite === 'undefined') {
+        overwrite = true;
+    }
+    for (key in hash2) {
+        if (overwrite || typeof hash1[key] === 'undefined') {
+            hash1[key] = hash2[key];
+        }
+    }
+}
+
+
+AzureaUtil.mixin = mixin;
+
+
+var PreProcessTimelineStatuses = [],
+    PreProcessTimelineStatus = [],
+    PreFilterProcessTimelineStatus = [],
+    PostFilterProcessTimelineStatus = [],
+    PostProcessTimelineStatus = [],
+    PostProcessTimelineStatuses = [],
+    PreSendUpdateStatus = [],
+    PostSendUpdateStatus = [],
+    ReceiveFavorite = [];
+
+
+function addEventListener(eventname, // @param String:
+                          fun) {     // @param Function:
+    var listener = eval(eventname),
+        i = -1;
+    
+    while (listener[++i]) {
+        if (listener[i] === fun) {
+            listener.splice(i, 1);
+        }
+    }
+    listener.push(fun);
+}
+
+
+function removeEventListener(eventname, // @param String:
+                             fun) {     // @param Function:
+    var listener = eval(eventname),
+        i = -1;
+    
+    while (listener[++i]) {
+        if (listener[i] === fun) {
+            listener.splice(i, 1);
+            break;
+        }
+    }
+}
+
+
+mixin(AzureaUtil.event, {
+    'PreProcessTimelineStatuses': PreProcessTimelineStatuses,
+    'PreProcessTimelineStatus': PreProcessTimelineStatus,
+    'PreFilterProcessTimelineStatus': PreFilterProcessTimelineStatus,
+    'PostFilterProcessTimelineStatus': PostFilterProcessTimelineStatus,
+    'PostProcessTimelineStatus': PostProcessTimelineStatus,
+    'PostProcessTimelineStatuses': PostProcessTimelineStatuses,
+    'PreSendUpdateStatus': PreSendUpdateStatus,
+    'PostSendUpdateStatus': PostSendUpdateStatus,
+    'ReceiveFavorite': ReceiveFavorite,
+    'addEventListener': addEventListener,
+    'removeEventListener': removeEventListener
+});
+
+
+var timeout_list = {},// {id: [time, fun]}
+    interval_list = {};// {id: [time, fun, interval]}
+//    timeevent_list = (function() {
+//    var timeevent_list,
+//        timeEvent;
+//    
+//    for () {
+//        timeEvent = System.settings.getValue('user.AzureaUtil', 'TimeEvent' + i);
+//        timeevent_list[]
+//    }
+//    return timeevent_list;
+//})();
+
+
+function attainSchedule() {
+    var now = new Date().getTime(),
+        id;
+    
+    for (id in timeout_list) {
+        if (timeout_list[id][0] <= now) {
+            timeout_list[id][1]();
+            delete timeout_list[id];
+        }
+    }
+    for (id in interval_list) {
+        if (interval_list[id][0] <= now) {
+            interval_list[id][0] += interval_list[id][2];
+            interval_list[id][1]();
+        }
+    }
+    //for (id in timeevent_list) {
+    //    if (timeevent_list[id][0] <= now) {
+    //        timeevent_list[id][1]();
+    //        delete timeevent_list[id];
+    //        System.settings.getValue('user.AzureaUtil', 'TimeEvent' + i);
+    //    }
+    //    
+    //}
+}
+
+
+addEventListener('PreProcessTimelineStatus', attainSchedule);
+addEventListener('PostSendUpdateStatus', attainSchedule);
+addEventListener('ReceiveFavorite', attainSchedule);
+
+
+function setTimeout(fun,  // @param Function:
+                    ms) { // @param Number:
+                          // @return Strings:
+    var id = Math.floor(Math.random() * new Date().getTime()).toString(36);
+    
+    timeout_list[id] = [new Date().getTime() + ms, fun];
+    return id;
+}
+
+
+function clearTimeout(id) { // @param Strings:
+    delete timeout_list[id];
+}
+
+
+function setInterval(fun,  // @param Function:
+                         ms) { // @param Number:
+                               // @return Strings:
+    var id = Math.floor(Math.random() * new Date().getTime()).toString(36);
+    
+    timeinterval_list[id] = [new Date().getTime() + ms, fun, ms];
+    return id
+}
+
+
+function clearInterval(id) { // @param Strings:
+    delete timeinterval_list[id];
+}
+
+
+//function setTimeevent(fun,  // @param Function:
+//                      ms) { // @param Number:
+//                            // @return Strings:
+//    
+//}
+//
+//
+//function clearTimeevent() {}
+
+
+mixin(AzureaUtil.time, {
+    'setTimeout': setTimeout,
+    'clearTimeout': clearTimeout,
+    'setInterval': setInterval,
+    'clearInterval': clearInterval
+});
+
+})();
+
+
+//function PreProcessTimelineStatuses() {}
+function PreProcessTimelineStatus(status) {
+    var listener = AzureaUtil.event.PreProcessTimelineStatus,
+        i = -1;
+    
+    while (listener[++i]) {
+        listener[i](status);
+    }
+}
+function PreFilterProcessTimelineStatus(status) {
+    var listener = AzureaUtil.event.PreFilterProcessTimelineStatus,
+        i = -1, r, flag = false;
+    
+    while (listener[++i]) {
+        r = listener[i](status);
+        flag = flag || r;
+    }
+    return flag;
+}
+//function PostFilterProcessTimelineStatus() {}
+//function PostProcessTimelineStatus() {}
+//function PostProcessTimelineStatuses() {}
+function PreSendUpdateStatus(status) {
+    var listener = AzureaUtil.event.PreSendUpdateStatus,
+        i = -1, r, flag = false;
+    
+    while (listener[++i]) {
+        r = listener[i](status);
+        flag = flag || r;
+    }
+    return flag;
+}
+function PostSendUpdateStatus() {
+    var listener = AzureaUtil.event.PostSendUpdateStatus,
+        i = -1;
+    
+    while (listener[++i]) {
+        listener[i]();
+    }
+}
+function ReceiveFavorite(source,
+                         target,
+                         target_object) {
+    var listener = AzureaUtil.event.ReceiveFavorites,
+        i = -1;
+    
+    while (listener[++i]) {
+        listener[i](source, target, target_object);
+    }
+}
