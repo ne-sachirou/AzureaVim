@@ -1,7 +1,7 @@
 Azurea.loadjs({
     "src/AzureaVim": ["src/AzureaUtil/AzureaUtil"],
     "src/AzureaUtil/AzureaUtil": [],
-    "src/plugins/open": ["src/AzureaVim"],
+    "src/plugins/open": ["src/AzureaVim", "src/plugins/unshorten"],
     "src/plugins/reply": ["src/AzureaVim"],
     "src/plugins/retweet": ["src/AzureaVim"],
     "src/plugins/settings": ["src/AzureaVim"],

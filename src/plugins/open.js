@@ -1,6 +1,7 @@
 AzureaUtil.mixin(AzureaVim.commands_list, {
     open: 'open',
     o: 'open',
+    'お': 'open',
     url: 'open url'
 });
 // :open [option1 [option2]]
@@ -52,10 +53,10 @@ AzureaVim.prototype.open = function() {
         if (!this.command[2]) {
             this.command[2] = 0;
         }
-        url = this.status_urls[this.command[2]];
+        url = this.unshorten.unshorten(this.status_urls[this.command[2]], true);
         break;
     default:
-        url = this.status_urls[0] || 'https://twitter.com/' + this.screen_name + '/status/' + this.status_id;
+        url = this.unshorten.unshorten(this.status_urls[0], true) || 'https://twitter.com/' + this.screen_name + '/status/' + this.status_id;
         break;
     }
     System.openUrl(url);

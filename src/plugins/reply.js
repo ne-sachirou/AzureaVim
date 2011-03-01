@@ -4,7 +4,9 @@ AzureaUtil.mixin(AzureaVim.commands_list, {
     '@': 'reply',
     quotetweet: 'reply quote',
     qt: 'reply quote',
-    mrt: 'reply mrt'
+    'ｑｔ': 'reply quote',
+    mrt: 'reply mrt',
+    'ｍｒｔ': 'reply mrt'
 });
 // :reply [option1 [option2 [option3]]]
 // 
@@ -71,7 +73,7 @@ AzureaVim.prototype.reply = function() {
         if (this.command[2] === 'f' || this.command[2] === 'fav' || this.command[2] === 'favstar') {
             this.command = ['reply', 'template', "#{} MRT: #{'http://favstar.fm/t/' + status_id}", 'false'];
         } else {
-            this.command = ['reply', 'template', "#{} MRT: #{'http://twitter.com/' + screen_name + '/ststus/' + status_id}", 'false'];
+            this.command = ['reply', 'template', "#{} MRT: #{'http://twitter.com/' + screen_name + '/status/' + status_id}", 'false'];
         }
         this.reply();
         break;

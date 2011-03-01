@@ -311,6 +311,7 @@ AzureaVim.prototype.run = function() {
 AzureaUtil.mixin(AzureaVim.commands_list, {
     open: 'open',
     o: 'open',
+    'お': 'open',
     url: 'open url'
 });
 // :open [option1 [option2]]
@@ -376,7 +377,9 @@ AzureaUtil.mixin(AzureaVim.commands_list, {
     '@': 'reply',
     quotetweet: 'reply quote',
     qt: 'reply quote',
-    mrt: 'reply mrt'
+    'ｑｔ': 'reply quote',
+    mrt: 'reply mrt',
+    'ｍｒｔ': 'reply mrt'
 });
 // :reply [option1 [option2 [option3]]]
 // 
