@@ -218,7 +218,7 @@ function PostSendUpdateStatus() {
 function ReceiveFavorite(source,
                          target,
                          target_object) {
-    var listener = AzureaUtil.event.ReceiveFavorites,
+    var listener = AzureaUtil.event.ReceiveFavorite,
         i = -1;
     
     while (listener[++i]) {

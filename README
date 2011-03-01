@@ -1,0 +1,14 @@
+=AzureaVim
+以下のsubプロジェクトを含みます。
+-AzureaVim
+-AzureaUtil
+-AzureaTest
+
+==AzureaVim
+command interface for Azurea
+
+==AzureaUtil
+AzureaScript utility
+
+==AzureaTest
+AzureaScript emulator

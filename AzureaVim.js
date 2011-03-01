@@ -218,7 +218,7 @@ function PostSendUpdateStatus() {
 function ReceiveFavorite(source,
                          target,
                          target_object) {
-    var listener = AzureaUtil.event.ReceiveFavorites,
+    var listener = AzureaUtil.event.ReceiveFavorite,
         i = -1;
     
     while (listener[++i]) {
@@ -440,7 +440,7 @@ AzureaVim.prototype.reply = function() {
         this.reply();
         break;
     case 'mrt':
-        if (this.command[2] = 'f' || this.command[2] = 'fav' || this.command[2] = 'favstar') {
+        if (this.command[2] === 'f' || this.command[2] === 'fav' || this.command[2] === 'favstar') {
             this.command = ['reply', 'template', "#{} MRT: #{'http://favstar.fm/t/' + status_id}", 'false'];
         } else {
             this.command = ['reply', 'template', "#{} MRT: #{'http://twitter.com/' + screen_name + '/ststus/' + status_id}", 'false'];
@@ -521,13 +521,13 @@ AzureaVim.prototype.unshorten = function() { // @return String: unshortened URL
 }
 
 
-var services = AzureaVim.prototype.unshorten.services = [],
-    cashe = AzureaVim.prototype.unshorten.cashe = {
+AzureaVim.prototype.unshorten.services = [],
+AzureaVim.prototype.unshorten.cashe = {
     'http://c4se.tk/': 'http://c4se.sakura.ne.jp/'
 };
 
 try {
-    Http.sendRequestAsync('http://untiny.me/api/1.0/services/?format=text', false,
+    Http.sendRequestAsync('http://untiny.me/api/1.0/services/?format=text', true,
                           function(response) { // @param HttpResponce Object:
         AzureaVim.prototype.unshorten.services = response.body.split(', ');
     });
@@ -536,10 +536,11 @@ try {
 
 function isPossibleUnshorten(url) { // @param String: shortend URL
                                     // @return Boolean:
-    var _services = services, i = -1, is_possible = false;
+    var services = AzureaVim.prototype.unshorten.services,
+        i = -1, is_possible = false;
     
-    while (_services[++i]) {
-        if (url.indexOf(_services[i]) !== -1) {
+    while (services[++i]) {
+        if (url.indexOf(services[i]) !== -1) {
             is_possible = true;
             break;
         }
@@ -551,11 +552,12 @@ function isPossibleUnshorten(url) { // @param String: shortend URL
 function unshorten(url,     // @param String: shortened URL
                    async) { // @param Boolean=false:
                             // @return String: unshortened URL
-    var _cashe = cashe, response, result = url;
+    var cashe = AzureaVim.prototype.unshorten.cashe,
+        response, result = url;
     
     if (isPossibleUnshorten(url)) {
-        if (_cashe[url]) {
-            result = _cashe[url];
+        if (cashe[url]) {
+            result = cashe[url];
         } else if (async) {
             try {
                 Http.sendRequestAsync('http://untiny.me/api/1.0/extract/?url=' + url + '&format=text', false,
@@ -567,7 +569,7 @@ function unshorten(url,     // @param String: shortened URL
             try {
                 response = Http.sendRequest('http://untiny.me/api/1.0/extract/?url=' + url + '&format=text', false);
                 result = /^error/.test(response.body) ? url : response.body;
-                _cashe[url] = result;
+                cashe[url] = result;
             } catch (e) {}
         }
     }
