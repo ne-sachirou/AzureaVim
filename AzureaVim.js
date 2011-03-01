@@ -309,204 +309,6 @@ AzureaVim.prototype.run = function() {
 
 })();
 AzureaUtil.mixin(AzureaVim.commands_list, {
-    open: 'open',
-    o: 'open',
-    'お': 'open',
-    url: 'open url'
-});
-// :open [option1 [option2]]
-//
-
-
-AzureaVim.prototype.open = function() {
-    var url,
-        c1 = {
-        status: 'status',
-        favstar: 'favstar',
-        fav: 'favstar',
-        f: 'favstar',
-        favotter: 'favotter',
-        favlook: 'favlook',
-        twistar: 'twistar',
-        favolog: 'favolog',
-        twilog: 'twilog',
-        user: 'user',
-        url: 'url'
-    };
-    
-    switch (c1[this.command[1]]) {
-    case 'status':
-        url = 'https://twitter.com/' + this.screen_name + '/status/' + this.status_id;
-        break;
-    case 'favstar':
-        url = 'http://favstar.fm/t/' + this.status_id;
-        break;
-    case 'favotter':
-        url = 'http://favotter.net/status.php?id=' + this.status_id;
-        break;
-    case 'favlook':
-        url = 'http://favlook.osa-p.net/status.html?status_id=' + this.status_id;
-        break;
-    case 'twistar':
-        url = 'http://twistar.cc/' + this.screen_name + '/status/' + this.status_id;
-        break;
-    case 'favolog':
-        url = 'http://favolog.org/' + (this.command[2] || this.screen_name);
-        break;
-    case 'twilog':
-        url = 'http://twilog.org/' + (this.command[2] || this.screen_name);
-        break;
-    case 'user':
-        url = 'http://twitter.com/' + (this.command[2] || this.screen_name);
-        break;
-    case 'url':
-        if (!this.command[2]) {
-            this.command[2] = 0;
-        }
-        url = this.status_urls[this.command[2]];
-        break;
-    default:
-        url = this.status_urls[0] || 'https://twitter.com/' + this.screen_name + '/status/' + this.status_id;
-        break;
-    }
-    System.openUrl(url);
-}
-AzureaUtil.mixin(AzureaVim.commands_list, {
-    reply: 'reply',
-    r: 'reply',
-    '@': 'reply',
-    quotetweet: 'reply quote',
-    qt: 'reply quote',
-    'ｑｔ': 'reply quote',
-    mrt: 'reply mrt',
-    'ｍｒｔ': 'reply mrt'
-});
-// :reply [option1 [option2 [option3]]]
-// 
-
-
-(function() {
-
-function _expandTemplate(template, // String:
-                         view) {   // Object:
-                                   // String: has Number [cursor] property
-    var cursor,
-        text = template.replace(/#{([^}]+?)}/g, function() {
-        with (view) {
-            return eval(arguments[1]);
-        }
-    });
-    
-    text = text.split('#{}');
-    if (text.length === 1) {
-        cursor = 0;
-        text = text[0];
-    } else {
-        cursor = text[0].length;
-        text = text.join('');
-    }
-    text.cursor = cursor;
-    return {
-        'text': text,
-        'cursor': cursor
-    };
-}
-
-
-AzureaVim.prototype.reply = function() {
-    var c1 = {
-        template: 'template',
-        all: 'all',
-        quote: 'quote',
-        qt: 'quote',
-        mrt: 'mrt',
-        masirosiki: 'mrt'
-    },
-        t;
-    
-    switch (c1[this.command[1]]) {
-    case 'template':
-        t = _expandTemplate(this.command[2], this);
-        Http.sendRequestAsync('http://google.com/', false,
-                              new Function("TextArea.text = '" + t.text.replace("'", "\\'") + "';" +
-            "TextArea.in_reply_to_status_id = '" + (this.command[3] === 'true' ? this.status_id : 0) + "';" +
-            "TextArea.show();" +
-            "TextArea.setFocus();" +
-            "TextArea.setCursor(" + t.cursor + ");"));
-        break;
-    case 'all':
-        this.command = ['reply', 'template', "@#{screen_name + (status_users.length ? ' @' +status_users.join(' @') : '')} #{}", 'true'];
-        this.reply();
-        break;
-    case 'quote':
-        this.command = ['reply', 'template', "@#{screen_name} #{} RT: #{status_text}", 'true'];
-        this.reply();
-        break;
-    case 'mrt':
-        if (this.command[2] === 'f' || this.command[2] === 'fav' || this.command[2] === 'favstar') {
-            this.command = ['reply', 'template', "#{} MRT: #{'http://favstar.fm/t/' + status_id}", 'false'];
-        } else {
-            this.command = ['reply', 'template', "#{} MRT: #{'http://twitter.com/' + screen_name + '/ststus/' + status_id}", 'false'];
-        }
-        this.reply();
-        break;
-    default:
-        this.command = ['reply', 'template', "@#{screen_name} #{}#{status_hashes.length ? ' ' + status_hashes.join(' ') : ''}", 'true'];
-        this.reply();
-        break;
-    }
-}
-
-})();
-AzureaUtil.mixin(AzureaVim.commands_list, {
-    retweet: 'retweet',
-    rt: 'retweet'
-});
-// :retweet
-// 指定statusをRetweetします。
-
-
-AzureaVim.prototype.retweet = function() {
-    TwitterService.retweet.create(this.status_id);
-}
-AzureaUtil.mixin(AzureaVim.commands_list, {
-    settings: 'settings',
-    setting: 'settings',
-    'set': 'settings',
-    'get': 'settings'
-});
-// :settings option1
-// optinon1は、設定式です。
-// 設定式は、
-//     「iniセクション名::キー=値」
-// 或いは
-//     「iniセクション名::キー」
-// の形を取ります。
-// ex. :settings Misc :: FontSize
-//     :settings Misc::EnableAutoRefresh=1
-//
-// :get option1
-// option1は、設定式です。
-// 設定式の「=値」は無視します。
-
-AzureaVim.prototype.settings = function() {
-    var figure, value;
-    
-    figure = this.command.slice(1).join('');
-    figure = figure.split('::');
-    figure = [figure[0]].concat(figure[1].split('='));
-    if (/^get/.test(this.command[0])) {
-        figure.length = 2;
-    }
-    if (figure[2]) {
-        System.settings.setValue(figure[0], figure[1], figure[2]);
-        System.showNotice('Setting done: ' + figure[0] + '::' + figure[1] + '=' + figure[2]);
-    } else {
-        System.showNotice('Getting done: ' + figure[0] + '::' + figure[1] + '=' + System.settings.getValue(figure[0], figure[1]));
-    }
-    //System.settings.reconfigure();
-}
-AzureaUtil.mixin(AzureaVim.commands_list, {
     unshorten: 'unshorten'
 });
 // :unshorten option1
@@ -589,6 +391,204 @@ AzureaUtil.event.addEventListener('PreProcessTimelineStatus', function(status) {
 });
 
 })();
+AzureaUtil.mixin(AzureaVim.commands_list, {
+    open: 'open',
+    o: 'open',
+    'お': 'open',
+    url: 'open url'
+});
+// :open [option1 [option2]]
+//
+
+
+AzureaVim.prototype.open = function() {
+    var url,
+        c1 = {
+        status: 'status',
+        favstar: 'favstar',
+        fav: 'favstar',
+        f: 'favstar',
+        favotter: 'favotter',
+        favlook: 'favlook',
+        twistar: 'twistar',
+        favolog: 'favolog',
+        twilog: 'twilog',
+        user: 'user',
+        url: 'url'
+    };
+    
+    switch (c1[this.command[1]]) {
+    case 'status':
+        url = 'https://twitter.com/' + this.screen_name + '/status/' + this.status_id;
+        break;
+    case 'favstar':
+        url = 'http://favstar.fm/t/' + this.status_id;
+        break;
+    case 'favotter':
+        url = 'http://favotter.net/status.php?id=' + this.status_id;
+        break;
+    case 'favlook':
+        url = 'http://favlook.osa-p.net/status.html?status_id=' + this.status_id;
+        break;
+    case 'twistar':
+        url = 'http://twistar.cc/' + this.screen_name + '/status/' + this.status_id;
+        break;
+    case 'favolog':
+        url = 'http://favolog.org/' + (this.command[2] || this.screen_name);
+        break;
+    case 'twilog':
+        url = 'http://twilog.org/' + (this.command[2] || this.screen_name);
+        break;
+    case 'user':
+        url = 'http://twitter.com/' + (this.command[2] || this.screen_name);
+        break;
+    case 'url':
+        if (!this.command[2]) {
+            this.command[2] = 0;
+        }
+        url = this.unshorten.unshorten(this.status_urls[this.command[2]], true);
+        break;
+    default:
+        url = this.unshorten.unshorten(this.status_urls[0], true) || 'https://twitter.com/' + this.screen_name + '/status/' + this.status_id;
+        break;
+    }
+    System.openUrl(url);
+}
+AzureaUtil.mixin(AzureaVim.commands_list, {
+    reply: 'reply',
+    r: 'reply',
+    '@': 'reply',
+    quotetweet: 'reply quote',
+    qt: 'reply quote',
+    'ｑｔ': 'reply quote',
+    mrt: 'reply mrt',
+    'ｍｒｔ': 'reply mrt'
+});
+// :reply [option1 [option2 [option3]]]
+// 
+
+
+(function() {
+
+function _expandTemplate(template, // String:
+                         view) {   // Object:
+                                   // String: has Number [cursor] property
+    var cursor,
+        text = template.replace(/#{([^}]+?)}/g, function() {
+        with (view) {
+            return eval(arguments[1]);
+        }
+    });
+    
+    text = text.split('#{}');
+    if (text.length === 1) {
+        cursor = 0;
+        text = text[0];
+    } else {
+        cursor = text[0].length;
+        text = text.join('');
+    }
+    text.cursor = cursor;
+    return {
+        'text': text,
+        'cursor': cursor
+    };
+}
+
+
+AzureaVim.prototype.reply = function() {
+    var c1 = {
+        template: 'template',
+        all: 'all',
+        quote: 'quote',
+        qt: 'quote',
+        mrt: 'mrt',
+        masirosiki: 'mrt'
+    },
+        t;
+    
+    switch (c1[this.command[1]]) {
+    case 'template':
+        t = _expandTemplate(this.command[2], this);
+        Http.sendRequestAsync('http://google.com/', false,
+                              new Function("TextArea.text = '" + t.text.replace("'", "\\'") + "';" +
+            "TextArea.in_reply_to_status_id = '" + (this.command[3] === 'true' ? this.status_id : 0) + "';" +
+            "TextArea.show();" +
+            "TextArea.setFocus();" +
+            "TextArea.setCursor(" + t.cursor + ");"));
+        break;
+    case 'all':
+        this.command = ['reply', 'template', "@#{screen_name + (status_users.length ? ' @' +status_users.join(' @') : '')} #{}", 'true'];
+        this.reply();
+        break;
+    case 'quote':
+        this.command = ['reply', 'template', "@#{screen_name} #{} RT: #{status_text}", 'true'];
+        this.reply();
+        break;
+    case 'mrt':
+        if (this.command[2] === 'f' || this.command[2] === 'fav' || this.command[2] === 'favstar') {
+            this.command = ['reply', 'template', "#{} MRT: #{'http://favstar.fm/t/' + status_id}", 'false'];
+        } else {
+            this.command = ['reply', 'template', "#{} MRT: #{'http://twitter.com/' + screen_name + '/status/' + status_id}", 'false'];
+        }
+        this.reply();
+        break;
+    default:
+        this.command = ['reply', 'template', "@#{screen_name} #{}#{status_hashes.length ? ' ' + status_hashes.join(' ') : ''}", 'true'];
+        this.reply();
+        break;
+    }
+}
+
+})();
+AzureaUtil.mixin(AzureaVim.commands_list, {
+    retweet: 'retweet',
+    rt: 'retweet'
+});
+// :retweet
+// 指定statusをRetweetします。
+
+
+AzureaVim.prototype.retweet = function() {
+    TwitterService.retweet.create(this.status_id);
+}
+AzureaUtil.mixin(AzureaVim.commands_list, {
+    settings: 'settings',
+    setting: 'settings',
+    'set': 'settings',
+    'get': 'settings'
+});
+// :settings option1
+// optinon1は、設定式です。
+// 設定式は、
+//     「iniセクション名::キー=値」
+// 或いは
+//     「iniセクション名::キー」
+// の形を取ります。
+// ex. :settings Misc :: FontSize
+//     :settings Misc::EnableAutoRefresh=1
+//
+// :get option1
+// option1は、設定式です。
+// 設定式の「=値」は無視します。
+
+AzureaVim.prototype.settings = function() {
+    var figure, value;
+    
+    figure = this.command.slice(1).join('');
+    figure = figure.split('::');
+    figure = [figure[0]].concat(figure[1].split('='));
+    if (/^get/.test(this.command[0])) {
+        figure.length = 2;
+    }
+    if (figure[2]) {
+        System.settings.setValue(figure[0], figure[1], figure[2]);
+        System.showNotice('Setting done: ' + figure[0] + '::' + figure[1] + '=' + figure[2]);
+    } else {
+        System.showNotice('Getting done: ' + figure[0] + '::' + figure[1] + '=' + System.settings.getValue(figure[0], figure[1]));
+    }
+    //System.settings.reconfigure();
+}
 AzureaUtil.mixin(AzureaVim.commands_list, {
     shindan: 'shindanmaker'
 });

@@ -98,8 +98,9 @@ Azurea.prototype = {
     notify: function(text) { // @param String:
         var doc_notify = uu.id('notify');
         
+        Azurea.prototype.notify.timeout_id || clearTimeout(Azurea.prototype.notify.timeout_id);
         doc_notify.innerHTML = text;
-        setTimeout(function() {
+        Azurea.prototype.notify.timeout_id = setTimeout(function() {
             doc_notify.innerHTML = '';
         }, 5000);
     },
@@ -275,17 +276,17 @@ global.System = {
     },
     
     alert: function(message) { // @param String:
-        alert(message);
+        window.alert(message);
     },
     
     openUrl: function(url) { // @param String:
-        
+        console_show('window.open(' + url + ', null)');
     },
     
     showMessage: function(message, // @param String:
                           title,   // @param String:
                           type) {  // @param Number: http://msdn.microsoft.com/en-us/library/ms645505(v=vs.85).aspx
-        
+        window.confirm(message);
     },
     
     launchApplication: function(file,      // @param String:
@@ -298,11 +299,11 @@ global.System = {
                        text,     // @param String:
                        is_ime) { // @param Boolean:
                                  // @return String:
-        
+        return window.prompt(message, text);
     },
     
     showNotice: function(message) { // @param String:
-        
+        azurea.notify(message);
     },
     
     setActiveProfile: function(profile_number) { // @param Number:
@@ -452,8 +453,9 @@ global.TwitterService = {
     },
     
     status: {
-        update: function() {
-            
+        update: function(status,                 // @param String:
+                         in_reply_to_status_id) { // @param String:
+            azurea.sendStatus(status, in_reply_to_status_id);
         },
         
         get: function() {

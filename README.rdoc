@@ -1,4 +1,9 @@
+=License
+AzureaVim - MIT License http://c4se.sakura.ne.jp/profile/ne.html
+uupaa.js - MIT License uupaa.js@gmail.com
+
 =AzureaVim
+
 以下のsubプロジェクトを含みます。
 -AzureaVim
 -AzureaUtil

@@ -2,7 +2,7 @@
 <html lang="ja">
   <head>
     <meta charset="utf-8"/>
-    <title>Azurea</title>
+    <title>AzureaTest</title>
     <style>
     #notify {
       height: 1em;
@@ -58,10 +58,13 @@
     </div>
     <script src="uupaa.js"></script>
     <script>
-    uu.click(uu.id('console_eval'), function() {
+    function console_show(string) {
         uu.id('console_view').innerHTML = uu.id('console_view').innerHTML +
                                           '<br/>' +
-                                          eval(uu.id('console_input').value);
+                                          string;
+    }
+    uu.click(uu.id('console_eval'), function() {
+        console_show(eval(uu.id('console_input').value));
     });
     uu.click(uu.id('console_clear'), function() {
         uu.id('console_view').innerHTML = '';
