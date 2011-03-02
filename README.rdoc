@@ -1,20 +1,22 @@
 =License
-AzureaVim - http://c4se.sakura.ne.jp/profile/ne.html MIT License
-uupaa.js - uupaa.js@gmail.com MIT License
-Closure Compiler - 2009 Google Inc. Apache License, Version 2.0
+* AzureaVim - http://c4se.sakura.ne.jp/profile/ne.html MIT License
+* uupaa.js - uupaa.js@gmail.com MIT License
+* Closure Compiler - 2009 Google Inc. Apache License, Version 2.0
 
 =AzureaVim
-
 以下のsubプロジェクトを含みます。
 * AzureaVim
 * AzureaUtil
 * AzureaTest
 
 ==AzureaVim
-command interface for Azurea
+  Command interface for Azurea
+  'js/AzureaVim.js' is a builded script file.
 
 ==AzureaUtil
-AzureaScript utility
+  AzureaScript utility
+  Place at 'src/AzureaUtil/'.
 
 ==AzureaTest
-AzureaScript emulator
+  AzureaScript emulator
+  Place at 'test/'.

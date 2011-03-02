@@ -28,7 +28,8 @@ open 'feature.js' do |feature_js|
 end
 
 file f_release => f_momonga do |t|
-  sh "java -jar closure-compiler/compiler.jar --compilation_level SIMPLE_OPTIMIZATIONS --js_output_file #{t.name} --js #{t.prerequisites[0]}"
+  compilation_level = 'WHITESPACE_ONLY' #WHITESPACE_ONLY | SIMPLE_OPTIMIZATIONS | ADVANCED_OPTIMIZATIONS
+  sh "java -jar closure-compiler/compiler.jar --compilation_level #{compilation_level} --js_output_file #{t.name} --js #{t.prerequisites[0]}"
   #sh "java -jar yuicompressor/build/yuicompressor-2.4.2.jar --charset UFT-8 -o #{t.name} #{t.prerequisites[0]}"
   #sh "AjaxMin/AjaxMin -enc:in UFT-8 #{t.prerequisites[0]} -out #{t.name}"
 end
