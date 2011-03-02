@@ -35,11 +35,11 @@ Azurea.loadjs = function(features) { // @param Hash:
         
         for (; i < l; ++i) {
             if(/feature\.js$/.test(script_nodes[i].src)) {
-                return script_nodes[i].src.replace(/feature\.js$/, '');
+                return script_nodes[i].getAttribute('src').replace(/feature\.js$/, '');
             }
         }
         return '';
-    })();
+    })() + '../src/';
     
     function appendScript(path) { // @param String:
         var node;

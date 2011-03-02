@@ -4,8 +4,8 @@ require 'json'
 f_momonga = '../js/momonga.js'
 f_release = '../js/AzureaVim.js'
 
-CLEAN.include("../js/momonga.js")
-CLOBBER.include("../js/AzureaVim.js")
+CLEAN.include(f_momonga)
+CLOBBER.include(f_release)
 
 open 'feature.js' do |feature_js|
   json = feature_js.read.gsub(/(^.+\()|(\).*$)/m, '')
@@ -15,9 +15,9 @@ open 'feature.js' do |feature_js|
     desc "#{key} => #{value}"
     task key => value do |t|
       puts t.name
-      open '../js/momonga.js', 'a' do |azurea_vim_js|
-        open "../#{t.name}.js" do |key_js|
-          azurea_vim_js.puts key_js.read
+      open f_momonga, 'a' do |momonga_js|
+        open "../src/#{t.name}.js" do |key_js|
+          momonga_js.puts key_js.read
         end
       end
     end
