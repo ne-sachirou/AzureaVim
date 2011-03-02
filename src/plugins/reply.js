@@ -1,7 +1,9 @@
 AzureaUtil.mixin(AzureaVim.commands_list, {
     reply: 'reply',
     r: 'reply',
+    'ｒ': 'reply',
     '@': 'reply',
+    '＠': 'reply',
     quotetweet: 'reply quote',
     qt: 'reply quote',
     'ｑｔ': 'reply quote',
@@ -9,7 +11,10 @@ AzureaUtil.mixin(AzureaVim.commands_list, {
     'ｍｒｔ': 'reply mrt'
 });
 // :reply [option1 [option2 [option3]]]
-// 
+// 指定tweetを元に、テンプレートに従ってTextAreaに記入する、QT用のコマンドです。
+// 基本は、「:reply tenplate "テンプレート" in_reply_toを付与するか否か」です。
+// option1は、replyテンプレートの種類（template, all, qt, mrt等）です。
+// option1を省略した場合、通常のreply（但しhashtagを引き継ぐ）テンプレートを選択します。
 
 
 (function() {

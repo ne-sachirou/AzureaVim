@@ -1,9 +1,12 @@
 AzureaUtil.mixin(AzureaVim.commands_list, {
     translate: 'translate',
-    ja: 'translate ja'
+    ja: 'translate ja',
+    'じゃ': 'translate ja'
 });
 // :translate [option1]
-//
+// Google翻訳APIで指定statusを翻訳します。
+// option1は、翻訳先言語です。ISOの言語コードを指定します。
+// option1がを省略した場合、jaへ翻訳します。
 
 AzureaVim.prototype.translate = function() {
     if (!this.command[1]) {

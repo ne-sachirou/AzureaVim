@@ -2,10 +2,15 @@ AzureaUtil.mixin(AzureaVim.commands_list, {
     view: 'view',
     v: 'view',
     home: 'view home',
-    user: 'view user'
+    'ほめ': 'view home',
+    user: 'view user',
+    'うせｒ': 'view user'
 });
 // :view option1 [option2]
-//
+// Azurea内のviewを移動します。
+// option1は、移動先viewです。
+// option1にuser, search, matchを指定した場合、option2を取ります。
+// :v userで、option2を省略した場合は、指定statusから補完します。
 
 
 AzureaVim.prototype.view = function() {

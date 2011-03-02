@@ -2,10 +2,13 @@ AzureaUtil.mixin(AzureaVim.commands_list, {
     open: 'open',
     o: 'open',
     'お': 'open',
-    url: 'open url'
+    url: 'open url',
+    'うｒｌ': 'open url'
 });
 // :open [option1 [option2]]
-//
+// webブラウザでurlを開きます。
+// option1は、開くurlの種類（url, status, favstar等）です。
+// option1を省略した場合、指定statusがurlを含めば0番目を、含まなければ、指定statusを開きます。
 
 
 AzureaVim.prototype.open = function() {

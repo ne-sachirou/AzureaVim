@@ -309,10 +309,15 @@ AzureaVim.prototype.run = function() {
 
 })();
 AzureaUtil.mixin(AzureaVim.commands_list, {
-    unshorten: 'unshorten'
+    unshorten: 'unshorten',
+    'うんしょｒてｎ': 'unshorten'
 });
-// :unshorten option1
-//
+// :unshorten [option1]
+// untiny.meのAPIを使用して、短縮urlを伸展します。inputBox中に伸展urlを表示します。
+// 受信tweetが含む短縮urlは、事前に非同期で伸展urlを取得し、キャッシュしています（UIをblockしません）。
+// 二度目以降の受信時には、初めから、伸展したurlをstatusに表示します。
+// option1は、指定tweetが含むurlの番号（0から始まる自然数）です。
+// option1を省略した場合、0を使用します。
 
 // https://gist.github.com/835563
 (function() {
@@ -395,10 +400,13 @@ AzureaUtil.mixin(AzureaVim.commands_list, {
     open: 'open',
     o: 'open',
     'お': 'open',
-    url: 'open url'
+    url: 'open url',
+    'うｒｌ': 'open url'
 });
 // :open [option1 [option2]]
-//
+// webブラウザでurlを開きます。
+// option1は、開くurlの種類（url, status, favstar等）です。
+// option1を省略した場合、指定statusがurlを含めば0番目を、含まなければ、指定statusを開きます。
 
 
 AzureaVim.prototype.open = function() {
@@ -461,7 +469,9 @@ AzureaVim.prototype.open = function() {
 AzureaUtil.mixin(AzureaVim.commands_list, {
     reply: 'reply',
     r: 'reply',
+    'ｒ': 'reply',
     '@': 'reply',
+    '＠': 'reply',
     quotetweet: 'reply quote',
     qt: 'reply quote',
     'ｑｔ': 'reply quote',
@@ -469,7 +479,10 @@ AzureaUtil.mixin(AzureaVim.commands_list, {
     'ｍｒｔ': 'reply mrt'
 });
 // :reply [option1 [option2 [option3]]]
-// 
+// 指定tweetを元に、テンプレートに従ってTextAreaに記入する、QT用のコマンドです。
+// 基本は、「:reply tenplate "テンプレート" in_reply_toを付与するか否か」です。
+// option1は、replyテンプレートの種類（template, all, qt, mrt等）です。
+// option1を省略した場合、通常のreply（但しhashtagを引き継ぐ）テンプレートを選択します。
 
 
 (function() {
@@ -626,10 +639,13 @@ AzureaVim.prototype.shindanmaker = function() {
 }
 AzureaUtil.mixin(AzureaVim.commands_list, {
     translate: 'translate',
-    ja: 'translate ja'
+    ja: 'translate ja',
+    'じゃ': 'translate ja'
 });
 // :translate [option1]
-//
+// Google翻訳APIで指定statusを翻訳します。
+// option1は、翻訳先言語です。ISOの言語コードを指定します。
+// option1がを省略した場合、jaへ翻訳します。
 
 AzureaVim.prototype.translate = function() {
     if (!this.command[1]) {
@@ -654,10 +670,15 @@ AzureaUtil.mixin(AzureaVim.commands_list, {
     view: 'view',
     v: 'view',
     home: 'view home',
-    user: 'view user'
+    'ほめ': 'view home',
+    user: 'view user',
+    'うせｒ': 'view user'
 });
 // :view option1 [option2]
-//
+// Azurea内のviewを移動します。
+// option1は、移動先viewです。
+// option1にuser, search, matchを指定した場合、option2を取ります。
+// :v userで、option2を省略した場合は、指定statusから補完します。
 
 
 AzureaVim.prototype.view = function() {

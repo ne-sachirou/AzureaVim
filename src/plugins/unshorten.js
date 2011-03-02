@@ -1,8 +1,13 @@
 AzureaUtil.mixin(AzureaVim.commands_list, {
-    unshorten: 'unshorten'
+    unshorten: 'unshorten',
+    'うんしょｒてｎ': 'unshorten'
 });
-// :unshorten option1
-//
+// :unshorten [option1]
+// untiny.meのAPIを使用して、短縮urlを伸展します。inputBox中に伸展urlを表示します。
+// 受信tweetが含む短縮urlは、事前に非同期で伸展urlを取得し、キャッシュしています（UIをblockしません）。
+// 二度目以降の受信時には、初めから、伸展したurlをstatusに表示します。
+// option1は、指定tweetが含むurlの番号（0から始まる自然数）です。
+// option1を省略した場合、0を使用します。
 
 // https://gist.github.com/835563
 (function() {
