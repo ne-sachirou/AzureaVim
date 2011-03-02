@@ -1,8 +1,9 @@
 // https://gist.github.com/841702
-AzureaUtil = {};
-AzureaUtil.mixin = {};
-AzureaUtil.event = {};
-AzureaUtil.time = {};
+AzureaUtil = {
+    mixin: {},
+    event: {},
+    time: {}
+};
 
 (function() {
 
@@ -11,7 +12,7 @@ function mixin(hash1,       // @param Hash:
                overwrite) { // @param Boolean=true:
     var key;
     
-    if (typeof overwrite === 'undefined') {
+    if (overwrite == null) { // null or undefined
         overwrite = true;
     }
     for (key in hash2) {
@@ -20,25 +21,24 @@ function mixin(hash1,       // @param Hash:
         }
     }
 }
-
-
 AzureaUtil.mixin = mixin;
 
 
-var PreProcessTimelineStatuses = [],
-    PreProcessTimelineStatus = [],
-    PreFilterProcessTimelineStatus = [],
-    PostFilterProcessTimelineStatus = [],
-    PostProcessTimelineStatus = [],
-    PostProcessTimelineStatuses = [],
-    PreSendUpdateStatus = [],
-    PostSendUpdateStatus = [],
-    ReceiveFavorite = [];
-
+var events_list = {
+    PreProcessTimelineStatuses: [],
+    PreProcessTimelineStatus: [],
+    PreFilterProcessTimelineStatus: [],
+    PostFilterProcessTimelineStatus: [],
+    PostProcessTimelineStatus: [],
+    PostProcessTimelineStatuses: [],
+    PreSendUpdateStatus: [],
+    PostSendUpdateStatus: [],
+    ReceiveFavorite: []
+};
 
 function addEventListener(eventname, // @param String:
                           fun) {     // @param Function:
-    var listener = eval(eventname),
+    var listener = events_list[eventname],
         i = -1;
     
     while (listener[++i]) {
@@ -52,7 +52,7 @@ function addEventListener(eventname, // @param String:
 
 function removeEventListener(eventname, // @param String:
                              fun) {     // @param Function:
-    var listener = eval(eventname),
+    var listener = events_list[eventname],
         i = -1;
     
     while (listener[++i]) {
@@ -65,15 +65,15 @@ function removeEventListener(eventname, // @param String:
 
 
 mixin(AzureaUtil.event, {
-    'PreProcessTimelineStatuses': PreProcessTimelineStatuses,
-    'PreProcessTimelineStatus': PreProcessTimelineStatus,
-    'PreFilterProcessTimelineStatus': PreFilterProcessTimelineStatus,
-    'PostFilterProcessTimelineStatus': PostFilterProcessTimelineStatus,
-    'PostProcessTimelineStatus': PostProcessTimelineStatus,
-    'PostProcessTimelineStatuses': PostProcessTimelineStatuses,
-    'PreSendUpdateStatus': PreSendUpdateStatus,
-    'PostSendUpdateStatus': PostSendUpdateStatus,
-    'ReceiveFavorite': ReceiveFavorite,
+    'PreProcessTimelineStatuses': events_list.PreProcessTimelineStatuses,
+    'PreProcessTimelineStatus': events_list.PreProcessTimelineStatus,
+    'PreFilterProcessTimelineStatus': events_list.PreFilterProcessTimelineStatus,
+    'PostFilterProcessTimelineStatus': events_list.PostFilterProcessTimelineStatus,
+    'PostProcessTimelineStatus': events_list.PostProcessTimelineStatus,
+    'PostProcessTimelineStatuses': events_list.PostProcessTimelineStatuses,
+    'PreSendUpdateStatus': events_list.PreSendUpdateStatus,
+    'PostSendUpdateStatus': events_list.PostSendUpdateStatus,
+    'ReceiveFavorite': events_list.ReceiveFavorite,
     'addEventListener': addEventListener,
     'removeEventListener': removeEventListener
 });

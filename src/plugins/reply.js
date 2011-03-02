@@ -12,20 +12,21 @@ AzureaUtil.mixin(AzureaVim.commands_list, {
 });
 // :reply [option1 [option2 [option3]]]
 // 指定tweetを元に、テンプレートに従ってTextAreaに記入する、QT用のコマンドです。
-// 基本は、「:reply tenplate "テンプレート" in_reply_toを付与するか否か」です。
+// 基本は、「:reply template "テンプレート" in_reply_toを付与するか否か」です。
 // option1は、replyテンプレートの種類（template, all, qt, mrt等）です。
 // option1を省略した場合、通常のreply（但しhashtagを引き継ぐ）テンプレートを選択します。
 
 
 (function() {
 
-function _expandTemplate(template, // String:
-                         view) {   // Object:
-                                   // String: has Number [cursor] property
+function _expandTemplate(template, // String: template
+                         view) {   // Object: view
+                                   // Hash: {text: expanded string,
+                                   //        cursor: number of cursor plase}
     var cursor,
-        text = template.replace(/#{([^}]+?)}/g, function() {
+        text = template.replace(/#{([^}]+?)}/g, function(m, figure) {
         with (view) {
-            return eval(arguments[1]);
+            return eval(figure);
         }
     });
     
@@ -37,7 +38,6 @@ function _expandTemplate(template, // String:
         cursor = text[0].length;
         text = text.join('');
     }
-    text.cursor = cursor;
     return {
         'text': text,
         'cursor': cursor

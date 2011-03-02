@@ -25,7 +25,8 @@ AzureaVim.prototype.open = function() {
         twilog: 'twilog',
         user: 'user',
         url: 'url'
-    };
+    },
+        _unshorten = this.unshorten ? this.unshorten.unshorten : function(url) {return url;};
     
     switch (c1[this.command[1]]) {
     case 'status':
@@ -56,11 +57,11 @@ AzureaVim.prototype.open = function() {
         if (!this.command[2]) {
             this.command[2] = 0;
         }
-        url = this.unshorten.unshorten(this.status_urls[this.command[2]], true);
+        url = _unshorten(this.status_urls[this.command[2]], true);
         break;
     default:
         if (this.status_urls[0]) {
-            url = this.unshorten.unshorten(this.status_urls[0], true);
+            url = _unshorten(this.status_urls[0], true);
         } else {
             url = 'https://twitter.com/' + this.screen_name + '/status/' + this.status_id;
         }

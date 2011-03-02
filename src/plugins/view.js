@@ -32,9 +32,13 @@ AzureaVim.prototype.view = function() {
         user: 'user',
         u: 'user',
         
+        search: 'search',
+        
         favorite: 'favorite',
         fav: 'favorite',
         f: 'favorite',
+        
+        match: 'match',
         
         following: 'following',
         follow: 'following',

@@ -12,31 +12,14 @@ AzureaUtil.mixin(AzureaVim.commands_list, {
 // https://gist.github.com/835563
 (function() {
 
-AzureaVim.prototype.unshorten = function() { // @return String: unshortened URL
-    var url = this.status_urls[this.command[1] || 0],
-        unurl = unshorten(url);
-    
-    System.inputBox(url, unurl, false);
-    return unurl;
-}
-
-
-AzureaVim.prototype.unshorten.services = [];
-AzureaVim.prototype.unshorten.cashe = {
+var azvm_unshorten_services = [],
+    azvm_unshorten_cashe = {
     'http://c4se.tk/': 'http://c4se.sakura.ne.jp/'
 };
 
-try {
-    Http.sendRequestAsync('http://untiny.me/api/1.0/services/?format=text', true,
-                          function(response) { // @param HttpResponce Object:
-        AzureaVim.prototype.unshorten.services = response.body.split(', ');
-    });
-} catch (e) {}
-
-
-function isPossibleUnshorten(url) { // @param String: shortend URL
+function _isPossibleUnshorten(url) { // @param String: shortend URL
                                     // @return Boolean:
-    var services = AzureaVim.prototype.unshorten.services,
+    var services = azvm_unshorten_services,
         i = -1, is_possible = false;
     
     while (services[++i]) {
@@ -49,13 +32,13 @@ function isPossibleUnshorten(url) { // @param String: shortend URL
 }
 
 
-function unshorten(url,     // @param String: shortened URL
-                   async) { // @param Boolean=false:
-                            // @return String: unshortened URL
-    var cashe = AzureaVim.prototype.unshorten.cashe,
+function _unshorten(url,     // @param String: shortened URL
+                    async) { // @param Boolean=false:
+                             // @return String: unshortened URL
+    var cashe = azvm_unshorten_cashe,
         response, result = url;
     
-    if (isPossibleUnshorten(url)) {
+    if (_isPossibleUnshorten(url)) {
         if (cashe[url]) {
             result = cashe[url];
         } else if (async) {
@@ -75,14 +58,32 @@ function unshorten(url,     // @param String: shortened URL
     }
     return result;
 }
-AzureaVim.prototype.unshorten.unshorten = unshorten;
+
+
+function azvm_unshorten() { // @return String: unshortened URL
+    var url = this.status_urls[this.command[1] || 0],
+        unurl = _unshorten(url);
+    
+    System.inputBox(url, unurl, false);
+    return unurl;
+}
 
 
 AzureaUtil.event.addEventListener('PreProcessTimelineStatus', function(status) { // @param Status Object:
     status.text = status.text.replace(/https?:\/\/[0-9A-Za-z._\-^~\/&%?]+/g,
                                       function(url) {
-        return unshorten(url, true);
+        return _unshorten(url, true);
     });
 });
+AzureaVim.prototype.unshorten = azvm_unshorten;
+AzureaVim.prototype.unshorten.services = azvm_unshorten_services;
+AzureaVim.prototype.unshorten.cashe = azvm_unshorten_cashe;
+AzureaVim.prototype.unshorten.unshoeten = _unshorten;
+try {
+    Http.sendRequestAsync('http://untiny.me/api/1.0/services/?format=text', true,
+                          function(response) { // @param HttpResponce Object:
+        AzureaVim.prototype.unshorten.services = response.body.split(', ');
+    });
+} catch (e) {}
 
 })();

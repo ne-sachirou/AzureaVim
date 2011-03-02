@@ -1,10 +1,11 @@
 //https://gist.github.com/833567
+AzureaVim = {};
+
 (function() {
 
-var commands_list = {};
+var azvm_commands_list = {};
 
-
-function focusInput(status_id) { // @param String: ststus id
+function _focusInput(status_id) { // @param String: status id
     TextArea.text = ':';
     TextArea.in_reply_to_status_id = status_id;
     TextArea.show();
@@ -13,29 +14,7 @@ function focusInput(status_id) { // @param String: ststus id
 }
 
 
-System.addKeyBindingHandler(0xBA, // VK_OEM_1 (:)
-                            0, focusInput);
-System.addContextMenuHandler(':vim', 0, focusInput);
-AzureaUtil.event.addEventListener('PreSendUpdateStatus', function(status) { // @param StatusUpdate Object:
-    var azvim, flag = false;
-    
-    try {
-        if (/^:/.test(status.text)) {
-            flag = true;
-            azvim = new AzureaVim(status);
-            TextArea.text = '';
-            TextArea.in_reply_to_status_id = 0;
-            azvim.run();
-        }
-    } catch (e) {
-        System.alert(e.name + ':\n' + e.message);
-        flag = true;
-    }
-    return flag;
-});
-
-
-function pearse(text) { // @reply String:
+function _pearse(text) { // @reply String: command text
                         // @return Array:
     var command = [], match, regex = /[^\s"]+|\s+|"[^\\"]*(?:\\.[^\\"]*)*"/g; //"
     
@@ -50,34 +29,66 @@ function pearse(text) { // @reply String:
 
 
 //AzureaVim Class
-AzureaVim = function(status) { //@param StatusUpdate Object:
+function azvm_AzureaVim(status) { //@param StatusUpdate Object:
+    var TwitterService_status = TwitterService.status,
+        status_id = status.in_reply_to_status_id,
+        status_obj = TwitterService_status.get(status_id);
+    
     this.command_text = status.text.slice(1);
-    this.command = pearse(this.command_text);
-    this.status_id = status.in_reply_to_status_id;
-    this.screen_name = TwitterService.status.get(this.status_id).user.screen_name;
-    this.status_text = TwitterService.status.get(this.status_id).text;
+    this.command = _pearse(this.command_text);
+    this.status_id = status_id;
+    this.screen_name = status_obj.user.screen_name;
+    this.status_text = status_obj.text;
     this.status_urls = [];
     this.status_hashes = [];
     this.status_users = [];
-    TwitterService.status.getUrls(this.status_id, this.status_urls);
-    TwitterService.status.getHashes(this.status_id, this.status_hashes);
-    TwitterService.status.getUsers(this.status_id, this.status_users);
+    TwitterService_status.getUrls(status_id, this.status_urls);
+    TwitterService_status.getHashes(status_id, this.status_hashes);
+    TwitterService_status.getUsers(status_id, this.status_users);
 }
 
 
-AzureaVim.commands_list = commands_list;
-
-
-AzureaVim.prototype.run = function() {
-    var command = commands_list[this.command[0]];
+function azvm_run() {
+    var _my_command = this.command,
+        command = azvm_commands_list[_my_command[0]];
     
-    if (/ /.test(command)) {
-        this.command.shift();
-        this.command = command.split(' ').concat(this.command);
+    if (command) {
+        if (command.indexOf(' ') !== -1) {
+            _my_command.shift();
+            _my_command = command.split(' ').concat(_my_command);
+            command = _my_command[0];
+        }
+        this[command]();
     } else {
-        this.command[0] = command;
+        System.showNotice(':' + _my_command[0] + ' command is undefined.');
     }
-    this[this.command[0]]();
 }
+
+
+System.addKeyBindingHandler(0xBA, // VK_OEM_1 (:)
+                            0, _focusInput);
+System.addContextMenuHandler(':vim', 0, _focusInput);
+AzureaUtil.event.addEventListener('PreSendUpdateStatus', function(status) { // @param StatusUpdate Object:
+    var azvm, do_notpost = false;
+    
+    try {
+        if (/^(?::|：)/.test(status.text)) {
+            do_notpost = true;
+            azvm = new azvm_AzureaVim(status);
+            TextArea.text = '';
+            TextArea.in_reply_to_status_id = 0;
+            azvm.run();
+        }
+    } catch (e) {
+        System.alert(e.name + ':\n' + e.message);
+        do_notpost = true;
+    }
+    return do_notpost;
+});
+AzureaVim = azvm_AzureaVim;
+AzureaVim.commands_list = azvm_commands_list;
+AzureaVim.prototype = {
+  run: azvm_run
+};
 
 })();

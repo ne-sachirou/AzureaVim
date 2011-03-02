@@ -9,9 +9,10 @@ AzureaUtil.mixin(AzureaVim.commands_list, {
 
 // https://gist.github.com/831901
 AzureaVim.prototype.shindanmaker = function() {
-    var url, i = -1;
+    var url, i = -1,
+        _unshorten = this.unshorten ? this.unshorten.unshorten : function(url) {return url;};
     
-    while (url = this.unshorten.unshorten(this.status_urls[++i], true)) {
+    while (url = _unshorten(this.status_urls[++i], true)) {
         if (url.match('^http://shindanmaker.com/[0-9]+')) {
             break;
         }
