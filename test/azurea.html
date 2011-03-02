@@ -49,7 +49,7 @@
         <input type="checkbox" id="console_ctrlkey"/>Ctrl
         <input type="checkbox" id="console_altkey"/>Alt
         <input type="text" id="console_otherkey" size="5"/>
-        <button id="console_press_key">PressKey</button>
+        <button id="console_presskey">PressKey</button>
       </div>
       <div>
         <input type="text" id="cosole_gesture" size="10"/>
@@ -68,6 +68,22 @@
     });
     uu.click(uu.id('console_clear'), function() {
         uu.id('console_view').innerHTML = '';
+    });
+    uu.click(uu.id('console_press_key'), function() {
+        var vkey = uu.id('console_otherkey').value[0].toUpperCase(),
+            specialkey = uu.id('console_shiftkey').checked * 1 +
+                         uu.id('console_ctrlkey').checked * 2 +
+                         uu.id('console_altkey').checked * 4;
+        
+        azurea.keyEvent(vkey, specialkey);
+    });
+    uu.click(uu.id('console_dogesture'), function() {
+        var gesture = uu.id('cosole_gesture').value
+                        .split(',').map(function(chr) {
+            return Number(chr);
+        });
+        
+        azurea.gestureEvent(gesture);
     });
     </script>
     <script src="azurea.js"></script>

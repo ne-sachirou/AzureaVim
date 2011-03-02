@@ -5,6 +5,26 @@ global.PreFilterProcessTimelineStatus = function(status){};
 global.PreSendUpdateStatus = function(status){};
 global.PostSendUpdateStatus = function(){};
 global.ReceiveFavorite = function(source, target, target_object){};
+var VK_LIST = {
+    ' ': 0x20,
+    '←': 0x25, '↑': 0x26, '→': 0x27, '↓': 0x28,
+    '0': 0x30, '1': 0x31, '2': 0x32, '3': 0x33, '4': 0x34, '5': 0x35, '6': 0x36, '7': 0x37, '8': 0x38, '9': 0x39,
+    'A': 0x41, 'B': 0x42, 'C': 0x43, 'D': 0x44, 'E': 0x45, 'F': 0x46, 'G': 0x47, 'H': 0x48,
+    'I': 0x49, 'J': 0x4A, 'K': 0x4B, 'L': 0x4C, 'M': 0x4D, 'N': 0x4E, 'O': 0x4F, 'P': 0x50,
+    'Q': 0x51, 'R': 0x52, 'S': 0x53, 'T': 0x54, 'U': 0x55, 'V': 0x56, 'W': 0x57, 'X': 0x58,
+    'Y': 0x59, 'Z': 0x5A,
+    '⌘': 0x5B,
+    //'0': 0x60, '1': 0x61, '2': 0x62, '3': 0x63, '4': 0x64, '5': 0x65, '6': 0x66, '7': 0x67, '8': 0x68, '9': 0x69,
+    '*': 0x6A, '+': 0x6B,
+    //',': 0x6C,
+    '-': 0x6D,
+    //'.': 0x6E, '/': 0x6F,
+    ':': 0xBA, ';': 0xBB, ',': 0xBC,
+    //'-^': 0xBD,
+    '.': 0xBE, '/': 0xBF,
+    '@': 0xC0, '[': 0xDB, '\\': 0xDC, ']': 0xDD, '^': 0xDE
+    //'\\': 0xE2
+};
 
 // Azurea Class
 function Azurea() {
@@ -12,19 +32,21 @@ function Azurea() {
     this.in_reply_to_id = 0;
     this.notification;
     this.view = [
-        [], // Timeline
-        [], // Mention
-        [], // Message
-        [], // Favorite
-        [], // Search
-        [], // User
-        [], // 抽出
-        [], // List
-        [], // Following
-        []  // Followers
+        [], // 0 Timeline
+        [], // 1 Mention
+        [], // 2 Message
+        [], // 3 Favorite
+        [], // 4 Search
+        [], // 5 User
+        [], // 6 抽出
+        [], // 7 List
+        [], // 8 Following
+        []  // 9 Followers
     ];
     this.current_view = 0;
     this.console = [];
+    this.key_event_handler = {};
+    this.gesture_event_handler = {}
 }
 
 Azurea.loadjs = function(features) { // @param Hash:
@@ -38,7 +60,7 @@ Azurea.loadjs = function(features) { // @param Hash:
                 return script_nodes[i].getAttribute('src').replace(/feature\.js$/, '');
             }
         }
-        return '';
+        return '../src/';
     })() + '../src/';
     
     function appendScript(path) { // @param String:
@@ -149,7 +171,12 @@ Azurea.prototype = {
         }
     },
     
-    pressKeys: function(string) { // @param String:
+    keyEvent: function(vkey,         // @param String:
+                       specialkey) { // @param Number:
+        vkey = VK_LIST(vkey);
+    },
+    
+    gestureEvent: function(gestures){ // @param Array[Number]:
         
     }
 };
