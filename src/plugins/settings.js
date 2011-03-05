@@ -2,7 +2,9 @@ AzureaUtil.mixin(AzureaVim.commands_list, {
     settings: 'settings',
     setting: 'settings',
     'set': 'settings',
-    'get': 'settings'
+    'せｔ': 'settings',
+    'get': 'settings',
+    'げｔ': 'settings'
 });
 // :settings option1
 // optinon1は、設定式です。
@@ -24,7 +26,7 @@ AzureaVim.prototype.settings = function() {
     figure = this.command.slice(1).join('');
     figure = figure.split('::');
     figure = [figure[0]].concat(figure[1].split('='));
-    if (/^get/.test(this.command[0])) {
+    if (/^(?:get|げｔ)/.test(this.command[0])) {
         figure.length = 2;
     }
     if (figure[2]) {

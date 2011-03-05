@@ -26,7 +26,9 @@ AzureaVim.prototype.open = function() {
         user: 'user',
         url: 'url'
     },
-        _unshorten = this.unshorten ? this.unshorten.unshorten : function(url) {return url;};
+        _unshorten = this.unshorten ?
+                     this.unshorten.unshorten :
+                     function(url, async) {return url;};
     
     switch (c1[this.command[1]]) {
     case 'status':

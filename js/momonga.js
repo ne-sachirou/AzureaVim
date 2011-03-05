@@ -1,8 +1,9 @@
 // https://gist.github.com/841702
-AzureaUtil = {};
-AzureaUtil.mixin = {};
-AzureaUtil.event = {};
-AzureaUtil.time = {};
+AzureaUtil = {
+    mixin: {},
+    event: {},
+    time: {}
+};
 
 (function() {
 
@@ -11,7 +12,7 @@ function mixin(hash1,       // @param Hash:
                overwrite) { // @param Boolean=true:
     var key;
     
-    if (typeof overwrite === 'undefined') {
+    if (overwrite == null) { // null or undefined
         overwrite = true;
     }
     for (key in hash2) {
@@ -20,25 +21,24 @@ function mixin(hash1,       // @param Hash:
         }
     }
 }
-
-
 AzureaUtil.mixin = mixin;
 
 
-var PreProcessTimelineStatuses = [],
-    PreProcessTimelineStatus = [],
-    PreFilterProcessTimelineStatus = [],
-    PostFilterProcessTimelineStatus = [],
-    PostProcessTimelineStatus = [],
-    PostProcessTimelineStatuses = [],
-    PreSendUpdateStatus = [],
-    PostSendUpdateStatus = [],
-    ReceiveFavorite = [];
-
+var events_list = {
+    PreProcessTimelineStatuses: [],
+    PreProcessTimelineStatus: [],
+    PreFilterProcessTimelineStatus: [],
+    PostFilterProcessTimelineStatus: [],
+    PostProcessTimelineStatus: [],
+    PostProcessTimelineStatuses: [],
+    PreSendUpdateStatus: [],
+    PostSendUpdateStatus: [],
+    ReceiveFavorite: []
+};
 
 function addEventListener(eventname, // @param String:
                           fun) {     // @param Function:
-    var listener = eval(eventname),
+    var listener = events_list[eventname],
         i = -1;
     
     while (listener[++i]) {
@@ -52,7 +52,7 @@ function addEventListener(eventname, // @param String:
 
 function removeEventListener(eventname, // @param String:
                              fun) {     // @param Function:
-    var listener = eval(eventname),
+    var listener = events_list[eventname],
         i = -1;
     
     while (listener[++i]) {
@@ -65,15 +65,15 @@ function removeEventListener(eventname, // @param String:
 
 
 mixin(AzureaUtil.event, {
-    'PreProcessTimelineStatuses': PreProcessTimelineStatuses,
-    'PreProcessTimelineStatus': PreProcessTimelineStatus,
-    'PreFilterProcessTimelineStatus': PreFilterProcessTimelineStatus,
-    'PostFilterProcessTimelineStatus': PostFilterProcessTimelineStatus,
-    'PostProcessTimelineStatus': PostProcessTimelineStatus,
-    'PostProcessTimelineStatuses': PostProcessTimelineStatuses,
-    'PreSendUpdateStatus': PreSendUpdateStatus,
-    'PostSendUpdateStatus': PostSendUpdateStatus,
-    'ReceiveFavorite': ReceiveFavorite,
+    'PreProcessTimelineStatuses': events_list.PreProcessTimelineStatuses,
+    'PreProcessTimelineStatus': events_list.PreProcessTimelineStatus,
+    'PreFilterProcessTimelineStatus': events_list.PreFilterProcessTimelineStatus,
+    'PostFilterProcessTimelineStatus': events_list.PostFilterProcessTimelineStatus,
+    'PostProcessTimelineStatus': events_list.PostProcessTimelineStatus,
+    'PostProcessTimelineStatuses': events_list.PostProcessTimelineStatuses,
+    'PreSendUpdateStatus': events_list.PreSendUpdateStatus,
+    'PostSendUpdateStatus': events_list.PostSendUpdateStatus,
+    'ReceiveFavorite': events_list.ReceiveFavorite,
     'addEventListener': addEventListener,
     'removeEventListener': removeEventListener
 });
@@ -226,12 +226,13 @@ function ReceiveFavorite(source,
     }
 }
 //https://gist.github.com/833567
+AzureaVim = {};
+
 (function() {
 
-var commands_list = {};
+var azvm_commands_list = {};
 
-
-function focusInput(status_id) { // @param String: ststus id
+function _focusInput(status_id) { // @param String: status id
     TextArea.text = ':';
     TextArea.in_reply_to_status_id = status_id;
     TextArea.show();
@@ -240,29 +241,7 @@ function focusInput(status_id) { // @param String: ststus id
 }
 
 
-System.addKeyBindingHandler(0xBA, // VK_OEM_1 (:)
-                            0, focusInput);
-System.addContextMenuHandler(':vim', 0, focusInput);
-AzureaUtil.event.addEventListener('PreSendUpdateStatus', function(status) { // @param StatusUpdate Object:
-    var azvim, flag = false;
-    
-    try {
-        if (/^:/.test(status.text)) {
-            flag = true;
-            azvim = new AzureaVim(status);
-            TextArea.text = '';
-            TextArea.in_reply_to_status_id = 0;
-            azvim.run();
-        }
-    } catch (e) {
-        System.alert(e.name + ':\n' + e.message);
-        flag = true;
-    }
-    return flag;
-});
-
-
-function pearse(text) { // @reply String:
+function _pearse(text) { // @reply String: command text
                         // @return Array:
     var command = [], match, regex = /[^\s"]+|\s+|"[^\\"]*(?:\\.[^\\"]*)*"/g; //"
     
@@ -277,35 +256,67 @@ function pearse(text) { // @reply String:
 
 
 //AzureaVim Class
-AzureaVim = function(status) { //@param StatusUpdate Object:
+function azvm_AzureaVim(status) { //@param StatusUpdate Object:
+    var TwitterService_status = TwitterService.status,
+        status_id = status.in_reply_to_status_id,
+        status_obj = TwitterService_status.get(status_id);
+    
     this.command_text = status.text.slice(1);
-    this.command = pearse(this.command_text);
-    this.status_id = status.in_reply_to_status_id;
-    this.screen_name = TwitterService.status.get(this.status_id).user.screen_name;
-    this.status_text = TwitterService.status.get(this.status_id).text;
+    this.command = _pearse(this.command_text);
+    this.status_id = status_id;
+    this.screen_name = status_obj.user.screen_name;
+    this.status_text = status_obj.text;
     this.status_urls = [];
     this.status_hashes = [];
     this.status_users = [];
-    TwitterService.status.getUrls(this.status_id, this.status_urls);
-    TwitterService.status.getHashes(this.status_id, this.status_hashes);
-    TwitterService.status.getUsers(this.status_id, this.status_users);
+    TwitterService_status.getUrls(status_id, this.status_urls);
+    TwitterService_status.getHashes(status_id, this.status_hashes);
+    TwitterService_status.getUsers(status_id, this.status_users);
 }
 
 
-AzureaVim.commands_list = commands_list;
-
-
-AzureaVim.prototype.run = function() {
-    var command = commands_list[this.command[0]];
+function azvm_run() {
+    var _my_command = this.command,
+        command = azvm_commands_list[this.command[0]];
     
-    if (/ /.test(command)) {
-        this.command.shift();
-        this.command = command.split(' ').concat(this.command);
+    if (command) {
+        if (command.indexOf(' ') !== -1) {
+            _my_command.shift();
+            _my_command = this.command = command.split(' ').concat(_my_command);
+            command = _my_command[0];
+        }
+        this[command]();
     } else {
-        this.command[0] = command;
+        System.showNotice(':' + _my_command[0] + ' command is undefined.');
     }
-    this[this.command[0]]();
 }
+
+
+System.addKeyBindingHandler(0xBA, // VK_OEM_1 (:)
+                            0, _focusInput);
+System.addContextMenuHandler(':vim', 0, _focusInput);
+AzureaUtil.event.addEventListener('PreSendUpdateStatus', function(status) { // @param StatusUpdate Object:
+    var azvm, do_notpost = false;
+    
+    try {
+        if (/^(?::|：)/.test(status.text)) {
+            do_notpost = true;
+            azvm = new azvm_AzureaVim(status);
+            TextArea.text = '';
+            TextArea.in_reply_to_status_id = 0;
+            azvm.run();
+        }
+    } catch (e) {
+        System.alert(e.name + ':\n' + e.message);
+        do_notpost = true;
+    }
+    return do_notpost;
+});
+AzureaVim = azvm_AzureaVim;
+AzureaVim.commands_list = azvm_commands_list;
+AzureaVim.prototype = {
+    run: azvm_run
+};
 
 })();
 AzureaUtil.mixin(AzureaVim.commands_list, {
@@ -322,30 +333,13 @@ AzureaUtil.mixin(AzureaVim.commands_list, {
 // https://gist.github.com/835563
 (function() {
 
-AzureaVim.prototype.unshorten = function() { // @return String: unshortened URL
-    var url = this.status_urls[this.command[1] || 0],
-        unurl = unshorten(url);
-    
-    System.inputBox(url, unurl, false);
-    return unurl;
-}
-
-
-AzureaVim.prototype.unshorten.services = [];
-AzureaVim.prototype.unshorten.cashe = {
+var azvm_unshorten_services = [],
+    azvm_unshorten_cashe = {
     'http://c4se.tk/': 'http://c4se.sakura.ne.jp/'
 };
 
-try {
-    Http.sendRequestAsync('http://untiny.me/api/1.0/services/?format=text', true,
-                          function(response) { // @param HttpResponce Object:
-        AzureaVim.prototype.unshorten.services = response.body.split(', ');
-    });
-} catch (e) {}
-
-
-function isPossibleUnshorten(url) { // @param String: shortend URL
-                                    // @return Boolean:
+function _isPossibleUnshorten(url) { // @param String: shortend URL
+                                     // @return Boolean:
     var services = AzureaVim.prototype.unshorten.services,
         i = -1, is_possible = false;
     
@@ -359,13 +353,13 @@ function isPossibleUnshorten(url) { // @param String: shortend URL
 }
 
 
-function unshorten(url,     // @param String: shortened URL
-                   async) { // @param Boolean=false:
-                            // @return String: unshortened URL
-    var cashe = AzureaVim.prototype.unshorten.cashe,
+function _unshorten(url,     // @param String: shortened URL
+                    async) { // @param Boolean=false:
+                             // @return String: unshortened URL
+    var cashe = azvm_unshorten_cashe,
         response, result = url;
     
-    if (isPossibleUnshorten(url)) {
+    if (_isPossibleUnshorten(url)) {
         if (cashe[url]) {
             result = cashe[url];
         } else if (async) {
@@ -385,15 +379,33 @@ function unshorten(url,     // @param String: shortened URL
     }
     return result;
 }
-AzureaVim.prototype.unshorten.unshorten = unshorten;
+
+
+function azvm_unshorten() { // @return String: unshortened URL
+    var url = this.status_urls[this.command[1] || 0],
+        unurl = _unshorten(url);
+    
+    System.inputBox(url, unurl, false);
+    return unurl;
+}
 
 
 AzureaUtil.event.addEventListener('PreProcessTimelineStatus', function(status) { // @param Status Object:
     status.text = status.text.replace(/https?:\/\/[0-9A-Za-z._\-^~\/&%?]+/g,
                                       function(url) {
-        return unshorten(url, true);
+        return _unshorten(url, true);
     });
 });
+AzureaVim.prototype.unshorten = azvm_unshorten;
+AzureaVim.prototype.unshorten.services = [];//azvm_unshorten_services;
+AzureaVim.prototype.unshorten.cashe = azvm_unshorten_cashe;
+AzureaVim.prototype.unshorten.unshorten = _unshorten;
+try {
+    Http.sendRequestAsync('http://untiny.me/api/1.0/services/?format=text', true,
+                          function(response) { // @param HttpResponce Object:
+        AzureaVim.prototype.unshorten.services = response.body.split(', ');
+    });
+} catch (e) {}
 
 })();
 AzureaUtil.mixin(AzureaVim.commands_list, {
@@ -423,7 +435,10 @@ AzureaVim.prototype.open = function() {
         twilog: 'twilog',
         user: 'user',
         url: 'url'
-    };
+    },
+        _unshorten = this.unshorten ?
+                     this.unshorten.unshorten :
+                     function(url, async) {return url;};
     
     switch (c1[this.command[1]]) {
     case 'status':
@@ -454,11 +469,11 @@ AzureaVim.prototype.open = function() {
         if (!this.command[2]) {
             this.command[2] = 0;
         }
-        url = this.unshorten.unshorten(this.status_urls[this.command[2]], true);
+        url = _unshorten(this.status_urls[this.command[2]], true);
         break;
     default:
         if (this.status_urls[0]) {
-            url = this.unshorten.unshorten(this.status_urls[0], true);
+            url = _unshorten(this.status_urls[0], true);
         } else {
             url = 'https://twitter.com/' + this.screen_name + '/status/' + this.status_id;
         }
@@ -480,20 +495,21 @@ AzureaUtil.mixin(AzureaVim.commands_list, {
 });
 // :reply [option1 [option2 [option3]]]
 // 指定tweetを元に、テンプレートに従ってTextAreaに記入する、QT用のコマンドです。
-// 基本は、「:reply tenplate "テンプレート" in_reply_toを付与するか否か」です。
+// 基本は、「:reply template "テンプレート" in_reply_toを付与するか否か」です。
 // option1は、replyテンプレートの種類（template, all, qt, mrt等）です。
 // option1を省略した場合、通常のreply（但しhashtagを引き継ぐ）テンプレートを選択します。
 
 
 (function() {
 
-function _expandTemplate(template, // String:
-                         view) {   // Object:
-                                   // String: has Number [cursor] property
+function _expandTemplate(template, // String: template
+                         view) {   // Object: view
+                                   // Hash: {text: expanded string,
+                                   //        cursor: number of cursor plase}
     var cursor,
-        text = template.replace(/#{([^}]+?)}/g, function() {
+        text = template.replace(/#{([^}]+?)}/g, function(m, figure) {
         with (view) {
-            return eval(arguments[1]);
+            return eval(figure);
         }
     });
     
@@ -505,7 +521,6 @@ function _expandTemplate(template, // String:
         cursor = text[0].length;
         text = text.join('');
     }
-    text.cursor = cursor;
     return {
         'text': text,
         'cursor': cursor
@@ -560,7 +575,8 @@ AzureaVim.prototype.reply = function() {
 })();
 AzureaUtil.mixin(AzureaVim.commands_list, {
     retweet: 'retweet',
-    rt: 'retweet'
+    rt: 'retweet',
+    'ｒｔ': 'retweet'
 });
 // :retweet
 // 指定statusをRetweetします。
@@ -573,7 +589,9 @@ AzureaUtil.mixin(AzureaVim.commands_list, {
     settings: 'settings',
     setting: 'settings',
     'set': 'settings',
-    'get': 'settings'
+    'せｔ': 'settings',
+    'get': 'settings',
+    'げｔ': 'settings'
 });
 // :settings option1
 // optinon1は、設定式です。
@@ -595,7 +613,7 @@ AzureaVim.prototype.settings = function() {
     figure = this.command.slice(1).join('');
     figure = figure.split('::');
     figure = [figure[0]].concat(figure[1].split('='));
-    if (/^get/.test(this.command[0])) {
+    if (/^(?:get|げｔ)/.test(this.command[0])) {
         figure.length = 2;
     }
     if (figure[2]) {
@@ -607,7 +625,8 @@ AzureaVim.prototype.settings = function() {
     //System.settings.reconfigure();
 }
 AzureaUtil.mixin(AzureaVim.commands_list, {
-    shindan: 'shindanmaker'
+    shindan: 'shindanmaker',
+    'しんだｎ': 'shindanmaker'
 });
 // :shindan [option1]
 // 該当statusが含む診断メーカーに問い合わせ、結果をTextAreaに記入します。
@@ -617,9 +636,10 @@ AzureaUtil.mixin(AzureaVim.commands_list, {
 
 // https://gist.github.com/831901
 AzureaVim.prototype.shindanmaker = function() {
-    var url, i = -1;
+    var url, i = -1,
+        _unshorten = this.unshorten ? this.unshorten.unshorten : function(url) {return url;};
     
-    while (url = this.unshorten.unshorten(this.status_urls[++i], true)) {
+    while (url = _unshorten(this.status_urls[++i], true)) {
         if (url.match('^http://shindanmaker.com/[0-9]+')) {
             break;
         }
@@ -700,9 +720,13 @@ AzureaVim.prototype.view = function() {
         user: 'user',
         u: 'user',
         
+        search: 'search',
+        
         favorite: 'favorite',
         fav: 'favorite',
         f: 'favorite',
+        
+        match: 'match',
         
         following: 'following',
         follow: 'following',

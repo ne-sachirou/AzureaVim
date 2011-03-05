@@ -50,12 +50,12 @@ function azvm_AzureaVim(status) { //@param StatusUpdate Object:
 
 function azvm_run() {
     var _my_command = this.command,
-        command = azvm_commands_list[_my_command[0]];
+        command = azvm_commands_list[this.command[0]];
     
     if (command) {
         if (command.indexOf(' ') !== -1) {
             _my_command.shift();
-            _my_command = command.split(' ').concat(_my_command);
+            _my_command = this.command = command.split(' ').concat(_my_command);
             command = _my_command[0];
         }
         this[command]();
@@ -88,7 +88,7 @@ AzureaUtil.event.addEventListener('PreSendUpdateStatus', function(status) { // @
 AzureaVim = azvm_AzureaVim;
 AzureaVim.commands_list = azvm_commands_list;
 AzureaVim.prototype = {
-  run: azvm_run
+    run: azvm_run
 };
 
 })();

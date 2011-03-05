@@ -1,5 +1,6 @@
 AzureaUtil.mixin(AzureaVim.commands_list, {
-    shindan: 'shindanmaker'
+    shindan: 'shindanmaker',
+    'しんだｎ': 'shindanmaker'
 });
 // :shindan [option1]
 // 該当statusが含む診断メーカーに問い合わせ、結果をTextAreaに記入します。

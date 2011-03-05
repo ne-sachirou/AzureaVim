@@ -1,6 +1,7 @@
 AzureaUtil.mixin(AzureaVim.commands_list, {
     retweet: 'retweet',
-    rt: 'retweet'
+    rt: 'retweet',
+    'ｒｔ': 'retweet'
 });
 // :retweet
 // 指定statusをRetweetします。

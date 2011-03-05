@@ -18,8 +18,8 @@ var azvm_unshorten_services = [],
 };
 
 function _isPossibleUnshorten(url) { // @param String: shortend URL
-                                    // @return Boolean:
-    var services = azvm_unshorten_services,
+                                     // @return Boolean:
+    var services = AzureaVim.prototype.unshorten.services,
         i = -1, is_possible = false;
     
     while (services[++i]) {
@@ -76,9 +76,9 @@ AzureaUtil.event.addEventListener('PreProcessTimelineStatus', function(status) {
     });
 });
 AzureaVim.prototype.unshorten = azvm_unshorten;
-AzureaVim.prototype.unshorten.services = azvm_unshorten_services;
+AzureaVim.prototype.unshorten.services = [];//azvm_unshorten_services;
 AzureaVim.prototype.unshorten.cashe = azvm_unshorten_cashe;
-AzureaVim.prototype.unshorten.unshoeten = _unshorten;
+AzureaVim.prototype.unshorten.unshorten = _unshorten;
 try {
     Http.sendRequestAsync('http://untiny.me/api/1.0/services/?format=text', true,
                           function(response) { // @param HttpResponce Object:

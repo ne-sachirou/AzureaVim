@@ -22,11 +22,13 @@ open 'feature.js' do |feature_js|
       end
     end
     
+    desc "Preprocess and uncompiled file."
     task f_momonga => feature.keys
     
   end
 end
 
+desc "Compile with Closure-Compiler."
 file f_release => f_momonga do |t|
   compilation_level = 'WHITESPACE_ONLY' #WHITESPACE_ONLY | SIMPLE_OPTIMIZATIONS | ADVANCED_OPTIMIZATIONS
   sh "java -jar closure-compiler/compiler.jar --compilation_level #{compilation_level} --js_output_file #{t.name} --js #{t.prerequisites[0]}"

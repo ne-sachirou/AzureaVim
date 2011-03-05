@@ -5,7 +5,91 @@ global.PreFilterProcessTimelineStatus = function(status){};
 global.PreSendUpdateStatus = function(status){};
 global.PostSendUpdateStatus = function(){};
 global.ReceiveFavorite = function(source, target, target_object){};
-var VK_LIST = {
+var ini = {
+    Twitter: {
+        ActiveProfileId: '0'
+    },
+    Proxy: {
+        Port: '8080',
+        UseIESetting: '1',
+        UseProxy: '0'
+    },
+    Misc: {
+        AskBeforePost: '0',
+        AutoAppendHashtag: '0',
+        BackgroundTiling: '0',
+        ColorSchemeFile: 'DefaultThin.txt',
+        DisableUnreadManagement: '1',
+        EnableAutoRefresh: '0',
+        EnableFlick: '0',
+        ExpandAll: '0',
+        ExpandComposeAreaSipOpened: '0',
+        FitToIconHeight: '0',
+        FontFace: 'TakaoExゴシック',
+        FontSize: '9',
+        InitialRefresh: '0',
+        Interval: '1',
+        NoPictures: '0',
+        NoRefreshAfterPosted: '1',
+        ReadCount: '40',
+        SaveLogData: '1',
+        ScrollToTop: '1',
+        ShowComposeAlways: '1',
+        ShowExitConfirmation: '0',
+        SimpleMode: '0',
+        TextColor: '12615680',
+        UseQT: '0',
+        UseSystemColor: '0'
+    },
+    Sound: {
+        VibrateId: '1',
+        VibrateNewMessage: '0',
+        VibrateNewReply: '0'
+    },
+    Location: {
+        DisableGPS: '1',
+        UseCellTowerInfo: '0'
+    },
+    WindowMetrics: {
+        Height: '700',
+        Left: '524',
+        Top: '0',
+        Width: '500'
+    },
+    UserStream: {
+        Enabled: '1'
+    },
+    Scripting: {
+        AllowActiveXObject: '0'
+    },
+    Matches: {
+        View0: 'http',
+        View1: 'c4se'
+    },
+    Searches: {
+        View0: '#c4se',
+        View1: '#Opera'
+    },
+    Profile0: {
+        Caption: 'Default',
+        Highlight: 'c4se|Opera',
+        Lists0: '4340928,ne_sachirou,uptodate',
+        Lists1: '13000438,lotus_gate,kuragenohone',
+        UserName: 'ne_sachirou',
+        oauth_token: '',
+        oauth_token_secret: ''
+    },
+    Profile1: {
+        Caption: 'Test',
+        Highlight: 'c4se|Opera',
+        Lists0: '35720045,ne_sachirou,MomongaSentai',
+        Lists1: '4835531,ne_sachirou,My favstar.fm list',
+        UserName: 'lotus_gate',
+        oauth_token: '',
+        oauth_token_secret: ''
+    }
+},
+    VK_LIST = {
     ' ': 0x20,
     '←': 0x25, '↑': 0x26, '→': 0x27, '↓': 0x28,
     '0': 0x30, '1': 0x31, '2': 0x32, '3': 0x33, '4': 0x34, '5': 0x35, '6': 0x36, '7': 0x37, '8': 0x38, '9': 0x39,
@@ -24,7 +108,13 @@ var VK_LIST = {
     '.': 0xBE, '/': 0xBF,
     '@': 0xC0, '[': 0xDB, '\\': 0xDC, ']': 0xDD, '^': 0xDE
     //'\\': 0xE2
-};
+},
+    prop;
+
+for (prop in VK_LIST) {
+    VK_LSIT[VK_LSIT[prop]] = prop;
+}
+
 
 // Azurea Class
 function Azurea() {
@@ -45,8 +135,9 @@ function Azurea() {
     ];
     this.current_view = 0;
     this.console = [];
+    this.context_menu_handler = {};
     this.key_event_handler = {};
-    this.gesture_event_handler = {}
+    this.gesture_event_handler = {};
 }
 
 Azurea.loadjs = function(features) { // @param Hash:
@@ -171,6 +262,10 @@ Azurea.prototype = {
         }
     },
     
+    contextMenu: function(caption) { // @param String:
+        
+    },
+    
     keyEvent: function(vkey,         // @param String:
                        specialkey) { // @param Number:
         vkey = VK_LIST(vkey);
@@ -181,6 +276,8 @@ Azurea.prototype = {
     }
 };
 
+Azurea.ini = ini;
+Azurea.VK_LIST = VK_LSIT;
 global.Azurea = Azurea;
 var azurea = new Azurea();
 global.azurea = azurea;
@@ -192,90 +289,6 @@ uu.live('#view li', 'click', function(event) {
     azurea.selectStatus(event.target.id);
 });
 
-Azurea.ini = {
-    Twitter: {
-        ActiveProfileId: '0'
-    },
-    Proxy: {
-        Port: '8080',
-        UseIESetting: '1',
-        UseProxy: '0'
-    },
-    Misc: {
-        AskBeforePost: '0',
-        AutoAppendHashtag: '0',
-        BackgroundTiling: '0',
-        ColorSchemeFile: 'DefaultThin.txt',
-        DisableUnreadManagement: '1',
-        EnableAutoRefresh: '0',
-        EnableFlick: '0',
-        ExpandAll: '0',
-        ExpandComposeAreaSipOpened: '0',
-        FitToIconHeight: '0',
-        FontFace: 'TakaoExゴシック',
-        FontSize: '9',
-        InitialRefresh: '0',
-        Interval: '1',
-        NoPictures: '0',
-        NoRefreshAfterPosted: '1',
-        ReadCount: '40',
-        SaveLogData: '1',
-        ScrollToTop: '1',
-        ShowComposeAlways: '1',
-        ShowExitConfirmation: '0',
-        SimpleMode: '0',
-        TextColor: '12615680',
-        UseQT: '0',
-        UseSystemColor: '0'
-    },
-    Sound: {
-        VibrateId: '1',
-        VibrateNewMessage: '0',
-        VibrateNewReply: '0'
-    },
-    Location: {
-        DisableGPS: '1',
-        UseCellTowerInfo: '0'
-    },
-    WindowMetrics: {
-        Height: '700',
-        Left: '524',
-        Top: '0',
-        Width: '500'
-    },
-    UserStream: {
-        Enabled: '1'
-    },
-    Scripting: {
-        AllowActiveXObject: '0'
-    },
-    Matches: {
-        View0: 'http',
-        View1: 'c4se'
-    },
-    Searches: {
-        View0: '#c4se',
-        View1: '#Opera'
-    },
-    Profile0: {
-        Caption: 'Default',
-        Highlight: 'c4se|Opera',
-        Lists0: '4340928,ne_sachirou,uptodate',
-        Lists1: '13000438,lotus_gate,kuragenohone',
-        UserName: 'ne_sachirou',
-        oauth_token: '',
-        oauth_token_secret: ''
-    },
-    Profile1: {
-        Caption: 'Test',
-        Highlight: 'c4se|Opera',
-        Lists0: '35720045,ne_sachirou,MomongaSentai',
-        Lists1: '4835531,ne_sachirou,My favstar.fm list',
-        UserName: 'lotus_gate',
-        oauth_token: '',
-        oauth_token_secret: ''
-    }
-};
 
 global.System = {
     apiLevel: 11,
