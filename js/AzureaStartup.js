@@ -13,8 +13,8 @@ function echo(message) {
 }
 
 
-function getMeta(script_text) { // @param String:
-                                // @return Hash:
+function getMeta(script_text) { // @param String: AzureaScript text
+                                // @return Hash: Meta infomation
     var regex_begin_meta = new RegExp('^\\s*//\\s*==AzureaScript=='),
         regex_end_meta = new RegExp('^\\s*//\\s*==/AzureaScript=='),
         i = 0, meta = {};
@@ -40,7 +40,7 @@ function getMeta(script_text) { // @param String:
 }
 
 
-function updateScripts(path) {
+function updateScripts(path) { // @param String: AzureaScript path
     var fso = WScript.CreateObject('Scripting.FileSystemObject'),
         files = new Enumerator(fso.GetFolder(path).Files),
         xml_http = new ActiveXObject('MSXML2.XMLHttp'),
@@ -75,7 +75,8 @@ function updateScripts(path) {
     }
 }
 
-function isActive(application_name) {
+function isActive(application_name) { // @param Script: Process name
+                                      // @return Boolean:
     var wmi = GetObject('winmgmts:\\\\.\\root\\cimv2'),
         procset = wmi.ExecQuery('Select * From Win32_Process'),
         procenum = new Enumerator(procset),
@@ -96,6 +97,7 @@ function isActive(application_name) {
 var i;
 
 new ActiveXObject('WScript.Shell').Run(APPLICATION_PATH, 1, false);
+WScript.sleep(6000);
 mainloop:
     while (true) {
     updateScripts(SCRIPTS_PATH);
