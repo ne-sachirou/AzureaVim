@@ -1,3 +1,10 @@
+// ==AzureaScript==
+// @name AzureaVim
+// @author http://c4se.sakura.ne.jp/profile.html
+// @scriptUrl https://github.com/ne-sachirou/AzureaVim/raw/master/js/
+// @date 2011-03-07
+// @license MIT License
+// ==/AzureaScript==
 AzureaUtil={mixin:{},event:{},time:{}};
 (function(){function mixin(hash1,hash2,overwrite){var key;if(overwrite==null)overwrite=true;for(key in hash2)if(overwrite||typeof hash1[key]==="undefined")hash1[key]=hash2[key]}AzureaUtil.mixin=mixin;var events_list={PreProcessTimelineStatuses:[],PreProcessTimelineStatus:[],PreFilterProcessTimelineStatus:[],PostFilterProcessTimelineStatus:[],PostProcessTimelineStatus:[],PostProcessTimelineStatuses:[],PreSendUpdateStatus:[],PostSendUpdateStatus:[],ReceiveFavorite:[]};function addEventListener(eventname,
 fun){var listener=events_list[eventname],i=-1;while(listener[++i])if(listener[i]===fun)listener.splice(i,1);listener.push(fun)}function removeEventListener(eventname,fun){var listener=events_list[eventname],i=-1;while(listener[++i])if(listener[i]===fun){listener.splice(i,1);break}}mixin(AzureaUtil.event,{PreProcessTimelineStatuses:events_list.PreProcessTimelineStatuses,PreProcessTimelineStatus:events_list.PreProcessTimelineStatus,PreFilterProcessTimelineStatus:events_list.PreFilterProcessTimelineStatus,
