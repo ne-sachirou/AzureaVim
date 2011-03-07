@@ -170,7 +170,11 @@ function updateStartupScript() {
         xml_http = new ActiveXObject('MSXML2.XMLHttp'),
         date_local, date_remote, stream;
     
-    date_local = fso.OpenTextFile(STARTUPSCRIPT_TARGET_PATH, 1).ReadAll().match(/\/\/ @date (.+)\n/)[1].split('-');
+    date_local = fso.OpenTextFile(fso.FileExists(STARTUPSCRIPT_BACKUP_PATH) ? STARTUPSCRIPT_BACKUP_PATH :
+                                                                              STARTUPSCRIPT_TARGET_PATH, 1)
+                    .ReadAll()
+                    .match(/\/\/ @date (.+)\n/)[1]
+                    .split('-');
     date_local = new Date(date_local[0], date_local[1], date_local[2]).getTime();
     xml_http.open('GET', STARTUPSCRIPT_UPDATE_URL, false);
     xml_http.onreadystatechange = function() {
