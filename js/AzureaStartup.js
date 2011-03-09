@@ -1,4 +1,4 @@
-// @date 2011-03-07
+// @date 2011-03-08
 
 // const
 var APPLICATION_NAME = 'Azurea.exe',
