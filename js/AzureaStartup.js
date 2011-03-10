@@ -1,4 +1,4 @@
-// @date 2011-03-08
+// @date 2011-03-10
 
 // const
 var APPLICATION_NAME = 'Azurea.exe',
@@ -267,4 +267,5 @@ mainloop:
         }
     }
 }
+update();
 attachUpdate();
