@@ -572,6 +572,24 @@ AzureaVim.prototype.reply = function() {
     }
 }
 
+
+function reply(status_id) { // @param String:
+                            // AzureaVim.prototype.replyと違い、同期処理で別途実装
+    var status = TwitterService.status.get(status_id),
+        status_user_screen_name = status.user.screen_name,
+        status_hashtags = [];//status_hashtags = status.text.match(/#(?:(?:[A-Za-z0-9_]+)|(?:[^\s#]+_))/g);
+    
+    TwitterService.status.getHashes(status_id, status_hashtags);
+    TextArea.text = '@' + status_user_screen_name + ' ' + (status_hashtags.length ? ' ' + status_hashtags.join(' ') : '');
+    TextArea.in_reply_to_status_id = status_id;
+    TextArea.show();
+    TextArea.setFocus();
+    TextArea.setCursor(status_user_screen_name.length + 2);
+}
+System.addKeyBindingHandler(0x52, // VK_R
+                            0,
+                            reply);
+
 })();
 AzureaUtil.mixin(AzureaVim.commands_list, {
     retweet: 'retweet',
