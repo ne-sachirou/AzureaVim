@@ -3,6 +3,7 @@ require 'json'
 
 FILE_MOMONGA = '../js/momonga.js'
 FILE_RELEASE = '../js/AzureaVim.js'
+COMPILER = 'closure'
 META = {
   'name' => 'AzureaVim',
   'author' => 'http://c4se.sakura.ne.jp/profile.html',
@@ -34,12 +35,19 @@ open 'feature.js' do |feature_js|
   end
 end
 
-desc 'Compile with Closure-Compiler.'
+desc 'Compile and add meta info.'
 file FILE_RELEASE => FILE_MOMONGA do |t|
-  compilation_level = 'WHITESPACE_ONLY' #WHITESPACE_ONLY | SIMPLE_OPTIMIZATIONS | ADVANCED_OPTIMIZATIONS
-  sh "java -jar closure-compiler/compiler.jar --compilation_level #{compilation_level} --js_output_file #{t.name} --js #{t.prerequisites[0]}"
-  #sh "java -jar yuicompressor/build/yuicompressor-2.4.2.jar --charset UFT-8 -o #{t.name} #{t.prerequisites[0]}"
-  #sh "AjaxMin/AjaxMin -enc:in UFT-8 #{t.prerequisites[0]} -out #{t.name}"
+  case COMPILER
+  when 'closure'
+    compilation_level = 'SIMPLE_OPTIMIZATIONS' #WHITESPACE_ONLY | SIMPLE_OPTIMIZATIONS | ADVANCED_OPTIMIZATIONS
+    sh "java -jar closure-compiler/compiler.jar --compilation_level #{compilation_level} --js_output_file #{t.name} --js #{t.prerequisites[0]}"
+  when 'yui'
+    sh "java -jar yuicompressor/build/yuicompressor-2.4.2.jar --charset UFT-8 -o #{t.name} #{t.prerequisites[0]}"
+  when 'ms'
+    sh "AjaxMin/AjaxMin -enc:in UFT-8 #{t.prerequisites[0]} -out #{t.name}"
+  when 'uglify'
+    sh "uglifyjs/uglifyjs --ascii --unsafe -o #{t.name} #{t.prerequisites[0]}"
+  end
   script = <<SCRIPTMETA
 // ==AzureaScript==
 // @name #{META['name']}
