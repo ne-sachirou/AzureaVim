@@ -1,43 +1,33 @@
-// ==AzureaScript==
-// @name 地震なう
-// @author http://c4se.sakura.ne.jp/profile/ne.html
-// @date 2011-03-10
-// @scriptUrl https://github.com/ne-sachirou/AzureaVim/raw/master/src/plugins/
-// @license public domain
-// ==/AzureaScript==
-
-try {
-    AzureaUtil.mixin(AzureaVim.commands_list, {
-        earthquake: 'earthquake',
-        e: 'earthquake',
-        jisin: 'earthquake',
-        'え': 'earthquake',
-        'じしん': 'earthquake'
-    });
-} catch (err) {}
+AzureaUtil.mixin(AzureaVim.commands_list, {
+    earthquake: 'earthquake',
+    jisin: 'earthquake',
+    'えあｒｔｈくあけ': 'earthquake',
+    'じしｎ': 'earthquake'
+});
 // :earthquake [set option2]
 // チャーハン諸島風地震なう機能です。Ctrl+↓で、設定した文を、時刻付きでpostします。
-// AzureaVim pluginとして丈でなく、単独のAzureaScriptとして使えます（其の場合コマンド機能は使用出来ません）。
-// option1にsetを入れた場合、投稿文を設定します。
+// option1にsetを入れた場合、option2に投稿文を設定します。
 
 
 (function() {
 
-var _message = System.settings.getValue('user.Earthquake', 'Message');
+var _message = System.settings.getValue('user.AzureaVim', 'EarthquakeMessage');
 
 if (_message === '') {
-    System.settings.setValue('user.Earthquake', 'Message', '地震なう');
-    _message = '地震なう';
+    System.settings.setValue('user.AzureaVim', 'EarthquakeMessage', '地震なう');
+    _message = '地震なう #{new Date().toString()}';
 }
 
+
 function _getMessage() { // @return String:
-    return _message;
+    return AzureaUtil.template.expand(_message).text;
 }
+
 
 function _setMessage(text) { // @param String:
                              // @return String:
     text = text || _message;
-    System.settings.setValue('user.Earthquake', 'Message', text);
+    System.settings.setValue('user.AzureaVim', 'EarthquakeMessage', text);
     _message = text;
     return text;
 }
@@ -52,31 +42,43 @@ function setEarthquakeMessage() { // @return String:
 
 
 function postEarthquakeMessage() { // @return String:
-    var text = _getMessage() + ' ' + (new Date()).toString();
+    var text = _getMessage(),
+        isDisableGPS = System.settings.getValue('Location', 'DisableGPS');
     
+    if (isDisableGPS) {
+        System.settings.setValue('Location', 'DisableGPS', '0');
+    }
     TwitterService.status.update(text, 0);
+    if (isDisableGPS) {
+        System.settings.setValue('Location', 'DisableGPS', '1');
+    }
     return text;
+}
+
+
+AzureaVim.prototype.earthquake = function() { // @return String:
+    var result,
+        isDisableGPS = System.settings.getValue('Location', 'DisableGPS');
+    
+    switch (this.command[1]) {
+    case 'set':
+        result = _setMessage(this.command[2]);
+        break;
+    default:
+        AzureaUtil.event.addEventListener('PreSendUpdateStatus', postEarthquakeMessage);
+        TwitterService.status.update(_getMessage(), 0);
+        AzureaUtil.event.removeEventListener('PreSendUpdateStatus', postEarthquakeMessage);
+        break;
+    }
+    return result;
 }
 
 
 System.addContextMenuHandler('地震なう設定', 0, setEarthquakeMessage);
 System.addKeyBindingHandler(0x28, // VK_DOWN ↓
                             2, // Ctrl
-                            postEarthquakeMessage);
-try {
-    AzureaVim.prototype.earthquake = function() { // @return String:
-        var result;
-        
-        switch (this.command[1]) {
-        case 'set':
-            result = _setMessage(this.command[2]);
-            break;
-        default:
-            result = postEarthquakeMessage();
-            break;
-        }
-        return result;
-    }
-} catch (err) {}
+                            function() {
+    TwitterService.status.update(':earthquake', 0);
+});
 
 })();
