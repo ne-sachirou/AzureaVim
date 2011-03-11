@@ -19,32 +19,6 @@ AzureaUtil.mixin(AzureaVim.commands_list, {
 
 (function() {
 
-function _expandTemplate(template, // String: template
-                         view) {   // Object: view
-                                   // Hash: {text: expanded string,
-                                   //        cursor: number of cursor plase}
-    var cursor,
-        text = template.replace(/#{([^}]+?)}/g, function(m, figure) {
-        with (view) {
-            return eval(figure);
-        }
-    });
-    
-    text = text.split('#{}');
-    if (text.length === 1) {
-        cursor = 0;
-        text = text[0];
-    } else {
-        cursor = text[0].length;
-        text = text.join('');
-    }
-    return {
-        'text': text,
-        'cursor': cursor
-    };
-}
-
-
 AzureaVim.prototype.reply = function() {
     var c1 = {
         template: 'template',
@@ -58,7 +32,7 @@ AzureaVim.prototype.reply = function() {
     
     switch (c1[this.command[1]]) {
     case 'template':
-        t = _expandTemplate(this.command[2], this);
+        t = AzureaUtil.template.expand(this.command[2], this);
         Http.sendRequestAsync('http://google.com/', false,
                               new Function("TextArea.text = '" + t.text.replace("'", "\\'") + "';" +
             "TextArea.in_reply_to_status_id = '" + (this.command[3] === 'true' ? this.status_id : 0) + "';" +

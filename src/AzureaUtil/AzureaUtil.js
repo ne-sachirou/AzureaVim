@@ -2,11 +2,13 @@
 AzureaUtil = {
     mixin: {},
     event: {},
-    time: {}
+    time: {},
+    template: {}
 };
 
 (function() {
 
+// ======================================== mixin ========================================
 function mixin(hash1,       // @param Hash:
                hash2,       // @param Hash:
                overwrite) { // @param Boolean=true:
@@ -24,6 +26,7 @@ function mixin(hash1,       // @param Hash:
 AzureaUtil.mixin = mixin;
 
 
+// ======================================== event ========================================
 var events_list = {
     PreProcessTimelineStatuses: [],
     PreProcessTimelineStatus: [],
@@ -79,6 +82,7 @@ mixin(AzureaUtil.event, {
 });
 
 
+// ======================================== time ========================================
 var timeout_list = {},// {id: [time, fun]}
     interval_list = {};// {id: [time, fun, interval]}
 //    timeevent_list = (function() {
@@ -171,6 +175,38 @@ mixin(AzureaUtil.time, {
     'setInterval': setInterval,
     'clearInterval': clearInterval
 });
+
+
+// ======================================== template ========================================
+function expandTemplate(template, // @param String: template
+                        view) {   // @param Object: view
+                                  // @return Hash: {text: expanded String,
+                                  //                cursor: Number of cursor plase}
+    var cursor,
+        text = template.replace(/#{([^}]+?)}/g, function(m, figure) {
+        with (view) {
+            return eval(figure);
+        }
+    });
+    
+    text = text.split('#{}');
+    if (text.length === 1) {
+        cursor = 0;
+        text = text[0];
+    } else {
+        cursor = text[0].length;
+        text = text.join('');
+    }
+    return {
+        'text': text,
+        'cursor': cursor
+    };
+}
+
+
+mixin(AzureaUtil.template, {
+    'expand': expandTemplate
+})
 
 })();
 
