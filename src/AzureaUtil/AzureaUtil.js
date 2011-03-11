@@ -3,7 +3,8 @@ AzureaUtil = {
     mixin: {},
     event: {},
     time: {},
-    template: {}
+    template: {},
+    yank: {}
 };
 
 (function() {
@@ -206,7 +207,38 @@ function expandTemplate(template, // @param String: template
 
 mixin(AzureaUtil.template, {
     'expand': expandTemplate
-})
+});
+
+
+// ======================================== yank ========================================
+function getYank(name) { // @param String:
+                         // @return String:
+    if (name) {
+        name = name.charAt(0);
+    } else {
+        name = '';
+    }
+    return System.settings.getValue('user.AzureaVim', 'Yank' + name);
+}
+
+
+function setYank(name,   // @param String:
+                 text) { // @param String:
+                         // @return String:
+    if (name) {
+        name = name.charAt(0);
+    } else {
+        name = '';
+    }
+    System.settings.setValue('user.AzureaVim', 'Yank' + name, text);
+    return text;
+}
+
+
+mixin(AzureaUtil.yank, {
+    'get': getYank,
+    'set': setYank
+});
 
 })();
 

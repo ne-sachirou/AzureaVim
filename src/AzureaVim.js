@@ -5,7 +5,9 @@ AzureaVim = {};
 
 var azvm_commands_list = {};
 
+
 function _focusInput(status_id) { // @param String: status id
+    AzureaUtil.yank.set(null, TextArea.text);
     TextArea.text = ':';
     TextArea.in_reply_to_status_id = status_id;
     TextArea.show();
@@ -72,7 +74,14 @@ AzureaUtil.event.addEventListener('PreSendUpdateStatus', function(status) { // @
     var azvm, do_notpost = false;
     
     try {
-        if (/^(?::|：)/.test(status.text)) {
+        if (status.text === ':') {
+            //do_notpost = true;
+            //AzureaUtil.time.setTimeout(function() {
+            //    TextArea.text = AzureaUtil.yank.get(null);
+            //}, 0);
+            status.text = '';
+            TextArea.text = AzureaUtil.yank.get(null);
+        }else if (/^(?::|：)/.test(status.text)) {
             do_notpost = true;
             azvm = new azvm_AzureaVim(status);
             TextArea.text = '';
