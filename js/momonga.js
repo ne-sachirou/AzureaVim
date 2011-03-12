@@ -2,11 +2,14 @@
 AzureaUtil = {
     mixin: {},
     event: {},
-    time: {}
+    time: {},
+    template: {},
+    yank: {}
 };
 
 (function() {
 
+// ======================================== mixin ========================================
 function mixin(hash1,       // @param Hash:
                hash2,       // @param Hash:
                overwrite) { // @param Boolean=true:
@@ -24,6 +27,7 @@ function mixin(hash1,       // @param Hash:
 AzureaUtil.mixin = mixin;
 
 
+// ======================================== event ========================================
 var events_list = {
     PreProcessTimelineStatuses: [],
     PreProcessTimelineStatus: [],
@@ -79,6 +83,7 @@ mixin(AzureaUtil.event, {
 });
 
 
+// ======================================== time ========================================
 var timeout_list = {},// {id: [time, fun]}
     interval_list = {};// {id: [time, fun, interval]}
 //    timeevent_list = (function() {
@@ -172,6 +177,69 @@ mixin(AzureaUtil.time, {
     'clearInterval': clearInterval
 });
 
+
+// ======================================== template ========================================
+function expandTemplate(template, // @param String: template
+                        view) {   // @param Object: view
+                                  // @return Hash: {text: expanded String,
+                                  //                cursor: Number of cursor plase}
+    var cursor,
+        text = template.replace(/#{([^}]+?)}/g, function(m, figure) {
+        with (view) {
+            return eval(figure);
+        }
+    });
+    
+    text = text.split('#{}');
+    if (text.length === 1) {
+        cursor = 0;
+        text = text[0];
+    } else {
+        cursor = text[0].length;
+        text = text.join('');
+    }
+    return {
+        'text': text,
+        'cursor': cursor
+    };
+}
+
+
+mixin(AzureaUtil.template, {
+    'expand': expandTemplate
+});
+
+
+// ======================================== yank ========================================
+function getYank(name) { // @param String:
+                         // @return String:
+    if (name) {
+        name = name.charAt(0);
+    } else {
+        name = '';
+    }
+    return System.settings.getValue('user.AzureaVim', 'Yank' + name);
+}
+
+
+function setYank(name,   // @param String:
+                 text) { // @param String:
+                         // @return String:
+    if (name) {
+        name = name.charAt(0);
+    } else {
+        name = '';
+    }
+    System.settings.setValue('user.AzureaVim', 'Yank' + name, text);
+    return text;
+}
+
+
+mixin(AzureaUtil.yank, {
+    'get': getYank,
+    'set': setYank
+});
+
 })();
 
 
@@ -232,7 +300,9 @@ AzureaVim = {};
 
 var azvm_commands_list = {};
 
+
 function _focusInput(status_id) { // @param String: status id
+    AzureaUtil.yank.set(null, TextArea.text);
     TextArea.text = ':';
     TextArea.in_reply_to_status_id = status_id;
     TextArea.show();
@@ -299,7 +369,14 @@ AzureaUtil.event.addEventListener('PreSendUpdateStatus', function(status) { // @
     var azvm, do_notpost = false;
     
     try {
-        if (/^(?::|：)/.test(status.text)) {
+        if (status.text === ':') {
+            do_notpost = true;
+            AzureaUtil.time.setTimeout(function() {
+                TextArea.text = AzureaUtil.yank.get(null);
+            }, 0);
+            //status.text = '';
+            //TextArea.text = AzureaUtil.yank.get(null);
+        }else if (/^(?::|：)/.test(status.text)) {
             do_notpost = true;
             azvm = new azvm_AzureaVim(status);
             TextArea.text = '';
@@ -502,32 +579,6 @@ AzureaUtil.mixin(AzureaVim.commands_list, {
 
 (function() {
 
-function _expandTemplate(template, // String: template
-                         view) {   // Object: view
-                                   // Hash: {text: expanded string,
-                                   //        cursor: number of cursor plase}
-    var cursor,
-        text = template.replace(/#{([^}]+?)}/g, function(m, figure) {
-        with (view) {
-            return eval(figure);
-        }
-    });
-    
-    text = text.split('#{}');
-    if (text.length === 1) {
-        cursor = 0;
-        text = text[0];
-    } else {
-        cursor = text[0].length;
-        text = text.join('');
-    }
-    return {
-        'text': text,
-        'cursor': cursor
-    };
-}
-
-
 AzureaVim.prototype.reply = function() {
     var c1 = {
         template: 'template',
@@ -541,7 +592,7 @@ AzureaVim.prototype.reply = function() {
     
     switch (c1[this.command[1]]) {
     case 'template':
-        t = _expandTemplate(this.command[2], this);
+        t = AzureaUtil.template.expand(this.command[2], this);
         Http.sendRequestAsync('http://google.com/', false,
                               new Function("TextArea.text = '" + t.text.replace("'", "\\'") + "';" +
             "TextArea.in_reply_to_status_id = '" + (this.command[3] === 'true' ? this.status_id : 0) + "';" +

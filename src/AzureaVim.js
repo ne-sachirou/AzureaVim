@@ -75,12 +75,12 @@ AzureaUtil.event.addEventListener('PreSendUpdateStatus', function(status) { // @
     
     try {
         if (status.text === ':') {
-            //do_notpost = true;
-            //AzureaUtil.time.setTimeout(function() {
-            //    TextArea.text = AzureaUtil.yank.get(null);
-            //}, 0);
-            status.text = '';
-            TextArea.text = AzureaUtil.yank.get(null);
+            do_notpost = true;
+            AzureaUtil.time.setTimeout(function() {
+                TextArea.text = AzureaUtil.yank.get(null);
+            }, 0);
+            //status.text = '';
+            //TextArea.text = AzureaUtil.yank.get(null);
         }else if (/^(?::|：)/.test(status.text)) {
             do_notpost = true;
             azvm = new azvm_AzureaVim(status);

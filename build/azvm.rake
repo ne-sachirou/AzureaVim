@@ -39,7 +39,7 @@ desc 'Compile and add meta info.'
 file FILE_RELEASE => FILE_MOMONGA do |t|
   case COMPILER
   when 'closure'
-    compilation_level = 'SIMPLE_OPTIMIZATIONS' #WHITESPACE_ONLY | SIMPLE_OPTIMIZATIONS | ADVANCED_OPTIMIZATIONS
+    compilation_level = 'WHITESPACE_ONLY' #WHITESPACE_ONLY | SIMPLE_OPTIMIZATIONS | ADVANCED_OPTIMIZATIONS
     sh "java -jar closure-compiler/compiler.jar --compilation_level #{compilation_level} --js_output_file #{t.name} --js #{t.prerequisites[0]}"
   when 'yui'
     sh "java -jar yuicompressor/build/yuicompressor-2.4.2.jar --charset UFT-8 -o #{t.name} #{t.prerequisites[0]}"
