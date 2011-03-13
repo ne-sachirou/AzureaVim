@@ -8,5 +8,6 @@ Azurea.loadjs({
     "plugins/shindan": ["AzureaVim", "plugins/unshorten"],
     "plugins/translate": ["AzureaVim"],
     "plugins/unshorten": ["AzureaVim"],
-    "plugins/view": ["AzureaVim"]
+    "plugins/view": ["AzureaVim"],
+    "plugins/earthquake": ["AzureaVim"]
 });

@@ -2,7 +2,7 @@
 // @name AzureaVim
 // @author http://c4se.sakura.ne.jp/profile.html
 // @scriptUrl https://github.com/ne-sachirou/AzureaVim/raw/master/js/
-// @date 2011-03-12
+// @date 2011-03-13
 // @license MIT License
 // ==/AzureaScript==
 AzureaUtil={mixin:{},event:{},time:{},template:{},yank:{}};
@@ -38,3 +38,7 @@ AzureaVim.prototype.translate=function(){if(!this.command[1])this.command[1]="ja
 "-> ",0)})};AzureaUtil.mixin(AzureaVim.commands_list,{view:"view",v:"view",home:"view home","\u307b\u3081":"view home",user:"view user","\u3046\u305b\uff52":"view user"});
 AzureaVim.prototype.view=function(){var c1={home:"home",timeline:"home",h:"home",mention:"mention",reply:"mention",r:"mention",m:"mention","@":"mention",message:"message",dm:"message",d:"message",user:"user",u:"user",search:"search",favorite:"favorite",fav:"favorite",f:"favorite",match:"match",following:"following",follow:"following",followers:"followers",follower:"followers",followed:"followers"},views=System.apiLevel>=11?System.views:System;switch(c1[this.command[1]]){case "home":views.openTimeline();
 break;case "mention":views.openMention();break;case "message":views.openMessage();break;case "user":views.openUserTimeline(this.command[2]||this.screen_name,false);break;case "search":views.openSearch(this.command[2],false);break;case "favorite":views.openFavorite();break;case "match":views.openMatch(this.command[2],false);break;case "following":views.openFollwoing();break;case "followers":views.openFollowers();break;default:break}};
+AzureaUtil.mixin(AzureaVim.commands_list,{earthquake:"earthquake",jisin:"earthquake","\u3048\u3042\uff52\uff54\uff48\u304f\u3042\u3051":"earthquake","\u3058\u3057\uff4e":"earthquake"});
+(function(){var _message=System.settings.getValue("user.AzureaVim","EarthquakeMessage");if(_message===""){System.settings.setValue("user.AzureaVim","EarthquakeMessage","\u5730\u9707\u306a\u3046");_message="\u5730\u9707\u306a\u3046 #{new Date().toString()}"}function _getMessage(view){var result;if(view==null)result=_message;else AzureaUtil.template.expand(_message,view).text;return result}function _setMessage(text){text=text||_message;System.settings.setValue("user.AzureaVim","EarthquakeMessage",text);
+_message=text;return text}function setEarthquakeMessage(){var text=System.inputBox("\u5730\u9707\u306a\u3046\u6295\u7a3f\u6587",_getMessage(),false);_setMessage(text);return text}AzureaVim.prototype.earthquake=function(){var result,isDisableGPS=System.settings.getValue("Location","DisableGPS");switch(this.command[1]){case "set":result=_setMessage(this.command[2]);break;default:TwitterService.status.update(_getMessage(this),0);break}return result};System.addContextMenuHandler("\u5730\u9707\u306a\u3046\u8a2d\u5b9a",
+0,setEarthquakeMessage);System.addKeyBindingHandler(40,2,function(){TwitterService.status.update(":earthquake",0)})})();

@@ -19,8 +19,16 @@ if (_message === '') {
 }
 
 
-function _getMessage() { // @return String:
-    return AzureaUtil.template.expand(_message).text;
+function _getMessage(view) { // @param Hash:
+                             // @return String:
+    var result;
+    
+    if (view == null) { // null or undefined
+        result = _message;
+    } else {
+        AzureaUtil.template.expand(_message, view).text
+    }
+    return result;
 }
 
 
@@ -41,19 +49,9 @@ function setEarthquakeMessage() { // @return String:
 }
 
 
-function postEarthquakeMessage() { // @return String:
-    var text = _getMessage(),
-        isDisableGPS = System.settings.getValue('Location', 'DisableGPS');
-    
-    if (isDisableGPS) {
-        System.settings.setValue('Location', 'DisableGPS', '0');
-    }
-    TwitterService.status.update(text, 0);
-    if (isDisableGPS) {
-        System.settings.setValue('Location', 'DisableGPS', '1');
-    }
-    return text;
-}
+//function postEarthquakeMessage(status_update) { // @param StatusUpdate Object:
+//   status_update.text = _getMessage(status_update);
+//}
 
 
 AzureaVim.prototype.earthquake = function() { // @return String:
@@ -65,9 +63,15 @@ AzureaVim.prototype.earthquake = function() { // @return String:
         result = _setMessage(this.command[2]);
         break;
     default:
-        AzureaUtil.event.addEventListener('PreSendUpdateStatus', postEarthquakeMessage);
-        TwitterService.status.update(_getMessage(), 0);
-        AzureaUtil.event.removeEventListener('PreSendUpdateStatus', postEarthquakeMessage);
+        //AzureaUtil.event.addEventListener('PreSendUpdateStatus', postEarthquakeMessage);
+        //if (isDisableGPS === -1) {
+        //    System.settings.setValue('Location', 'DisableGPS', '0');
+        //}
+        TwitterService.status.update(_getMessage(this), 0);
+        //if (isDisableGPS) {
+        //    System.settings.setValue('Location', 'DisableGPS', '1');
+        //}
+        //AzureaUtil.event.removeEventListener('PreSendUpdateStatus', postEarthquakeMessage);
         break;
     }
     return result;
