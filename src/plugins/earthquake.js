@@ -11,7 +11,7 @@ AzureaUtil.mixin(AzureaVim.commands_list, {
 
 (function() {
 
-if (AzureaUtil.db.get('EarthquakeMessage')) {
+if (!AzureaUtil.db.get('EarthquakeMessage')) {
     AzureaUtil.db.set('EarthquakeMessage', '地震なう #{Date()}');
 }
 
@@ -56,7 +56,7 @@ AzureaVim.prototype.earthquake = function() { // @return String:
         break;
     default:
         //if (GeoLocation.enabled) {
-        //    geo = GeoLocation.current()
+        //    geo = GeoLocation.current();
         //    this.geo = {
         //        lat: geo.latitude,
         //        lon: geo.longitude

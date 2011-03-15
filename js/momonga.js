@@ -1,6 +1,7 @@
 // https://gist.github.com/841702
 AzureaUtil = {
     mixin: {},
+    db: {},
     event: {},
     time: {},
     template: {},
@@ -25,6 +26,55 @@ function mixin(hash1,       // @param Hash:
     }
 }
 AzureaUtil.mixin = mixin;
+
+
+// ======================================== db ========================================
+var db_cashe = {};
+
+function setDbKey(key,     // @param String:
+                  value) { // @param String='':
+    System.settings.setValue('user.AzureaVim', key, encodeURIComponent(value));
+    db_cashe[key] = value;
+}
+
+
+function getDbKey(key) { // @param String:
+                         // @return String:
+    if (!db_cashe[key]) {
+        db_cashe[key] = decodeURIComponent(System.settings.getValue('user.AzureaVim', key));
+    }
+    return db_cashe[key];
+}
+
+
+function deleteDbKey(key) { // @param String:
+    System.settings.setValue('user.AzureaVim', key, '');
+    delete db_cashe[key];
+}
+
+
+function dbKeys(regex) { // @param RegExp|String='':
+                         // @return Array[String]:
+    var key, keys = [];
+    
+    if (typeof regex === 'string' || regex instanceof String) {
+        regex = RegExp(regex);
+    }
+    for (key in db_cashe) {
+        if (match.test(key)) {
+            keys.push(key);
+        }
+    }
+    return keys;
+}
+
+
+mixin(AzureaUtil.db, {
+    'get': getDbKey,
+    'set': setDbKey,
+    'del': deleteDbKey,
+    'keys': dbKeys
+});
 
 
 // ======================================== event ========================================
@@ -86,16 +136,19 @@ mixin(AzureaUtil.event, {
 // ======================================== time ========================================
 var timeout_list = {},// {id: [time, fun]}
     interval_list = {};// {id: [time, fun, interval]}
-//    timeevent_list = (function() {
-//    var timeevent_list,
-//        timeEvent;
-//    
-//    for () {
-//        timeEvent = System.settings.getValue('user.AzureaUtil', 'TimeEvent' + i);
-//        timeevent_list[]
-//    }
-//    return timeevent_list;
-//})();
+    timeevent_list = (function() { // {id: [time, fun, i]}
+    var timeevent_list = {},
+        timeevent, i = -1;
+    
+    while (timeevent = getDbKey('TimeEvent' + (++i))) {
+        timeevent_list[timeevent.substring(0, timeevent.indexOf(':'))] = [
+            timeevent.substring(timeevent.indexOf(':') + 1, timeevent.indexOf('|')) - 0,
+            eval('(function(){return ' + timeevent.substring(timeevent.indexOf('|') + 1) + '})()'),
+            i
+        ];
+    }
+    return timeevent_list;
+})();
 
 
 function attainSchedule() {
@@ -110,24 +163,24 @@ function attainSchedule() {
     }
     for (id in interval_list) {
         if (interval_list[id][0] <= now) {
-            interval_list[id][0] += interval_list[id][2];
+            interval_list[id][0] = now + interval_list[id][2];
             interval_list[id][1]();
         }
     }
-    //for (id in timeevent_list) {
-    //    if (timeevent_list[id][0] <= now) {
-    //        timeevent_list[id][1]();
-    //        delete timeevent_list[id];
-    //        System.settings.getValue('user.AzureaUtil', 'TimeEvent' + i);
-    //    }
-    //    
-    //}
+    for (id in timeevent_list) {
+        if (timeevent_list[id][0] <= now) {
+            timeevent_list[id][1]();
+            deleteDbKey('TimeEvent' + timeevent_list[id][2]);
+            delete timeevent_list[id];
+        }
+    }
 }
 
 
 addEventListener('PreProcessTimelineStatus', attainSchedule);
 addEventListener('PostSendUpdateStatus', attainSchedule);
 addEventListener('ReceiveFavorite', attainSchedule);
+attainSchedule();
 
 
 function setTimeout(fun,  // @param Function:
@@ -160,21 +213,33 @@ function clearInterval(id) { // @param Strings:
 }
 
 
-//function setTimeevent(fun,  // @param Function:
-//                      ms) { // @param Number:
-//                            // @return Strings:
-//    
-//}
-//
-//
-//function clearTimeevent() {}
+function setTimeevent(fun,  // @param String: Function = eval(String)
+                      ms) { // @param Number: Date().getTime()
+                            // @return Strings:
+    var id = Math.floor(Math.random() * new Date().getTime()).toString(36),
+        i = -1;
+    
+    while (getDbKey('TimeEvent' + (++i))) {
+    }
+    setDbKey('TimeEvent' + i, id + ':' + ms + '|' + fun);
+    timeevent_list[id] = [ms, eval('(function(){return ' + fun + '})()'), i];
+    return id;
+}
+
+
+function clearTimeevent(id) { // @param Strings:
+    deleteDbKey('TimeEvent' + timeevent_list[id][2]);
+    delete timeevent_list[id];
+}
 
 
 mixin(AzureaUtil.time, {
     'setTimeout': setTimeout,
     'clearTimeout': clearTimeout,
     'setInterval': setInterval,
-    'clearInterval': clearInterval
+    'clearInterval': clearInterval,
+    'setTimeevent': setTimeevent,
+    'clearTimeevent': clearTimeevent
 });
 
 
@@ -211,26 +276,32 @@ mixin(AzureaUtil.template, {
 
 
 // ======================================== yank ========================================
-function getYank(name) { // @param String:
+function getYank(name) { // @param String='':
                          // @return String:
     if (name) {
         name = name.charAt(0);
+        if (/[0-9A-Za-z]/.test(name)) {
+            name = '';
+        }
     } else {
         name = '';
     }
-    return System.settings.getValue('user.AzureaVim', 'Yank' + name);
+    return getDbKey('Yank' + name);
 }
 
 
-function setYank(name,   // @param String:
+function setYank(name,   // @param String='':
                  text) { // @param String:
                          // @return String:
     if (name) {
         name = name.charAt(0);
+        if (/[0-9A-Za-z]/.test(name)) {
+            name = '';
+        }
     } else {
         name = '';
     }
-    System.settings.setValue('user.AzureaVim', 'Yank' + name, text);
+    setDbKey('Yank' + name, text);
     return text;
 }
 
@@ -378,6 +449,7 @@ AzureaUtil.event.addEventListener('PreSendUpdateStatus', function(status) { // @
             //TextArea.text = AzureaUtil.yank.get(null);
         }else if (/^(?::|：)/.test(status.text)) {
             do_notpost = true;
+            AzureaUtil.yank.set(null, status.text);
             azvm = new azvm_AzureaVim(status);
             TextArea.text = '';
             TextArea.in_reply_to_status_id = 0;
@@ -851,22 +923,17 @@ AzureaUtil.mixin(AzureaVim.commands_list, {
 
 (function() {
 
-var _message = System.settings.getValue('user.AzureaVim', 'EarthquakeMessage');
-
-if (_message === '') {
-    System.settings.setValue('user.AzureaVim', 'EarthquakeMessage', '地震なう');
-    _message = '地震なう #{Date()}';
+if (!AzureaUtil.db.get('EarthquakeMessage')) {
+    AzureaUtil.db.set('EarthquakeMessage', '地震なう #{Date()}');
 }
 
 
 function _getMessage(view) { // @param Hash:
                              // @return String:
-    var result;
+    var result = AzureaUtil.db.get('EarthquakeMessage');
     
-    if (view == null) { // null or undefined
-        result = _message;
-    } else {
-        result = AzureaUtil.template.expand(_message, view).text
+    if (view != null) { // not null or undefined
+        result = AzureaUtil.template.expand(result, view).text;
     }
     return result;
 }
@@ -874,9 +941,8 @@ function _getMessage(view) { // @param Hash:
 
 function _setMessage(text) { // @param String:
                              // @return String:
-    text = text || _message;
-    System.settings.setValue('user.AzureaVim', 'EarthquakeMessage', text);
-    _message = text;
+    text = text || AzureaUtil.db.get('EarthquakeMessage');
+    AzureaUtil.db.set('EarthquakeMessage', text);
     return text;
 }
 
@@ -902,7 +968,7 @@ AzureaVim.prototype.earthquake = function() { // @return String:
         break;
     default:
         //if (GeoLocation.enabled) {
-        //    geo = GeoLocation.current()
+        //    geo = GeoLocation.current();
         //    this.geo = {
         //        lat: geo.latitude,
         //        lon: geo.longitude
@@ -922,3 +988,79 @@ System.addKeyBindingHandler(0x28, // VK_DOWN ↓
 });
 
 })();
+AzureaUtil.mixin(AzureaVim.commands_list, {
+    delay: 'delay'
+});
+// delay option1 option2
+// 
+
+(function() {
+
+if (AzureaUtil.db.get('DelayUseTwitDelay')) {
+    AzureaUtil.db.set('DelayUseTwitDelay', '0');
+}
+
+function postTwitDelay(text,       // @param String:
+                       time,       // @param String: RFC2822
+                       callback) { // @param Function:
+    Http.postRequestAsync('http://twitdelay.appspot.com/api/post',
+                          'user_id=' + AzureaUtil.db.get('UserName') +
+                          '&api_key=' + AzureaUtil.db.get('DelayTwitDelayApiKey') +
+                          '&status=' + text +
+                          '&at=' + time,
+                          false,
+                          callback);
+}
+
+
+AzureaVim.prototype.delay = function() {
+    var regex_date = /^(?:(?:(\d{4})-)?(\d{1,2})-(\d{1,2}) )?(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?$/,
+        m1, d, type;
+    
+    if (m1 = this.command[1].match(regex_date)) {
+        var d = new Date();
+        m1[1] && d.setFullYear(m1[1]);
+        m1[2] && d.setMonth(m1[2] - 1);
+        m1[3] && d.setDate(m1[3]);
+        d.setHours(m1[4]);
+        d.setMinutes(m1[5]);
+        d.setSeconds(0);
+        m1[6] && d.setSeconds(m1[6]);
+        this.command[1] = d.getTime();
+        type = 2;
+        this.command[2] = this.command.slice(2).join(' ');
+    } else {
+        this.command[1] = new Date().getTime() + (this.command[1] - 0);
+        type = 1;
+        this.command[2] = this.command.slice(2).join(' ');
+    }
+    if (AzureaUtil.db.get('DelayUseTwitDelay')) {
+        d = new Date(this.command[1]);
+        postTwitDelay(this.command[2],
+                      d.getUTCDate() + ' ' + d.getUTCMonth() + ' ' + d.getUTCFullYear() + ' ' + d.getUTCHours() + ':' + d.getUTCMinutes() + ':' + d.getUTCSeconds() + ' +0000',
+                      function() {});
+    } else {
+        if (type === 1) {
+            AzureaUtil.time.setTimeout((function(obj) {
+                return function() {
+                    TwitterService.status.update(obj.command[2], obj.status_id);
+                }
+            })(this),
+                                       this.command[1] - new Date().getTime());
+        } else {
+            AzureaUtil.time.setTimeevent('function() {TwitterService.status.update("' + this.command[2] + '", "' + this.status_id + '");}',
+                                         this.command[1]);
+        }
+    }
+}
+
+})();
+AzureaUtil.mixin(AzureaVim.commands_list, {
+    eval: '_evaluate'
+});
+
+
+AzureaVim.prototype._evaluate = function() {
+    this.command[1] = this.command.slice(1).join(' ');
+    System.inputBox(this.command[1], eval(this.command[1]), false);
+}

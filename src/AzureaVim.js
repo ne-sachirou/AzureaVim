@@ -83,6 +83,7 @@ AzureaUtil.event.addEventListener('PreSendUpdateStatus', function(status) { // @
             //TextArea.text = AzureaUtil.yank.get(null);
         }else if (/^(?::|：)/.test(status.text)) {
             do_notpost = true;
+            AzureaUtil.yank.set(null, status.text);
             azvm = new azvm_AzureaVim(status);
             TextArea.text = '';
             TextArea.in_reply_to_status_id = 0;

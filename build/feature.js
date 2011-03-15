@@ -9,5 +9,7 @@ Azurea.loadjs({
     "plugins/translate": ["AzureaVim"],
     "plugins/unshorten": ["AzureaVim"],
     "plugins/view": ["AzureaVim"],
-    "plugins/earthquake": ["AzureaVim"]
+    "plugins/earthquake": ["AzureaVim"],
+    "plugins/delay": ["AzureaVim"],
+    "plugins/debug": ["AzureaVim"]
 });

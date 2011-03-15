@@ -1,6 +1,7 @@
 // https://gist.github.com/841702
 AzureaUtil = {
     mixin: {},
+    db: {},
     event: {},
     time: {},
     template: {},
@@ -28,27 +29,27 @@ AzureaUtil.mixin = mixin;
 
 
 // ======================================== db ========================================
-var db = {};
+var db_cashe = {};
 
 function setDbKey(key,     // @param String:
                   value) { // @param String='':
     System.settings.setValue('user.AzureaVim', key, encodeURIComponent(value));
-    db[key] = value;
+    db_cashe[key] = value;
 }
 
 
 function getDbKey(key) { // @param String:
                          // @return String:
-    if (!db[key]) {
-        db[key] = decodeURIComponent(System.settings.getValue('user.AzureaVim', key));
+    if (!db_cashe[key]) {
+        db_cashe[key] = decodeURIComponent(System.settings.getValue('user.AzureaVim', key));
     }
-    return db[key];
+    return db_cashe[key];
 }
 
 
 function deleteDbKey(key) { // @param String:
     System.settings.setValue('user.AzureaVim', key, '');
-    delete db[key];
+    delete db_cashe[key];
 }
 
 
@@ -59,7 +60,7 @@ function dbKeys(regex) { // @param RegExp|String='':
     if (typeof regex === 'string' || regex instanceof String) {
         regex = RegExp(regex);
     }
-    for (key in db) {
+    for (key in db_cashe) {
         if (match.test(key)) {
             keys.push(key);
         }
@@ -71,7 +72,7 @@ function dbKeys(regex) { // @param RegExp|String='':
 mixin(AzureaUtil.db, {
     'get': getDbKey,
     'set': setDbKey,
-    'delete': deleteDbKey,
+    'del': deleteDbKey,
     'keys': dbKeys
 });
 
@@ -136,13 +137,13 @@ mixin(AzureaUtil.event, {
 var timeout_list = {},// {id: [time, fun]}
     interval_list = {};// {id: [time, fun, interval]}
     timeevent_list = (function() { // {id: [time, fun, i]}
-    var timeevent_list,
-        timeEvent, i = -1;
+    var timeevent_list = {},
+        timeevent, i = -1;
     
-    while (timeEvent = getDbKey('TimeEvent' + (++i))) {
-        timeevent_list[timeEvent.substring(0, timeEvent.indexOf(':'))] = [
-            timeEvent.substring(timeEvent.indexOf(':') + 1, timeEvent.indexOf('|')),
-            eval(timeEvent.substring(timeEvent.indexOf(':')+1)),
+    while (timeevent = getDbKey('TimeEvent' + (++i))) {
+        timeevent_list[timeevent.substring(0, timeevent.indexOf(':'))] = [
+            timeevent.substring(timeevent.indexOf(':') + 1, timeevent.indexOf('|')) - 0,
+            eval('(function(){return ' + timeevent.substring(timeevent.indexOf('|') + 1) + '})()'),
             i
         ];
     }
@@ -151,7 +152,7 @@ var timeout_list = {},// {id: [time, fun]}
 
 
 function attainSchedule() {
-    var now = Date().getTime(),
+    var now = new Date().getTime(),
         id;
     
     for (id in timeout_list) {
@@ -162,17 +163,16 @@ function attainSchedule() {
     }
     for (id in interval_list) {
         if (interval_list[id][0] <= now) {
-            interval_list[id][0] += interval_list[id][2];
+            interval_list[id][0] = now + interval_list[id][2];
             interval_list[id][1]();
         }
     }
     for (id in timeevent_list) {
         if (timeevent_list[id][0] <= now) {
             timeevent_list[id][1]();
-            deleteDbKey('TimeEvent' + timeevent_list[2]);
+            deleteDbKey('TimeEvent' + timeevent_list[id][2]);
             delete timeevent_list[id];
         }
-        
     }
 }
 
@@ -180,12 +180,13 @@ function attainSchedule() {
 addEventListener('PreProcessTimelineStatus', attainSchedule);
 addEventListener('PostSendUpdateStatus', attainSchedule);
 addEventListener('ReceiveFavorite', attainSchedule);
+attainSchedule();
 
 
 function setTimeout(fun,  // @param Function:
                     ms) { // @param Number:
                           // @return Strings:
-    var id = Math.floor(Math.random() * Date().getTime()).toString(36);
+    var id = Math.floor(Math.random() * new Date().getTime()).toString(36);
     
     timeout_list[id] = [new Date().getTime() + ms, fun];
     return id;
@@ -200,7 +201,7 @@ function clearTimeout(id) { // @param Strings:
 function setInterval(fun,  // @param Function:
                      ms) { // @param Number:
                            // @return Strings:
-    var id = Math.floor(Math.random() * Date().getTime()).toString(36);
+    var id = Math.floor(Math.random() * new Date().getTime()).toString(36);
     
     timeinterval_list[id] = [new Date().getTime() + ms, fun, ms];
     return id;
@@ -212,21 +213,21 @@ function clearInterval(id) { // @param Strings:
 }
 
 
-function setTimeevent(fun,    // @param String:
-                      time) { // @param Number: Date().getTime()
-                              // @return Strings:
-    var id = Math.floor(Math.random() * Date().getTime()).toString(36),
+function setTimeevent(fun,  // @param String: Function = eval(String)
+                      ms) { // @param Number: Date().getTime()
+                            // @return Strings:
+    var id = Math.floor(Math.random() * new Date().getTime()).toString(36),
         i = -1;
     
-    while (getDbKey(TimeEvent + (++i))) {
+    while (getDbKey('TimeEvent' + (++i))) {
     }
-    setDbKey('TimeEvent' + i, id + ':' + time + '|' + fun);
-    timeevent_list[id] = [time, eval(fun), i];
+    setDbKey('TimeEvent' + i, id + ':' + ms + '|' + fun);
+    timeevent_list[id] = [ms, eval('(function(){return ' + fun + '})()'), i];
     return id;
 }
 
 
-function clearTimeevent() {
+function clearTimeevent(id) { // @param Strings:
     deleteDbKey('TimeEvent' + timeevent_list[id][2]);
     delete timeevent_list[id];
 }
