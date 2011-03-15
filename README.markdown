@@ -1,11 +1,11 @@
 <h1>Dependence</h1>
-uupaa.js - uupaa.js@gmail.com MIT License
+uupaa.js - uupaa.js@gmail.com MIT License<br/>
 Closure Compiler - 2009 Google Inc. Apache License, Version 2.0
 
 <h1>AzureaVim</h1>
-Command interface for Azurea.
-<a href="https://github.com/ne-sachirou/AzureaVim/blob/master/js/AzureaVim.js">js/AzureaVim.js</a> is a builded script file.
-Auto update by <a href="https://github.com/ne-sachirou/AzureaVim/blob/master/js/AzureaStartup.js">js/AzureaStartup.js</a>.
+<p>Command interface for Azurea.</p>
+<p><a href="https://github.com/ne-sachirou/AzureaVim/blob/master/js/AzureaVim.js">js/AzureaVim.js</a> is a builded script file.</p>
+<p>Auto update by <a href="https://github.com/ne-sachirou/AzureaVim/blob/master/js/AzureaStartup.js">js/AzureaStartup.js</a>.</p>
 
 <h2>Installation</h2>
 <ol>
@@ -33,10 +33,10 @@ Auto update by <a href="https://github.com/ne-sachirou/AzureaVim/blob/master/js/
 </ul>
 
 <h2>Command list</h2>
-Read <a href="https://github.com/ne-sachirou/AzureaVim/tree/master/src/plugins">src/plugins</a> js source comments.
+<p>Read <a href="https://github.com/ne-sachirou/AzureaVim/tree/master/src/plugins">src/plugins</a> js source comments.</p>
 
 <h2>License</h2>
-Copyright (c) 2011 <a href="http://c4se.sakura.ne.jp/profile/ne.html">http://c4se.sakura.ne.jp/profile/ne.html</a>
+<pre>Copyright (c) 2011 <a href="http://c4se.sakura.ne.jp/profile/ne.html">http://c4se.sakura.ne.jp/profile/ne.html</a>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
@@ -54,4 +54,4 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
- THE SOFTWARE.
+ THE SOFTWARE.</pre>
