@@ -15,7 +15,7 @@ var _message = System.settings.getValue('user.AzureaVim', 'EarthquakeMessage');
 
 if (_message === '') {
     System.settings.setValue('user.AzureaVim', 'EarthquakeMessage', '地震なう');
-    _message = '地震なう #{new Date().toString()}';
+    _message = '地震なう #{Date()}';
 }
 
 
@@ -26,7 +26,7 @@ function _getMessage(view) { // @param Hash:
     if (view == null) { // null or undefined
         result = _message;
     } else {
-        AzureaUtil.template.expand(_message, view).text
+        result = AzureaUtil.template.expand(_message, view).text
     }
     return result;
 }
@@ -49,36 +49,32 @@ function setEarthquakeMessage() { // @return String:
 }
 
 
-//function postEarthquakeMessage(status_update) { // @param StatusUpdate Object:
-//   status_update.text = _getMessage(status_update);
-//}
-
-
 AzureaVim.prototype.earthquake = function() { // @return String:
-    var result,
-        isDisableGPS = System.settings.getValue('Location', 'DisableGPS');
+    var result, geo;
     
     switch (this.command[1]) {
     case 'set':
-        result = _setMessage(this.command[2]);
+        if (this.command[2]) {
+            result = _setMessage(this.command[2]);
+        } else {
+            result = setEarthquakeMessage();
+        }
         break;
     default:
-        //AzureaUtil.event.addEventListener('PreSendUpdateStatus', postEarthquakeMessage);
-        //if (isDisableGPS === -1) {
-        //    System.settings.setValue('Location', 'DisableGPS', '0');
+        //if (GeoLocation.enabled) {
+        //    geo = GeoLocation.current()
+        //    this.geo = {
+        //        lat: geo.latitude,
+        //        lon: geo.longitude
+        //    };
         //}
         TwitterService.status.update(_getMessage(this), 0);
-        //if (isDisableGPS) {
-        //    System.settings.setValue('Location', 'DisableGPS', '1');
-        //}
-        //AzureaUtil.event.removeEventListener('PreSendUpdateStatus', postEarthquakeMessage);
         break;
     }
     return result;
 }
 
 
-System.addContextMenuHandler('地震なう設定', 0, setEarthquakeMessage);
 System.addKeyBindingHandler(0x28, // VK_DOWN ↓
                             2, // Ctrl
                             function() {
