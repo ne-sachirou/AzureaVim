@@ -27,6 +27,55 @@ function mixin(hash1,       // @param Hash:
 AzureaUtil.mixin = mixin;
 
 
+// ======================================== db ========================================
+var db = {};
+
+function setDbKey(key,     // @param String:
+                  value) { // @param String='':
+    System.settings.setValue('user.AzureaVim', key, encodeURIComponent(value));
+    db[key] = value;
+}
+
+
+function getDbKey(key) { // @param String:
+                         // @return String:
+    if (!db[key]) {
+        db[key] = decodeURIComponent(System.settings.getValue('user.AzureaVim', key));
+    }
+    return db[key];
+}
+
+
+function deleteDbKey(key) { // @param String:
+    System.settings.setValue('user.AzureaVim', key, '');
+    delete db[key];
+}
+
+
+function dbKeys(regex) { // @param RegExp|String='':
+                         // @return Array[String]:
+    var key, keys = [];
+    
+    if (typeof regex === 'string' || regex instanceof String) {
+        regex = RegExp(regex);
+    }
+    for (key in db) {
+        if (match.test(key)) {
+            keys.push(key);
+        }
+    }
+    return keys;
+}
+
+
+mixin(AzureaUtil.db, {
+    'get': getDbKey,
+    'set': setDbKey,
+    'delete': deleteDbKey,
+    'keys': dbKeys
+});
+
+
 // ======================================== event ========================================
 var events_list = {
     PreProcessTimelineStatuses: [],
@@ -86,20 +135,23 @@ mixin(AzureaUtil.event, {
 // ======================================== time ========================================
 var timeout_list = {},// {id: [time, fun]}
     interval_list = {};// {id: [time, fun, interval]}
-//    timeevent_list = (function() {
-//    var timeevent_list,
-//        timeEvent;
-//    
-//    for () {
-//        timeEvent = System.settings.getValue('user.AzureaUtil', 'TimeEvent' + i);
-//        timeevent_list[]
-//    }
-//    return timeevent_list;
-//})();
+    timeevent_list = (function() { // {id: [time, fun, i]}
+    var timeevent_list,
+        timeEvent, i = -1;
+    
+    while (timeEvent = getDbKey('TimeEvent' + (++i))) {
+        timeevent_list[timeEvent.substring(0, timeEvent.indexOf(':'))] = [
+            timeEvent.substring(timeEvent.indexOf(':') + 1, timeEvent.indexOf('|')),
+            eval(timeEvent.substring(timeEvent.indexOf(':')+1)),
+            i
+        ];
+    }
+    return timeevent_list;
+})();
 
 
 function attainSchedule() {
-    var now = new Date().getTime(),
+    var now = Date().getTime(),
         id;
     
     for (id in timeout_list) {
@@ -114,14 +166,14 @@ function attainSchedule() {
             interval_list[id][1]();
         }
     }
-    //for (id in timeevent_list) {
-    //    if (timeevent_list[id][0] <= now) {
-    //        timeevent_list[id][1]();
-    //        delete timeevent_list[id];
-    //        System.settings.getValue('user.AzureaUtil', 'TimeEvent' + i);
-    //    }
-    //    
-    //}
+    for (id in timeevent_list) {
+        if (timeevent_list[id][0] <= now) {
+            timeevent_list[id][1]();
+            deleteDbKey('TimeEvent' + timeevent_list[2]);
+            delete timeevent_list[id];
+        }
+        
+    }
 }
 
 
@@ -133,7 +185,7 @@ addEventListener('ReceiveFavorite', attainSchedule);
 function setTimeout(fun,  // @param Function:
                     ms) { // @param Number:
                           // @return Strings:
-    var id = Math.floor(Math.random() * new Date().getTime()).toString(36);
+    var id = Math.floor(Math.random() * Date().getTime()).toString(36);
     
     timeout_list[id] = [new Date().getTime() + ms, fun];
     return id;
@@ -148,7 +200,7 @@ function clearTimeout(id) { // @param Strings:
 function setInterval(fun,  // @param Function:
                      ms) { // @param Number:
                            // @return Strings:
-    var id = Math.floor(Math.random() * new Date().getTime()).toString(36);
+    var id = Math.floor(Math.random() * Date().getTime()).toString(36);
     
     timeinterval_list[id] = [new Date().getTime() + ms, fun, ms];
     return id;
@@ -160,21 +212,33 @@ function clearInterval(id) { // @param Strings:
 }
 
 
-//function setTimeevent(fun,  // @param Function:
-//                      ms) { // @param Number:
-//                            // @return Strings:
-//    
-//}
-//
-//
-//function clearTimeevent() {}
+function setTimeevent(fun,    // @param String:
+                      time) { // @param Number: Date().getTime()
+                              // @return Strings:
+    var id = Math.floor(Math.random() * Date().getTime()).toString(36),
+        i = -1;
+    
+    while (getDbKey(TimeEvent + (++i))) {
+    }
+    setDbKey('TimeEvent' + i, id + ':' + time + '|' + fun);
+    timeevent_list[id] = [time, eval(fun), i];
+    return id;
+}
+
+
+function clearTimeevent() {
+    deleteDbKey('TimeEvent' + timeevent_list[id][2]);
+    delete timeevent_list[id];
+}
 
 
 mixin(AzureaUtil.time, {
     'setTimeout': setTimeout,
     'clearTimeout': clearTimeout,
     'setInterval': setInterval,
-    'clearInterval': clearInterval
+    'clearInterval': clearInterval,
+    'setTimeevent': setTimeevent,
+    'clearTimeevent': clearTimeevent
 });
 
 
@@ -211,26 +275,32 @@ mixin(AzureaUtil.template, {
 
 
 // ======================================== yank ========================================
-function getYank(name) { // @param String:
+function getYank(name) { // @param String='':
                          // @return String:
     if (name) {
         name = name.charAt(0);
+        if (/[0-9A-Za-z]/.test(name)) {
+            name = '';
+        }
     } else {
         name = '';
     }
-    return System.settings.getValue('user.AzureaVim', 'Yank' + name);
+    return getDbKey('Yank' + name);
 }
 
 
-function setYank(name,   // @param String:
+function setYank(name,   // @param String='':
                  text) { // @param String:
                          // @return String:
     if (name) {
         name = name.charAt(0);
+        if (/[0-9A-Za-z]/.test(name)) {
+            name = '';
+        }
     } else {
         name = '';
     }
-    System.settings.setValue('user.AzureaVim', 'Yank' + name, text);
+    setDbKey('Yank' + name, text);
     return text;
 }
 

@@ -11,22 +11,17 @@ AzureaUtil.mixin(AzureaVim.commands_list, {
 
 (function() {
 
-var _message = System.settings.getValue('user.AzureaVim', 'EarthquakeMessage');
-
-if (_message === '') {
-    System.settings.setValue('user.AzureaVim', 'EarthquakeMessage', '地震なう');
-    _message = '地震なう #{Date()}';
+if (AzureaUtil.db.get('EarthquakeMessage')) {
+    AzureaUtil.db.set('EarthquakeMessage', '地震なう #{Date()}');
 }
 
 
 function _getMessage(view) { // @param Hash:
                              // @return String:
-    var result;
+    var result = AzureaUtil.db.get('EarthquakeMessage');
     
-    if (view == null) { // null or undefined
-        result = _message;
-    } else {
-        result = AzureaUtil.template.expand(_message, view).text
+    if (view != null) { // not null or undefined
+        result = AzureaUtil.template.expand(result, view).text;
     }
     return result;
 }
@@ -34,9 +29,8 @@ function _getMessage(view) { // @param Hash:
 
 function _setMessage(text) { // @param String:
                              // @return String:
-    text = text || _message;
-    System.settings.setValue('user.AzureaVim', 'EarthquakeMessage', text);
-    _message = text;
+    text = text || AzureaUtil.db.get('EarthquakeMessage');
+    AzureaUtil.db.set('EarthquakeMessage', text);
     return text;
 }
 
