@@ -69,7 +69,16 @@ function azvm_run() {
 
 System.addKeyBindingHandler(0xBA, // VK_OEM_1 (:)
                             0, _focusInput);
-System.addContextMenuHandler(':vim', 0, _focusInput);
+System.addContextMenuHandler(':vim', 0, function() {
+    var command_text = System.inputBox('command', '', true), azvm;
+    
+    AzureaUtil.yank.set(null, command_text);
+    azvm = new azvm_AzureaVim({
+        text: ':' + command_text,
+        in_reply_to_status_id: System.views.selectedStatusId
+    });
+    azvm.run();
+});
 AzureaUtil.event.addEventListener('PreSendUpdateStatus', function(status) { // @param StatusUpdate Object:
     var azvm, do_notpost = false;
     
