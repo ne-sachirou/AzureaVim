@@ -17,7 +17,7 @@ Closure Compiler - 2009 Google Inc. Apache License, Version 2.0
 <h2>Basical usage</h2>
 <ol>
   <li>Select a timeline status.</li>
-  <li>Press / then input : to TextArea and focus automatically.</li>
+  <li>Press : then input : to TextArea and focus automatically.</li>
   <li>Input command</li>
   <li>Press Enter to send tweet</li>
   <li>You&apos;ll see the command is done.</li>

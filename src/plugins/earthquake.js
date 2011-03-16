@@ -4,9 +4,10 @@ AzureaUtil.mixin(AzureaVim.commands_list, {
     'えあｒｔｈくあけ': 'earthquake',
     'じしｎ': 'earthquake'
 });
-// :earthquake [set option2]
+// :earthquake [set [option2]]
 // チャーハン諸島風地震なう機能です。Ctrl+↓で、設定した文を、時刻付きでpostします。
 // option1にsetを入れた場合、option2に投稿文を設定します。
+// option2を省略した場合、inputBoxで、現在の設定投稿文を元に編集出来ます。
 
 
 (function() {

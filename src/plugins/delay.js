@@ -1,8 +1,18 @@
 AzureaUtil.mixin(AzureaVim.commands_list, {
-    delay: 'delay'
+    delay: 'delay',
+    'でぁｙ': 'delay'
 });
-// delay option1 option2
-// 
+// :delay option1 option2
+// 指定時間後にstatus updateします。
+// option1はポストする時間です。
+//   ^(?:(?:(\d{4})-)?(\d{1,2})-(\d{1,2}) )?(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?$
+// 形式を記述した場合、setTimeeventを使い、指定時後にポストします。
+// setTimeeventは、Azureaのセッションを越えて設定を保存、実行します（再起動しても有効です）。
+// 其れ以外の記述であった場合、単一の数値と見做して、setTimeoutで指定時間経過後にpostします。
+// option1が空白を含む場合、ダブルクオーテーションで囲って下さい。
+// option2は、ポストする文です。空白を含められます。
+// AzureaVimの仕様上、option2が:から始まる場合、AzureaVimのコマンドとして、該当コマンドが実行されます。
+// 遅延投稿時のin_reply_to_status_idは、:delay実行時の物を使用します。
 
 (function() {
 
