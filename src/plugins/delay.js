@@ -24,7 +24,7 @@ function postTwitDelay(text,       // @param String:
                        time,       // @param String: RFC2822
                        callback) { // @param Function:
     Http.postRequestAsync('http://twitdelay.appspot.com/api/post',
-                          'user_id=' + AzureaUtil.db.get('UserName') +
+                          'user_id=' + TwitterService.currentUser.id +
                           '&api_key=' + AzureaUtil.db.get('DelayTwitDelayApiKey') +
                           '&status=' + text +
                           '&at=' + time,
