@@ -1,16 +1,16 @@
 // https://gist.github.com/841702
 AzureaUtil = {
     mixin: {},
+    ApiProxy: {},
     db: {},
     event: {},
     time: {},
     template: {},
-    yank: {}
+    yank: {},
+    notify: {}
 };
 
 (function() {
-
-// ======================================== mixin ========================================
 function mixin(hash1,       // @param Hash:
                hash2,       // @param Hash:
                overwrite) { // @param Boolean=true:
@@ -25,10 +25,62 @@ function mixin(hash1,       // @param Hash:
         }
     }
 }
+
 AzureaUtil.mixin = mixin;
+var API_PROKY_SERVER = 'http://localhost:10080/';
 
+function ApiProxy(mountpoint) { // @param String='':
+                                // @return ApiProxy Object:
+    if (!(this instanceof ApiProxy)) {
+        return new ApiProxy(mountpoint);
+    }
+    
+    mountpoint = mountpoint || '';
+    this.uri = API_PROKY_SERVER + mountpoint;
+    return this;
+};
+ApiProxy.prototype = {
+    submit: function(filename,   // @param String='':
+                     data,       // @param Hash:
+                     callback) { // @param Function:
+        var result,
+            baseuri = this.uri, uri,
+            poststring = [], key;
+        
+        for (key in data) {
+            if (data[key]) {
+                poststring.push(key + '=' + data[key]);
+            }
+        }
+        poststring = encodeURI(poststring.join('&'));
+        
+        filename = filename || '';
+        if (filename) {
+            if (/\/$/.test(baseuri) && filename.charAt(0) === '/') {
+                uri = baseuri.substring(1) + filename;
+            } else if (!(/\/$/.test(baseuri)) && filename.charAt(0) !== '/') {
+                uri = baseuri + '/' + filename;
+            } else {
+                uri = baseuri + filename;
+            }
+        } else {
+            uri = baseuri;
+        }
+        
+        if (callback && data) {
+            Http.postRequestAsync(uri, poststring, false, callback);
+        } else if (callback) {
+            Http.sendRequestAsync(uri, false, callback);
+        } else if (data){
+            result = Http.postRequest(uri, poststring, false);
+        } else {
+            result = Http.sendRequest(uri, false);
+        }
+        return result;
+    }
+};
 
-// ======================================== db ========================================
+AzureaUtil.ApiProxy = ApiProxy;
 var db_cashe = {};
 
 function setDbKey(key,     // @param String:
@@ -75,9 +127,6 @@ mixin(AzureaUtil.db, {
     'del': deleteDbKey,
     'keys': dbKeys
 });
-
-
-// ======================================== event ========================================
 var events_list = {
     PreProcessTimelineStatuses: [],
     PreProcessTimelineStatus: [],
@@ -131,9 +180,6 @@ mixin(AzureaUtil.event, {
     'addEventListener': addEventListener,
     'removeEventListener': removeEventListener
 });
-
-
-// ======================================== time ========================================
 var timeout_list = {},// {id: [time, fun]}
     interval_list = {};// {id: [time, fun, interval]}
     timeevent_list = (function() { // {id: [time, fun, i]}
@@ -180,7 +226,7 @@ function attainSchedule() {
 addEventListener('PreProcessTimelineStatus', attainSchedule);
 addEventListener('PostSendUpdateStatus', attainSchedule);
 addEventListener('ReceiveFavorite', attainSchedule);
-attainSchedule();
+//attainSchedule();
 
 
 function setTimeout(fun,  // @param Function:
@@ -241,9 +287,6 @@ mixin(AzureaUtil.time, {
     'setTimeevent': setTimeevent,
     'clearTimeevent': clearTimeevent
 });
-
-
-// ======================================== template ========================================
 function expandTemplate(template, // @param String: template
                         view) {   // @param Object: view
                                   // @return Hash: {text: expanded String,
@@ -273,9 +316,6 @@ function expandTemplate(template, // @param String: template
 mixin(AzureaUtil.template, {
     'expand': expandTemplate
 });
-
-
-// ======================================== yank ========================================
 function getYank(name) { // @param String='':
                          // @return String:
     if (name) {
@@ -310,7 +350,52 @@ mixin(AzureaUtil.yank, {
     'get': getYank,
     'set': setYank
 });
+var NOTIFY_USE_GROWL = false,//(System.systemInfo <= 2),
+    notify_proxy = new ApiProxy('gntp');
 
+function notifyNative(text) { // @param String:
+    System.isActive ? System.showNotice(text) :
+                      System.showMessage(text, text, 0x100000);
+}
+
+
+function notifyGrowl(title,        // @param String:
+                     text,         // @param Strong:
+                     screen_name,  // @param String:
+                     sticky)     { // @param Boolean=false:
+    notify_proxy.submit(null, {
+        "title": title,
+        "text": text,
+        "twitter_screen_name": screen_name,
+        "sticky": sticky ? 'on' : null
+    },
+                        function(response) {
+        var re = eval(response.body);
+        
+        if (re.error) {
+            notifyNative(re.request.text);
+        }
+    });
+}
+
+
+function notify(text,         // @param String:
+                title,        // @param String:
+                screen_name,  // @param String:
+                sticky)     { // @param Boolean=false:
+    try {
+        if (NOTIFY_USE_GROWL) {
+            notifyGrowl(title, text, screen_name, sticky);
+        } else {
+            notifyNative(text);
+        }
+    } catch (err) {
+        notifyNative(text);
+    }
+}
+
+
+AzureaUtil.notify = notify;
 })();
 
 
@@ -435,7 +520,16 @@ function azvm_run() {
 
 System.addKeyBindingHandler(0xBA, // VK_OEM_1 (:)
                             0, _focusInput);
-System.addContextMenuHandler(':vim', 0, _focusInput);
+System.addContextMenuHandler(':vim', 0, function() {
+    var command_text = System.inputBox('command', '', true), azvm;
+    
+    AzureaUtil.yank.set(null, command_text);
+    azvm = new azvm_AzureaVim({
+        text: ':' + command_text,
+        in_reply_to_status_id: System.views.selectedStatusId
+    });
+    azvm.run();
+});
 AzureaUtil.event.addEventListener('PreSendUpdateStatus', function(status) { // @param StatusUpdate Object:
     var azvm, do_notpost = false;
     
@@ -454,6 +548,8 @@ AzureaUtil.event.addEventListener('PreSendUpdateStatus', function(status) { // @
             TextArea.text = '';
             TextArea.in_reply_to_status_id = 0;
             azvm.run();
+        } else {
+            AzureaUtil.yank.set(null, status.text);
         }
     } catch (e) {
         System.alert(e.name + ':\n' + e.message);
@@ -916,9 +1012,10 @@ AzureaUtil.mixin(AzureaVim.commands_list, {
     'えあｒｔｈくあけ': 'earthquake',
     'じしｎ': 'earthquake'
 });
-// :earthquake [set option2]
+// :earthquake [set [option2]]
 // チャーハン諸島風地震なう機能です。Ctrl+↓で、設定した文を、時刻付きでpostします。
 // option1にsetを入れた場合、option2に投稿文を設定します。
+// option2を省略した場合、inputBoxで、現在の設定投稿文を元に編集出来ます。
 
 
 (function() {
@@ -989,10 +1086,20 @@ System.addKeyBindingHandler(0x28, // VK_DOWN ↓
 
 })();
 AzureaUtil.mixin(AzureaVim.commands_list, {
-    delay: 'delay'
+    delay: 'delay',
+    'でぁｙ': 'delay'
 });
-// delay option1 option2
-// 
+// :delay option1 option2
+// 指定時間後にstatus updateします。
+// option1はポストする時間です。
+//   ^(?:(?:(\d{4})-)?(\d{1,2})-(\d{1,2}) )?(\d{1,2}):(\d{1,2})(?::(\d{1,2}))?$
+// 形式を記述した場合、setTimeeventを使い、指定時後にポストします。
+// setTimeeventは、Azureaのセッションを越えて設定を保存、実行します（再起動しても有効です）。
+// 其れ以外の記述であった場合、単一の数値と見做して、setTimeoutで指定時間経過後にpostします。
+// option1が空白を含む場合、ダブルクオーテーションで囲って下さい。
+// option2は、ポストする文です。空白を含められます。
+// AzureaVimの仕様上、option2が:から始まる場合、AzureaVimのコマンドとして、該当コマンドが実行されます。
+// 遅延投稿時のin_reply_to_status_idは、:delay実行時の物を使用します。
 
 (function() {
 
@@ -1004,7 +1111,7 @@ function postTwitDelay(text,       // @param String:
                        time,       // @param String: RFC2822
                        callback) { // @param Function:
     Http.postRequestAsync('http://twitdelay.appspot.com/api/post',
-                          'user_id=' + AzureaUtil.db.get('UserName') +
+                          'user_id=' + TwitterService.currentUser.id +
                           '&api_key=' + AzureaUtil.db.get('DelayTwitDelayApiKey') +
                           '&status=' + text +
                           '&at=' + time,
@@ -1058,6 +1165,14 @@ AzureaVim.prototype.delay = function() {
 AzureaUtil.mixin(AzureaVim.commands_list, {
     eval: '_evaluate'
 });
+// :eval code
+// 任意のAzureaScriptを実行し、返値をinputBoxで表示します。
+// AzureaVimのグローバルスコープで実行されます。
+// codeは空白を含められます。連続した空白は、一つの半角空白に置き換えられます。
+// 自由に空白を含めたい場合は、ダブルクオーテーションでcode全体を囲って下さい。
+// コマンドパーサーの制限として、ダブルクオーテーションで囲わないcodeの中では、
+// ダブルクオーテーションを使用出来ません。（囲ったcode中では、エスケープして使
+// 用出来ます。）
 
 
 AzureaVim.prototype._evaluate = function() {

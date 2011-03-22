@@ -16,25 +16,32 @@ OPTION = {
   :Port         => 10080
 }
 
-class TwitterIcon
-  @@icon_uri_cache = {}
+class TwitterUser
+  @@icon_uri_cache = {
+  }
   
-  def getUri screen_name
-    unless @@icon_uri_cache[screen_name] && @@icon_uri_cache[screen_name]['time'] + 300 > Time.now
+  def initialize screen_name
+    @screen_name = screen_name
+    
+    icon_uri_cache = @@icon_uri_cache
+    unless icon_uri_cache[screen_name] && (icon_uri_cache[screen_name][:time] + 300 > Time.now)
       open "http://twitter.com/#{screen_name}" do |file|
         doc = Nokogiri::HTML file
-        @@icon_uri_cache[screen_name] = {
-          :uri => doc.css('#profile-image, #profile-img')[0]['src'],
+        icon_uri_cache[screen_name] = {
+          :uri => doc.css('#profile-image, #profile-img')[0]['src'].sub(/^https/, 'http'),
           :time => Time.now
         }
       end
     end
-    @@icon_uri_cache[screen_name]['uri']
+    @@icon_uri_cache = icon_uri_cache
+    @icon_uri = @@icon_uri_cache[screen_name][:uri]
   end
+  
+  attr_reader :screen_name, :icon_uri
 end
 
 class GrowlServlet < WEBrick::HTTPServlet::AbstractServlet
-  @@growl = GNTP.new 'HTTP GNTP'
+  @@growl = GNTP.new 'ApiProxy'
   @@growl.register({
     :notifications => [
       {
@@ -51,17 +58,23 @@ class GrowlServlet < WEBrick::HTTPServlet::AbstractServlet
         :name   => 'notify',
         :title  => req.query['title'],
         :text   => req.query['text'],
-        :icon   => if req.query['twitter_screen_name'] != ''
-          twic = TwitterIcon.new
-          twic.getUri req.query['twitter_screen_name']
+        :icon   => if req.query['twitter_screen_name'] || req.query['twitter_screen_name'] != ''
+          twuser = TwitterUser.new req.query['twitter_screen_name']
+          twuser.icon_uri
         else
           req.query['icon_uri']
         end,
         :sticky => !!req.query['sticky']
       })
-      res.body = "{\"ok\": \"growl ok\", \"request\": #{req.query.to_json}}"
+      res.body = {
+        :ok => "growl ok",
+        :request => req.query
+      }.to_json
     rescue
-      res.body = "{\"error\": \"#$!\", \"request\": #{req.query.to_json}}"
+      res.body = {
+        :error => $!,
+        :request => req.query
+      }.to_json
     end
   end
 end

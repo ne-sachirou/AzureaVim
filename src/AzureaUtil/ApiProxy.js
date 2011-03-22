@@ -1,18 +1,19 @@
 var API_PROKY_SERVER = 'http://localhost:10080/';
 
-function ApiProxy(mountpoint) { // @param String:
+function ApiProxy(mountpoint) { // @param String='':
                                 // @return ApiProxy Object:
     if (!(this instanceof ApiProxy)) {
         return new ApiProxy(mountpoint);
     }
     
-    this.uri = API_PROKY_SERVER + uri;
+    mountpoint = mountpoint || '';
+    this.uri = API_PROKY_SERVER + mountpoint;
     return this;
 };
 ApiProxy.prototype = {
-    submit: function(filename,  // @param String='':
-                     callback,  // @param Function: 
-                     data)    { // @param Hash: 
+    submit: function(filename,   // @param String='':
+                     data,       // @param Hash:
+                     callback) { // @param Function:
         var result,
             baseuri = this.uri, uri,
             poststring = [], key;
@@ -25,12 +26,16 @@ ApiProxy.prototype = {
         poststring = encodeURI(poststring.join('&'));
         
         filename = filename || '';
-        if (/\/$/.test(baseuri) && filename.charAt(0) === '/') {
-            uri = baseuri.substring(1) + filename;
-        } else if (!(/\/$/.test(baseuri)) && filename.charAt(0) !== '/') {
-            uri = baseuri + '/' + filename;
+        if (filename) {
+            if (/\/$/.test(baseuri) && filename.charAt(0) === '/') {
+                uri = baseuri.substring(1) + filename;
+            } else if (!(/\/$/.test(baseuri)) && filename.charAt(0) !== '/') {
+                uri = baseuri + '/' + filename;
+            } else {
+                uri = baseuri + filename;
+            }
         } else {
-            uri = baseuri + filename;
+            uri = baseuri;
         }
         
         if (callback && data) {
@@ -38,9 +43,9 @@ ApiProxy.prototype = {
         } else if (callback) {
             Http.sendRequestAsync(uri, false, callback);
         } else if (data){
-            result = Http.sendRequest(uri, false);
-        } else {
             result = Http.postRequest(uri, poststring, false);
+        } else {
+            result = Http.sendRequest(uri, false);
         }
         return result;
     }

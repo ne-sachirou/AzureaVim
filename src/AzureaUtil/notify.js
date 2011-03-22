@@ -1,4 +1,4 @@
-var NOTIFY_USE_GROWL = (System.systemInfo =< 2),
+var NOTIFY_USE_GROWL = false,//(System.systemInfo <= 2),
     notify_proxy = new ApiProxy('gntp');
 
 function notifyNative(text) { // @param String:
@@ -11,7 +11,7 @@ function notifyGrowl(title,        // @param String:
                      text,         // @param Strong:
                      screen_name,  // @param String:
                      sticky)     { // @param Boolean=false:
-    notify_proxy.submit({
+    notify_proxy.submit(null, {
         "title": title,
         "text": text,
         "twitter_screen_name": screen_name,
