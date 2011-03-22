@@ -1,6 +1,8 @@
-# HTTP POST‚ğWEBrick‚Åó‚¯AGrowl’Ê’m‚µ‚Ü‚·B
-# POST‚Ìkey‚É‚ÍA title, text, twitter_screen_name, icon_uri, sticky ‚ğg—p‚µ‚Ü‚·B
-# ruby_gntp ‚Æ nokogiri ‚ÉˆË‘¶‚µ‚Ü‚·B
+# coding=utf-8
+
+# HTTP POSTã‚’WEBrickã§å—ã‘ã€Growlé€šçŸ¥ã—ã¾ã™ã€‚
+# POSTã®keyã«ã¯ã€ title, text, twitter_screen_name, icon_uri, sticky ã‚’ä½¿ç”¨ã—ã¾ã™ã€‚
+# ruby_gntp ã¨ nokogiri ã«ä¾å­˜ã—ã¾ã™ã€‚
 
 require 'webrick'
 require 'ruby_gntp'
@@ -66,4 +68,9 @@ end
 
 server = WEBrick::HTTPServer.new OPTION
 server.mount '/gntp', GrowlServlet
+
+['TERM', 'INT'].each do |signal|
+  trap(signal){ server.shutdown }
+end
+
 server.start

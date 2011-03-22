@@ -1,11 +1,13 @@
 // https://gist.github.com/841702
 AzureaUtil = {
     mixin: {},
+    ApiProxy: {},
     db: {},
     event: {},
     time: {},
     template: {},
-    yank: {}
+    yank: {},
+    notify: {}
 };
 
 (function() {
@@ -25,7 +27,60 @@ function mixin(hash1,       // @param Hash:
         }
     }
 }
+
 AzureaUtil.mixin = mixin;
+
+
+// ======================================== ApiProxy ========================================
+var API_PROKY_SERVER = 'http://localhost:10080/';
+
+function ApiProxy(mountpoint) { // @param String:
+                                // @return ApiProxy Object:
+    if (!(this instanceof ApiProxy)) {
+        return new ApiProxy(mountpoint);
+    }
+    
+    this.uri = API_PROKY_SERVER + uri;
+    return this;
+};
+ApiProxy.prototype = {
+    submit: function(filename,  // @param String='':
+                     callback,  // @param Function: 
+                     data)    { // @param Hash: 
+        var result,
+            baseuri = this.uri, uri,
+            poststring = [], key;
+        
+        for (key in data) {
+            if (data[key]) {
+                poststring.push(key + '=' + data[key]);
+            }
+        }
+        poststring = encodeURI(poststring.join('&'));
+        
+        filename = filename || '';
+        if (/\/$/.test(baseuri) && filename.charAt(0) === '/') {
+            uri = baseuri.substring(1) + filename;
+        } else if (!(/\/$/.test(baseuri)) && filename.charAt(0) !== '/') {
+            uri = baseuri + '/' + filename;
+        } else {
+            uri = baseuri + filename;
+        }
+        
+        if (callback && data) {
+            Http.postRequestAsync(uri, poststring, false, callback);
+        } else if (callback) {
+            Http.sendRequestAsync(uri, false, callback);
+        } else if (data){
+            result = Http.sendRequest(uri, false);
+        } else {
+            result = Http.postRequest(uri, poststring, false);
+        }
+        return result;
+    }
+};
+
+AzureaUtil.ApiProxy = ApiProxy;
 
 
 // ======================================== db ========================================
@@ -180,7 +235,7 @@ function attainSchedule() {
 addEventListener('PreProcessTimelineStatus', attainSchedule);
 addEventListener('PostSendUpdateStatus', attainSchedule);
 addEventListener('ReceiveFavorite', attainSchedule);
-attainSchedule();
+//attainSchedule();
 
 
 function setTimeout(fun,  // @param Function:
@@ -310,6 +365,55 @@ mixin(AzureaUtil.yank, {
     'get': getYank,
     'set': setYank
 });
+
+
+// ======================================== notify ========================================
+var NOTIFY_USE_GROWL = (System.systemInfo =< 2),
+    notify_proxy = new ApiProxy('gntp');
+
+function notifyNative(text) { // @param String:
+    System.isActive ? System.showNotice(text) :
+                      System.showMessage(text, text, 0x100000);
+}
+
+
+function notifyGrowl(title,        // @param String:
+                     text,         // @param Strong:
+                     screen_name,  // @param String:
+                     sticky)     { // @param Boolean=false:
+    notify_proxy.submit({
+        "title": title,
+        "text": text,
+        "twitter_screen_name": screen_name,
+        "sticky": sticky ? 'on' : null
+    },
+                        function(response) {
+        var re = eval(response.body);
+        
+        if (re.error) {
+            notifyNative(re.request.text);
+        }
+    });
+}
+
+
+function notify(text,         // @param String:
+                title,        // @param String:
+                screen_name,  // @param String:
+                sticky)     { // @param Boolean=false:
+    try {
+        if (NOTIFY_USE_GROWL) {
+            notifyGrowl(title, text, screen_name, sticky);
+        } else {
+            notifyNative(text);
+        }
+    } catch (err) {
+        notifyNative(text);
+    }
+}
+
+
+AzureaUtil.notify = notify;
 
 })();
 
