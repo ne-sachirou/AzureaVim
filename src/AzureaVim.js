@@ -97,6 +97,8 @@ AzureaUtil.event.addEventListener('PreSendUpdateStatus', function(status) { // @
             TextArea.text = '';
             TextArea.in_reply_to_status_id = 0;
             azvm.run();
+        } else {
+            AzureaUtil.yank.set(null, status.text);
         }
     } catch (e) {
         System.alert(e.name + ':\n' + e.message);
