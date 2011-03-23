@@ -538,6 +538,7 @@ AzureaUtil.event.addEventListener('PreSendUpdateStatus', function(status) { // @
             do_notpost = true;
             AzureaUtil.time.setTimeout(function() {
                 TextArea.text = AzureaUtil.yank.get(null);
+                TextArea.show();
             }, 0);
             //status.text = '';
             //TextArea.text = AzureaUtil.yank.get(null);
@@ -1162,6 +1163,19 @@ AzureaVim.prototype.delay = function() {
 }
 
 })();
+AzureaUtil.mixin(AzureaVim.codelist, {
+});
+//
+
+
+System.addKeyBindingHandler(0x43, // VK_C
+                            2, // Ctrl
+                            function(status_id) { // @param String:
+    var text = TwitterService.status.get(status_id).text;
+    
+    System.clipboard = text;
+    AzureaUtil.yank.set(null, text);
+});
 AzureaUtil.mixin(AzureaVim.commands_list, {
     eval: '_evaluate'
 });

@@ -87,6 +87,7 @@ AzureaUtil.event.addEventListener('PreSendUpdateStatus', function(status) { // @
             do_notpost = true;
             AzureaUtil.time.setTimeout(function() {
                 TextArea.text = AzureaUtil.yank.get(null);
+                TextArea.show();
             }, 0);
             //status.text = '';
             //TextArea.text = AzureaUtil.yank.get(null);

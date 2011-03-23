@@ -30,5 +30,6 @@ Azurea.loadjs({
     "plugins/view": ["AzureaVim"],
     "plugins/earthquake": ["AzureaVim"],
     "plugins/delay": ["AzureaVim"],
+    "plugins/yank": ["AzureaVim"],
     "plugins/debug": ["AzureaVim"]
 });
