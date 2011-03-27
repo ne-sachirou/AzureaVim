@@ -21,7 +21,7 @@ function notifyGrowl(title,    // @param String:
         "sticky": sticky ? 'on' : null
     };
     
-    option[/^https?:\/\/./.test(icon) ? 'icon_url' : 'twitter_screen_name'] = icon;
+    option[/^https?:\/\/./.test(icon) ? 'icon_uri' : 'twitter_screen_name'] = icon;
     notify_proxy.submit(null,
                         option,
                         function(response) {
@@ -31,8 +31,8 @@ function notifyGrowl(title,    // @param String:
             if (re.error) {
                 notifyNative(re.request.text);
             }
-        } catch (e) {
-            notifyNative(response.body);
+        } catch (err) {
+            notifyNative(err.message + response.body);
         }
     });
 }

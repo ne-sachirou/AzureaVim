@@ -1,25 +1,31 @@
 # coding=utf-8
 
-# HTTP POSTをWEBrickで受け、Growl通知します。
-# POSTのkeyには、 title, text, twitter_screen_name, icon_uri, sticky を使用します。
-# ruby_gntp と nokogiri に依存します。
+# https://gist.github.com/875223
+# Http to other api proxy.
 
-require 'webrick'
-require 'ruby_gntp'
+require 'uri'
 require 'open-uri'
-require 'nokogiri'
+require 'webrick'
 require 'json'
+require 'ruby_gntp'
+require 'nokogiri'
 
+# WEBrick::HTTPServer.new OPTION
 OPTION = {
   :DocumentRoot => '.',
   :BindAddress  => '127.0.0.1',
   :Port         => 80
 }
 
+# TwitterUser infomation class.
 class TwitterUser
+  attr_reader :screen_name, :icon_uri
+  
   @@icon_uri_cache = {
   }
   
+  # Give twitter screen_name to the argument.
+  # This cache user info 300 seconds.
   def initialize screen_name
     @screen_name = screen_name
     
@@ -36,10 +42,9 @@ class TwitterUser
     @@icon_uri_cache = icon_uri_cache
     @icon_uri = @@icon_uri_cache[screen_name][:uri]
   end
-  
-  attr_reader :screen_name, :icon_uri
 end
 
+# Http to GNTP proxy server.
 class GrowlServlet < WEBrick::HTTPServlet::AbstractServlet
   @@growl = GNTP.new 'ApiProxy'
   @@growl.register({
@@ -51,6 +56,20 @@ class GrowlServlet < WEBrick::HTTPServlet::AbstractServlet
     ]
   })
   
+  # Http Post request
+  #   :title => Growl title
+  #   :text => Growl text
+  #   :twitter_screen_name => Twitter screen name
+  #   :ison_uri => Growl icon uri
+  #   :sticky => Growl sticky on or not
+  # :twitter_screen_name or :icon_uri is optional.
+  #
+  # Return JSON
+  #   :ok => "growl ok"
+  #   :request => request.query
+  # or
+  #   :error => "#{error.class}: #{error.message}"
+  #   :request => request.query
   def do_POST req, res
     res['Content-Type'] = 'text/plain'
     begin
@@ -58,19 +77,22 @@ class GrowlServlet < WEBrick::HTTPServlet::AbstractServlet
         :name   => 'notify',
         :title  => req.query['title'],
         :text   => req.query['text'],
-        :icon   => if req.query['twitter_screen_name'] || req.query['twitter_screen_name'] != ''
-          twuser = TwitterUser.new req.query['twitter_screen_name']
-          twuser.icon_uri
-        else
-          req.query['icon_uri']
-        end,
+        :icon   => if req.query['twitter_screen_name'] && (req.query['twitter_screen_name'] != '')
+                     twuser = TwitterUser.new req.query['twitter_screen_name']
+                     twuser.icon_uri
+                   else
+                     req.query['icon_uri']
+                   end,
         :sticky => !!req.query['sticky']
       })
+      req.query['text'] = URI.escape req.query['text']
       res.body = {
         :ok => "growl ok",
         :request => req.query
       }.to_json
     rescue => err
+      puts "#{err.class}: #{err.message}\n#{err.backtrace.join "\n"}"
+      req.query['text'] = URI.escape req.query['text']
       res.body = {
         :error => "#{err.class}: #{err.message}",
         :request => req.query

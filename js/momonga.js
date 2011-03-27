@@ -895,7 +895,7 @@ function notifyGrowl(title,    // @param String:
         "sticky": sticky ? 'on' : null
     };
     
-    option[/^https?:\/\/./.test(icon) ? 'icon_url' : 'twitter_screen_name'] = icon;
+    option[/^https?:\/\/./.test(icon) ? 'icon_uri' : 'twitter_screen_name'] = icon;
     notify_proxy.submit(null,
                         option,
                         function(response) {
@@ -905,8 +905,8 @@ function notifyGrowl(title,    // @param String:
             if (re.error) {
                 notifyNative(re.request.text);
             }
-        } catch (e) {
-            notifyNative(response.body);
+        } catch (err) {
+            notifyNative(err.message + response.body);
         }
     });
 }
@@ -1836,7 +1836,7 @@ AzureaUtil.event.addEventListener('ReceiveFavorite',
     if (when.faved) {
         AzureaUtil.notify('Favs@' + source.screen_name + ': ' + target_object.text,
                           'Favs - AzureaVim',
-                          source.screen_name,//source.profile_image_url,
+                          source.profile_image_url,//source.screen_name,
                           false);
     }
 });
@@ -1850,13 +1850,13 @@ AzureaUtil.event.addEventListener('PreFilterProcessTimelineStatus',
     if (_when.mention && text.indexOf(TwitterService.currentUser.screen_name) !== -1) {
         AzureaUtil.notify('Mention@' + user.screen_name + ': ' + text,
                           'Mention - AzureaVim',
-                          user.screen_name,//user.profile_image_url,
+                          user.profile_image_url,//user.screen_name,
                           false);
     }
     if (_when.matched && regex && regex.test(text)) {
         AzureaUtil.notify('Matches@' + user.screen_name + ': ' + text,
                           'Matched - AzureaVim',
-                          user.screen_name,//user.profile_image_url,
+                          user.profile_image_url,//user.screen_name,
                           false);
     }
 });
