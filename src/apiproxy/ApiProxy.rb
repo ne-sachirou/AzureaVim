@@ -70,9 +70,9 @@ class GrowlServlet < WEBrick::HTTPServlet::AbstractServlet
         :ok => "growl ok",
         :request => req.query
       }.to_json
-    rescue
+    rescue => err
       res.body = {
-        :error => $!,
+        :error => "#{err.class}: #{err.message}",
         :request => req.query
       }.to_json
     end
