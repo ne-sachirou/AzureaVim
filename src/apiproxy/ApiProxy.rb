@@ -13,7 +13,7 @@ require 'json'
 OPTION = {
   :DocumentRoot => '.',
   :BindAddress  => '127.0.0.1',
-  :Port         => 10080
+  :Port         => 80
 }
 
 class TwitterUser

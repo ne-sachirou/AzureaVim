@@ -2,6 +2,7 @@ Azurea.loadjs({
     "AzureaVim": ["AzureaUtil/post"],
     
     "AzureaUtil/pre": [],
+    "AzureaUtil/json2": ["AzureaUtil/pre"],
     "AzureaUtil/mixin": ["AzureaUtil/pre"],
     "AzureaUtil/ApiProxy": ["AzureaUtil/pre"],
     "AzureaUtil/db": ["AzureaUtil/pre", "AzureaUtil/mixin"],
@@ -11,6 +12,7 @@ Azurea.loadjs({
     "AzureaUtil/yank": ["AzureaUtil/pre", "AzureaUtil/mixin", "AzureaUtil/db"],
     "AzureaUtil/notify": ["AzureaUtil/pre", "AzureaUtil/ApiProxy"],
     "AzureaUtil/post": ["AzureaUtil/pre",
+                        "AzureaUtil/json2",
                         "AzureaUtil/mixin",
                         "AzureaUtil/ApiProxy",
                         "AzureaUtil/db",
@@ -20,6 +22,7 @@ Azurea.loadjs({
                         "AzureaUtil/yank",
                         "AzureaUtil/notify"],
     
+    "plugins/debug": ["AzureaVim"],
     "plugins/open": ["AzureaVim", "plugins/unshorten"],
     "plugins/reply": ["AzureaVim"],
     "plugins/retweet": ["AzureaVim"],
@@ -31,5 +34,5 @@ Azurea.loadjs({
     "plugins/earthquake": ["AzureaVim"],
     "plugins/delay": ["AzureaVim"],
     "plugins/yank": ["AzureaVim"],
-    "plugins/debug": ["AzureaVim"]
+    "plugins/notify": ["AzureaVim"]
 });

@@ -1,5 +1,4 @@
-var NOTIFY_USE_GROWL = false,//(System.systemInfo <= 2),
-    notify_proxy = new ApiProxy('gntp');
+var notify_proxy = new ApiProxy('gntp');
 
 function notifyNative(text) { // @param String:
     System.isActive ? System.showNotice(text) :
@@ -18,7 +17,7 @@ function notifyGrowl(title,        // @param String:
         "sticky": sticky ? 'on' : null
     },
                         function(response) {
-        var re = eval(response.body);
+        var re = JSON.parse(response.body);
         
         if (re.error) {
             notifyNative(re.request.text);
@@ -31,8 +30,10 @@ function notify(text,         // @param String:
                 title,        // @param String:
                 screen_name,  // @param String:
                 sticky)     { // @param Boolean=false:
+    var use_growl = (System.systemInfo <= 2);// && getDbKey('NotifyUseGrowl');
+    
     try {
-        if (NOTIFY_USE_GROWL) {
+        if (use_growl) {
             notifyGrowl(title, text, screen_name, sticky);
         } else {
             notifyNative(text);

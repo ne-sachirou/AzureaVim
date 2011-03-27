@@ -1,4 +1,4 @@
-var API_PROKY_SERVER = 'http://localhost:10080/';
+var API_PROKY_SERVER = 'http://localhost:80/';
 
 function ApiProxy(mountpoint) { // @param String='':
                                 // @return ApiProxy Object:
@@ -9,7 +9,7 @@ function ApiProxy(mountpoint) { // @param String='':
     mountpoint = mountpoint || '';
     this.uri = API_PROKY_SERVER + mountpoint;
     return this;
-};
+}
 ApiProxy.prototype = {
     submit: function(filename,   // @param String='':
                      data,       // @param Hash:

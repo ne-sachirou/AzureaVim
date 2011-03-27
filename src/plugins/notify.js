@@ -5,7 +5,7 @@ AzureaUtil.mixin(AzureaVim.codelist, {
 // https://gist.github.com/835993
 (function() {
 
-var MATCH = /さっちゃ|c4se|ももん|もんが|opera|azurea/i;
+var MATCH = /test/i;
 
 AzureaUtil.event.addEventListener('ReceiveFavorite',
                                   function(source,          // @param User Object:
@@ -19,7 +19,7 @@ AzureaUtil.event.addEventListener('ReceiveFavorite',
 
 AzureaUtil.event.addEventListener('PreFilterProcessTimelineStatus',
                                   function(status) { // @param Ststus Object:
-    if (status.text.indexOf(System.currentUser.screen_name) !== -1) {
+    if (status.text.indexOf(TwitterService.currentUser.screen_name) !== -1) {
         AzureaUtil.notify('Mention@' + status.user.screen_name + ': ' + status.text,
                           'Mention',
                           status.user.screen_name,
