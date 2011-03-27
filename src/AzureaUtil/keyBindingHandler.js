@@ -33,7 +33,7 @@ defaultKeyBindingHandler[0][0x52] = function(status_id) {
     TextArea.in_reply_to_status_id = status_id;
     TextArea.show();
     TextArea.setFocus();
-    TextArea.setCursor(status_user_screen_name.length + 2);
+    TextArea.cursor = status_user_screen_name.length + 2;
 }
 
 // T

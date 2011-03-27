@@ -12,7 +12,7 @@ function _focusInput(status_id) { // @param String: status id
     TextArea.in_reply_to_status_id = status_id;
     TextArea.show();
     TextArea.setFocus();
-    TextArea.setCursor(1);
+    TextArea.cursor = 1;
 }
 
 

@@ -38,7 +38,7 @@ AzureaVim.prototype.reply = function() {
             "TextArea.in_reply_to_status_id = '" + (this.command[3] === 'true' ? this.status_id : 0) + "';" +
             "TextArea.show();" +
             "TextArea.setFocus();" +
-            "TextArea.setCursor(" + t.cursor + ");"));
+            "TextArea.cursor = " + t.cursor + ";"));
         break;
     case 'all':
         this.command = ['reply', 'template', "@#{screen_name + (status_users.length ? ' @' +status_users.join(' @') : '')} #{}", 'true'];
@@ -75,7 +75,7 @@ function reply(status_id) { // @param String:
     TextArea.in_reply_to_status_id = status_id;
     TextArea.show();
     TextArea.setFocus();
-    TextArea.setCursor(status_user_screen_name.length + 2);
+    TextArea.cursor = status_user_screen_name.length + 2;
 }
 System.addKeyBindingHandler(0x52, // VK_R
                             0,
