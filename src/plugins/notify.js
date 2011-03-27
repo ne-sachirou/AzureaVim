@@ -1,8 +1,22 @@
 AzureaUtil.mixin(AzureaVim.commands_list, {
     notify: 'notify'
 });
-// :notify (pattern|when|growl) [option2]
-// 
+// :notify (pattern|growl [option2])|(when option2 [option3])
+// WM ToastやGrowl for Windows等、様々な通知を設定するコマンドです。
+// option1がpatternの場合、option2に、statusにマッチする正規表現を指定します。
+// 正規表現は、前後に/を置いた場合、後者の/の後にオプションを指定出来ます。
+// ex1.
+//     AzureaVim|azureaVim|Azureavim|azureavim|azvm
+// ex2.
+//     /AzureaVim|azvm/i
+// option2は必ずしもダブルクオーテーションで囲む必要は有りません。
+// option2を省略すると、inputBoxにて正規表現を取得・設定出来ます。
+// option1がgrowlの場合、Growl for Windows (via ApiProxy.rb)を使用するか否かを指定します。
+// WMでは、此の設定を無視し、常にfalseと扱います。
+// option2を省略すると、inputBoxにて真偽値を取得・設定出来ます。
+// option1がwhenの場合、option2にfaved|mention|matchedを指定し、
+// 其々の場合に通知するかをoption3にて指定します。
+// option3を省略すると、inputBoxにて真偽値を取得・設定出来ます。
 
 // https://gist.github.com/835993
 (function() {

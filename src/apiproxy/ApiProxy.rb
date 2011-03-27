@@ -18,6 +18,11 @@ OPTION = {
 }
 
 # TwitterUser infomation class.
+#
+# Usage
+#   twuser = TwitterUser.new 'ne_sachirou'
+#   twuser.screen_name #=> 'ne_sachirou'
+#   twuser.icon_uri #=> ne_sachirou's twitter icon uri
 class TwitterUser
   attr_reader :screen_name, :icon_uri
   
