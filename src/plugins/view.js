@@ -46,36 +46,35 @@ AzureaVim.prototype.view = function() {
         followers: 'followers',
         follower: 'followers',
         followed: 'followers'
-    },
-        views = System.apiLevel >= 11 ? System.views : System;
+    };
     
     switch (c1[this.command[1]]) {
     case 'home':
-        views.openTimeline();
+        System.views.openView(0);
         break;
     case 'mention':
-        views.openMention();
+        System.views.openView(1);
         break;
     case 'message':
-        views.openMessage();
+        System.views.openView(2);
         break;
     case 'user':
-        views.openUserTimeline(this.command[2] || this.screen_name, false);
+        System.views.openView(5, this.command[2] || this.screen_name);
         break;
     case 'search':
-        views.openSearch(this.command[2], false);
+        System.views.openView(4, this.command[2]);
         break;
     case 'favorite':
-        views.openFavorite();
+        System.views.openView(3);
         break;
     case 'match':
-        views.openMatch(this.command[2], false);
+        System.views.openView(6, this.command[2]);
         break;
     case 'following':
-        views.openFollwoing();
+        System.views.openView(8);
         break;
     case 'followers':
-        views.openFollowers();
+        System.views.openView(9);
         break;
     default:
         break;

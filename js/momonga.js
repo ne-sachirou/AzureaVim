@@ -1061,7 +1061,7 @@ System.addContextMenuHandler(':vim', 0, function() {
     AzureaUtil.yank.set(null, command_text);
     azvm = new azvm_AzureaVim({
         text: ':' + command_text,
-        in_reply_to_status_id: System.views.selectedStatusId
+        in_reply_to_status_id: System.views.currentView.selectedStatusId
     });
     azvm.run();
 });
@@ -1458,6 +1458,7 @@ AzureaUtil.mixin(AzureaVim.commands_list, {
 // option1がを省略した場合、jaへ翻訳します。
 
 AzureaVim.prototype.translate = function() {
+    
     if (!this.command[1]) {
         this.command[1] = 'ja';
     }
@@ -1524,36 +1525,35 @@ AzureaVim.prototype.view = function() {
         followers: 'followers',
         follower: 'followers',
         followed: 'followers'
-    },
-        views = System.apiLevel >= 11 ? System.views : System;
+    };
     
     switch (c1[this.command[1]]) {
     case 'home':
-        views.openTimeline();
+        System.views.openView(0);
         break;
     case 'mention':
-        views.openMention();
+        System.views.openView(1);
         break;
     case 'message':
-        views.openMessage();
+        System.views.openView(2);
         break;
     case 'user':
-        views.openUserTimeline(this.command[2] || this.screen_name, false);
+        System.views.openView(5, this.command[2] || this.screen_name);
         break;
     case 'search':
-        views.openSearch(this.command[2], false);
+        System.views.openView(4, this.command[2]);
         break;
     case 'favorite':
-        views.openFavorite();
+        System.views.openView(3);
         break;
     case 'match':
-        views.openMatch(this.command[2], false);
+        System.views.openView(6, this.command[2]);
         break;
     case 'following':
-        views.openFollwoing();
+        System.views.openView(8);
         break;
     case 'followers':
-        views.openFollowers();
+        System.views.openView(9);
         break;
     default:
         break;
@@ -1731,8 +1731,22 @@ System.addKeyBindingHandler(0x43, // VK_C
 AzureaUtil.mixin(AzureaVim.commands_list, {
     notify: 'notify'
 });
-// :notify (pattern|when|growl) [option2]
-// 
+// :notify (pattern|growl [option2])|(when option2 [option3])
+// WM ToastやGrowl for Windows等、様々な通知を設定するコマンドです。
+// option1がpatternの場合、option2に、statusにマッチする正規表現を指定します。
+// 正規表現は、前後に/を置いた場合、後者の/の後にオプションを指定出来ます。
+// ex1.
+//     AzureaVim|azureaVim|Azureavim|azureavim|azvm
+// ex2.
+//     /AzureaVim|azvm/i
+// option2は必ずしもダブルクオーテーションで囲む必要は有りません。
+// option2を省略すると、inputBoxにて正規表現を取得・設定出来ます。
+// option1がgrowlの場合、Growl for Windows (via ApiProxy.rb)を使用するか否かを指定します。
+// WMでは、此の設定を無視し、常にfalseと扱います。
+// option2を省略すると、inputBoxにて真偽値を取得・設定出来ます。
+// option1がwhenの場合、option2にfaved|mention|matchedを指定し、
+// 其々の場合に通知するかをoption3にて指定します。
+// option3を省略すると、inputBoxにて真偽値を取得・設定出来ます。
 
 // https://gist.github.com/835993
 (function() {

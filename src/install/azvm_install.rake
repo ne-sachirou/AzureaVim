@@ -5,7 +5,7 @@ require 'uri'
 require 'net/https'
 require 'zip/zip'
 
-AZUREAWIN_ZIP = 'http://refy.net/temp/AzureaWin.1.3.2.Beta13.zip'
+AZUREAWIN_ZIP = 'http://refy.net/temp/AzureaWin.1.3.2.Beta14.zip'
 AZUREAVIM_JS = 'https://github.com/ne-sachirou/AzureaVim/raw/master/js/AzureaVim.js'
 AZUREAVIM_ZIP = 'https://github.com/ne-sachirou/AzureaVim/raw/master/js/AzureaVim.zip'
 GEMS = ['ruby_gntp', 'nokogiri']

@@ -75,7 +75,7 @@ System.addContextMenuHandler(':vim', 0, function() {
     AzureaUtil.yank.set(null, command_text);
     azvm = new azvm_AzureaVim({
         text: ':' + command_text,
-        in_reply_to_status_id: System.views.selectedStatusId
+        in_reply_to_status_id: System.views.currentView.selectedStatusId
     });
     azvm.run();
 });

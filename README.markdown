@@ -5,15 +5,15 @@ Closure Compiler - 2009 Google Inc. Apache License, Version 2.0
 <p>Highly customized and more customizable interface for Azurea.</p>
 <p><a href="http://azurea.refy.net/ja/wiki/index.php">Azurea</a> is a simple and powerful Twitter client. From it&apos;s Wiki,</p>
 <blockquote cite="http://azurea.refy.net/ja/wiki/index.php?Azurea%E3%81%A8%E3%81%AF">
-<h1>Azurea‚Æ‚Í </h1>
-Windows MobileŒü‚¯‚Ì‚Â‚¢‚Á‚½ƒNƒ‰ƒCƒAƒ“ƒgB‚Æ‚Á‚Ä‚àƒVƒ“ƒvƒ‹B
+<h1>Azureaã¨ã¯ </h1>
+Windows Mobileå‘ã‘ã®ã¤ã„ã£ãŸã‚¯ãƒ©ã‚¤ã‚¢ãƒ³ãƒˆã€‚ã¨ã£ã¦ã‚‚ã‚·ãƒ³ãƒ—ãƒ«ã€‚
 
-<h2>‹@”\‚ÍH </h2>
+<h2>æ©Ÿèƒ½ã¯ï¼Ÿ </h2>
 <ul>
-  <li>‚Æ‚Á‚Ä‚àƒVƒ“ƒvƒ‹‚Èƒ†[ƒUƒCƒ“ƒ^[ƒtƒF[ƒX</li>
-  <li>ƒŠƒvƒ‰ƒC‚ªƒcƒŠ[‚É‚È‚è‚Ü‚·</li>
-  <li>ƒƒ‚ƒŠÁ”ï‚ª‚í‚è‚ÆŒy‚©‚Á‚½‚Ì‚Å‚·‚ªAÅ‹ß‚»‚¤‚Å‚à‚È‚­‚È‚Á‚Ä‚«‚Ü‚µ‚½B</li>
-  <li>‚à‚¿‚ë‚ñƒpƒ“ƒXƒNƒ[ƒ‹‚Å‚«‚Ü‚·</li>
+  <li>ã¨ã£ã¦ã‚‚ã‚·ãƒ³ãƒ—ãƒ«ãªãƒ¦ãƒ¼ã‚¶ã‚¤ãƒ³ã‚¿ãƒ¼ãƒ•ã‚§ãƒ¼ã‚¹</li>
+  <li>ãƒªãƒ—ãƒ©ã‚¤ãŒãƒ„ãƒªãƒ¼ã«ãªã‚Šã¾ã™</li>
+  <li>ãƒ¡ãƒ¢ãƒªæ¶ˆè²»ãŒã‚ã‚Šã¨è»½ã‹ã£ãŸã®ã§ã™ãŒã€æœ€è¿‘ãã†ã§ã‚‚ãªããªã£ã¦ãã¾ã—ãŸã€‚</li>
+  <li>ã‚‚ã¡ã‚ã‚“ãƒ‘ãƒ³ã‚¹ã‚¯ãƒ­ãƒ¼ãƒ«ã§ãã¾ã™</li>
 </ul>
 </blockquote>
 <p>Addtionally, it&apos;s most largest feature is that <b>Azurea can be highly extended by JScript.</b></p>
