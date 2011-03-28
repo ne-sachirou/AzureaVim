@@ -1,23 +1,38 @@
-<h1>Dependence</h1>
-uupaa.js - uupaa.js@gmail.com MIT License<br/>
+<h1>Include</h1>
 Closure Compiler - 2009 Google Inc. Apache License, Version 2.0
 
 <h1>AzureaVim</h1>
-<p>Command interface for Azurea.</p>
-<p><a href="https://github.com/ne-sachirou/AzureaVim/blob/master/js/AzureaVim.js">js/AzureaVim.js</a> is a builded script file.</p>
-<p>Auto update by <a href="https://github.com/ne-sachirou/AzureaVim/blob/master/js/AzureaStartup.js">js/AzureaStartup.js</a>.</p>
+<p>Highly customized and more customizable interface for Azurea.</p>
+<p><a href="http://azurea.refy.net/ja/wiki/index.php">Azurea</a> is a simple and powerful Twitter client. From it&apos;s Wiki,</p>
+<blockquote cite="http://azurea.refy.net/ja/wiki/index.php?Azurea%E3%81%A8%E3%81%AF">
+<h1>Azureaとは </h1>
+Windows Mobile向けのついったクライアント。とってもシンプル。
+
+<h2>機能は？ </h2>
+<ul>
+  <li>とってもシンプルなユーザインターフェース</li>
+  <li>リプライがツリーになります</li>
+  <li>メモリ消費がわりと軽かったのですが、最近そうでもなくなってきました。</li>
+  <li>もちろんパンスクロールできます</li>
+</ul>
+</blockquote>
+<p>Addtionally, it&apos;s most largest feature is that <b>Azurea can be highly extended by JScript.</b></p>
+<p><b>AzureaVim</b> gives wider environment for Azurea. It&apos;s contain <b>AzureaStartup.js</b>, <b>ApiProxy.rb</b> and <b>AzureaVim.js</b>. All is <b>open sourced</b> under MIT License, so you can develop AzureaVim with us.</p>
+<p><a href="https://github.com/ne-sachirou/AzureaVim/blob/master/js/AzureaVim.js">js/AzureaVim.js</a> is our core.</p>
+<p><a href="https://github.com/ne-sachirou/AzureaVim/blob/master/js/AzureaStartup.js">js/AzureaStartup.js</a></p>
+<p><a href="https://github.com/ne-sachirou/AzureaVim/blob/master/src/apiproxy/ApiProxy.rb">src/apiproxy/ApiProxy.rb</a></p>
+<p> is easy setup tool.</p>
 
 <h2>Installation</h2>
-<ol>
-  <li>Put <a href="https://github.com/ne-sachirou/AzureaVim/blob/master/js/AzureaVim.js">js/AzureaVim.js</a> to your Azurea Scripts folder.</li>
-  <li>Put <a href="https://github.com/ne-sachirou/AzureaVim/blob/master/js/AzureaStartup.js">js/AzureaStartup.js</a> to the same folder of Azurea.exe.</li>
-  <li>Double click AzureaStartup.js then start Azurea.</li>
-</ol>
+<h3>Easy install</h3>
+
+<h3>Install manually</h3>
+
 
 <h2>Basical usage</h2>
 <ol>
   <li>Select a timeline status.</li>
-  <li>Press : then input : to TextArea and focus automatically.</li>
+  <li>Press <q>:</q>, then input <q>:</q> to TextArea and focus automatically.</li>
   <li>Input command</li>
   <li>Press Enter to send tweet</li>
   <li>You&apos;ll see the command is done.</li>
@@ -25,18 +40,21 @@ Closure Compiler - 2009 Google Inc. Apache License, Version 2.0
 
 <h2>Feature list</h2>
 <ul>
-  <li>:commands (extensible)</li>
+  <li>Meny :commands (extensible)</li>
   <li>addEventListener, removeEventListener</li>
   <li>setTimeout, clearTimeout, setInterval, clearInterval, setTimeevent, clearTimeevent</li>
   <li>template</li>
   <li>yank</li>
+  <li>Customizable notification using <b>Growl for Windows</b>.</li>
 </ul>
 
 <h2>Command list</h2>
 <p>Read <a href="https://github.com/ne-sachirou/AzureaVim/tree/master/src/plugins">src/plugins</a> js source comments.</p>
 
 <h2>License</h2>
-<pre>Copyright (c) 2011 <a href="http://c4se.sakura.ne.jp/profile/ne.html">http://c4se.sakura.ne.jp/profile/ne.html</a>
+<pre>The MIT License
+
+Copyright (c) 2011 <a href="http://c4se.sakura.ne.jp/profile/ne.html">ne_Sachirou</a>
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
  of this software and associated documentation files (the "Software"), to deal
