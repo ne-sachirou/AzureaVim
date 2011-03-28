@@ -28,17 +28,21 @@ AzureaVim.prototype.reply = function() {
         mrt: 'mrt',
         masirosiki: 'mrt'
     },
-        t;
+        has_in_reply_to = this.command[3],
+        expanded_template;
+    
+    function callback(response) {
+        TextArea.text = expanded_template.text;
+        TextArea.in_reply_to_status_id = (has_in_reply_to === true ? this.status_id : 0);
+        TextArea.show();
+        TextArea.setFocus();
+        TextArea.cursor = expanded_template.cursor;
+    }
     
     switch (c1[this.command[1]]) {
     case 'template':
-        t = AzureaUtil.template.expand(this.command[2], this);
-        Http.sendRequestAsync('http://google.com/', false,
-                              new Function("TextArea.text = '" + t.text.replace("'", "\\'") + "';" +
-            "TextArea.in_reply_to_status_id = '" + (this.command[3] === 'true' ? this.status_id : 0) + "';" +
-            "TextArea.show();" +
-            "TextArea.setFocus();" +
-            "TextArea.cursor = " + t.cursor + ";"));
+        expanded_template = AzureaUtil.template.expand(this.command[2], this);
+        Http.sendRequestAsync('http://google.com/', false, callback);
         break;
     case 'all':
         this.command = ['reply', 'template', "@#{screen_name + (status_users.length ? ' @' +status_users.join(' @') : '')} #{}", 'true'];

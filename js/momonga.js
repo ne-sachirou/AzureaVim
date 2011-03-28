@@ -1309,17 +1309,21 @@ AzureaVim.prototype.reply = function() {
         mrt: 'mrt',
         masirosiki: 'mrt'
     },
-        t;
+        has_in_reply_to = this.command[3],
+        expanded_template;
+    
+    function callback(response) {
+        TextArea.text = expanded_template.text;
+        TextArea.in_reply_to_status_id = (has_in_reply_to === true ? this.status_id : 0);
+        TextArea.show();
+        TextArea.setFocus();
+        TextArea.cursor = expanded_template.cursor;
+    }
     
     switch (c1[this.command[1]]) {
     case 'template':
-        t = AzureaUtil.template.expand(this.command[2], this);
-        Http.sendRequestAsync('http://google.com/', false,
-                              new Function("TextArea.text = '" + t.text.replace("'", "\\'") + "';" +
-            "TextArea.in_reply_to_status_id = '" + (this.command[3] === 'true' ? this.status_id : 0) + "';" +
-            "TextArea.show();" +
-            "TextArea.setFocus();" +
-            "TextArea.cursor = " + t.cursor + ";"));
+        expanded_template = AzureaUtil.template.expand(this.command[2], this);
+        Http.sendRequestAsync('http://google.com/', false, callback);
         break;
     case 'all':
         this.command = ['reply', 'template', "@#{screen_name + (status_users.length ? ' @' +status_users.join(' @') : '')} #{}", 'true'];
@@ -1458,24 +1462,27 @@ AzureaUtil.mixin(AzureaVim.commands_list, {
 // option1がを省略した場合、jaへ翻訳します。
 
 AzureaVim.prototype.translate = function() {
+    var view = System.views.currentView,
+        item = view.getItem(view.selectedItemId);
+    
+    function callback(response) { // @param HttpResponce Object:
+        if (response.statusCode !== 200) {
+            throw Error('Google Translate API Error. statusCode is ' + response.statusCode + '.');
+        }
+        item.text = response.body.match(/"translatedText"\s*:\s*"(.*)"/)[1];
+        //response.body.match(/"detectedSourceLanguage"\s*:\s*"(.*)"/)[1] + '-> ' + this.command[1]
+    }
     
     if (!this.command[1]) {
         this.command[1] = 'ja';
     }
     Http.sendRequestAsync('https://www.googleapis.com/language/translate/v2?key=' +
-                                     'AIzaSyCva1yUIFIBRqXOZDJ0nrbGbm0bz3FIksc' +
-                                     '&q=' +
-                                     encodeURI(this.status_text) +
-                                     '&target=' + this.command[1],
-                                     false,
-                                     function(response) { // @param HttpResponce Object:
-        if (response.statusCode !== 200) {
-            throw Error('Google Translate API Error. statusCode is ' + response.statusCode + '.');
-        }
-        System.showMessage(response.body.match(/"translatedText"\s*:\s*"(.*)"/)[1],
-                           response.body.match(/"detectedSourceLanguage"\s*:\s*"(.*)"/)[1] + '-> ',// + this.command[1],
-                           0);
-    });
+                          'AIzaSyCva1yUIFIBRqXOZDJ0nrbGbm0bz3FIksc' +
+                          '&q=' +
+                          encodeURI(this.status_text) +
+                          '&target=' + this.command[1],
+                          false,
+                          callback);
 }
 AzureaUtil.mixin(AzureaVim.commands_list, {
     view: 'view',
