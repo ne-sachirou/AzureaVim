@@ -1,6 +1,0 @@
-<job>
-  <script language="JScript" src="unzip.js"/>
-  <script language="JScript">
-  unzip('startup.zip','zip');
-  </script>
-</job>

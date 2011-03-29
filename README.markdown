@@ -16,18 +16,24 @@ Windows Mobile向けのついったクライアント。とってもシンプル
   <li>もちろんパンスクロールできます</li>
 </ul>
 </blockquote>
-<p>Addtionally, it&apos;s most largest feature is that <b>Azurea can be highly extended by JScript.</b></p>
-<p><b>AzureaVim</b> gives wider environment for Azurea. It&apos;s contain <b>AzureaStartup.js</b>, <b>ApiProxy.rb</b> and <b>AzureaVim.js</b>. All is <b>open sourced</b> under MIT License, so you can develop AzureaVim with us.</p>
+<p>Addtionally, it&apos;s most largest feature is that <b>Azurea can be highly extensible by JScript.</b></p>
+<p><b>AzureaVim</b> gives wider environment for Azurea. It&apos;s contain <b>AzureaStartup.js</b>, <b>ApiProxy.rb</b> and <b>AzureaVim.js</b>. All is published in <b>open source</b> under MIT License, so you can develop AzureaVim with us.</p>
 <p><a href="https://github.com/ne-sachirou/AzureaVim/blob/master/js/AzureaVim.js">js/AzureaVim.js</a> is our core.</p>
-<p><a href="https://github.com/ne-sachirou/AzureaVim/blob/master/js/AzureaStartup.js">js/AzureaStartup.js</a></p>
-<p><a href="https://github.com/ne-sachirou/AzureaVim/blob/master/src/apiproxy/ApiProxy.rb">src/apiproxy/ApiProxy.rb</a></p>
-<p> is easy setup tool.</p>
+<p><a href="https://github.com/ne-sachirou/AzureaVim/blob/master/js/AzureaVim.zip">js/AzureaVim.zip</a></p>
+<p><a href="https://github.com/ne-sachirou/AzureaVim/blob/master/src/install/azvm_install.js">azvm_install.js</a> is easy setup & update tool.</p>
 
 <h2>Installation</h2>
 <h3>Easy install</h3>
+<p>Download <a href="https://github.com/ne-sachirou/AzureaVim/blob/master/src/install/azvm_install.js">azvm_install.js</a> and double click it.</p>
 
 <h3>Install manually</h3>
-
+<ol>
+  <li>Install Ruby 1.9</li>
+  <li>gem install ruby_gntp and nokogiri.</li>
+  <li>Download AzureaWin and expand zip.</li>
+  <li>Download AzureaVim.js</li>
+  <li>Download AzureaVim.zip and expand zip.</li>
+</ol>
 
 <h2>Basical usage</h2>
 <ol>
