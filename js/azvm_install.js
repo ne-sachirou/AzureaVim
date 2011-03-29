@@ -2,7 +2,7 @@ var RUBY_URI = 'http://ftp.ruby-lang.org/pub/ruby/binaries/mswin32/',
     RUBY_i386 = 'ruby-1.9.2-p136-i386-mswin32.zip',
     RUBY_x64 = 'ruby-1.9.2-p0-x64-mswin64_80.zip',
     RUBY_ZIPFILE_NAME = 'ruby-1.9.2-p-mswin.zip',
-    RAKEFILE_URI = 'https://github.com/ne-sachirou/AzureaVim/raw/master/js/',
+    RAKEFILE_URI = 'https://github.com/ne-sachirou/AzureaVim/raw/master/src/install/',
     RAKEFILE_NAME = 'azvm_install.rake';
 
 (function() {

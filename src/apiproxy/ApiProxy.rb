@@ -106,11 +106,20 @@ class GrowlServlet < WEBrick::HTTPServlet::AbstractServlet
   end
 end
 
-server = WEBrick::HTTPServer.new OPTION
-server.mount '/gntp', GrowlServlet
-
-['TERM', 'INT'].each do |signal|
-  trap(signal){ server.shutdown }
+class ExitServlet < WEBrick::HTTPServlet::AbstractServlet
+  def do_GET req, res
+    res['Content-Type'] = 'text/plain'
+    res.body = {:ok => 'exit ok.'}.to_json
+    $apiproxy_server.shutdown
+  end
 end
 
-server.start
+$apiproxy_server = WEBrick::HTTPServer.new OPTION
+$apiproxy_server.mount '/gntp', GrowlServlet
+$apiproxy_server.mount '/exit', ExitServlet
+
+['TERM', 'INT'].each do |signal|
+  trap(signal){ $apiproxy_server.shutdown }
+end
+
+$apiproxy_server.start

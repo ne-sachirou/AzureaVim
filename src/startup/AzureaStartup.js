@@ -90,22 +90,30 @@ function isActive(application_name) { // @param Script: Process name
     return is_active;
 }
 
+function exitApiProxy() {
+    var xhr = new ActiveXObject('MSXML2.XMLHttp');
+    
+    xhr.open('GET', 'http://localhost:80/exit', false);
+    xhr.send();
+}
+
 
 /* ========== MAIN ========== */
 var fso = new ActiveXObject('Scripting.FileSystemObject'),
     shell = new ActiveXObject('WScript.Shell'),
     i;
 
+shell.run('cmd /C ruby "' + WScript.ScriptFullName.replace(/[^\\]+$/, '') + 'data\\apiproxy\\apiproxy.rb"', 1, false);
 shell.run(APPLICATION_PATH, 1, true);
-shell.run('ruby data/apiproxy/apiproxy.rb', 1, true);
 mainloop:
     while (true) {
-    updateScripts();
+    updateScripts(SCRIPTS_PATH);
     for (i = 0; i < 60; ++i) {
-        WScript.sleep(60000);
+        WScript.sleep(12000);
         if (!isActive(APPLICATION_NAME)) {
             break mainloop;
         }
     }
 }
-updateScripts();
+exitApiProxy();
+updateScripts(SCRIPTS_PATH);
