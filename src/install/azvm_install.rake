@@ -14,20 +14,13 @@ GEMS = ['ruby_gntp', 'nokogiri']
 #   unzip_file 'under/from.zip', '.'
 def unzip_file zip_filename, target_foldername
   Dir.mkdir target_foldername unless File.exist? target_foldername
-  i = 0
   Zip::ZipFile.foreach zip_filename do |zipentry|
     puts target = "#{target_foldername}/#{zipentry.name}"
-    if i == 0 && zipentry.file?
-      topfolder = target.sub(/[^\/]+$/, '')
-      Dir.mkdir topfolder unless File.exist? topfolder
-    end
-    i = 1
     if zipentry.file?
+      destdirs = File.dirname(target).split('/')
+      destdirs.each_index {|i| Dir.mkdir destdirs[0..i].join('/') unless File.exist? destdirs[0..i].join('/')}
       File.delete target if File.exist? target
       zipentry.extract target
-    elsif !File.directory? target
-      File.delete target if File.exist? target
-      Dir.mkdir target
     end
   end
 end
@@ -68,9 +61,17 @@ end
 desc 'Install or update AzureaVim environment.'
 task 'AzureaVim' => 'Azurea' do
   puts 'Updating AzureaVim.'
-  open AZUREAVIM_ZIP do |zip|
-    unzip_file(zip, File.exist?('Azurea.exe') ? '.' : 'AzureaWin')
+  zipfilename = AZUREAVIM_ZIP.scan(/[^\/]+$/)[0]
+  uri = URI.parse AZUREAVIM_ZIP
+  http = Net::HTTP.new uri.host, '443'
+  http.use_ssl = true
+  http.verify_mode = OpenSSL::SSL::VERIFY_NONE
+  http.start do |w|
+    response = w.get uri.path
+    open(zipfilename, 'w+b'){|target| target.write response.body}
   end
+  unzip_file(zipfilename, File.exist?('Azurea.exe') ? '.' : 'AzureaWin')
+  File.delete zipfilename
 end
 
 task :default => GEMS + ['Azurea', 'AzureaWin/Scripts/AzureaVim.js', 'AzureaVim']

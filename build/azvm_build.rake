@@ -68,15 +68,23 @@ SCRIPTMETA
   end
 end
 
+desc 'Deploy azvm_install.js'
+file 'azvm_install.js' do |t|
+  puts "Copy #{t.name}"
+  FileUtils.copy_file "../src/install/#{t.name}", "../js/#{t.name}"
+end
+
 desc 'Deploy AzureaVim.zip'
-file FILE_ENV => 'clobber' do |t|
+file FILE_ENV => ['clobber', 'azvm_install.js'] do |t|
   Zip::ZipFile.open t.name, Zip::ZipFile::CREATE do |zipfile|
     puts 'Zip to azvm_startup.wsf'
     zipfile.add 'azvm_startup.wsf', '../src/startup/azvm_startup.wsf'
     ['AzureaStartup.js', 'do_uac.js'].each do |filename|
-      puts "Zip to date/Startup/#{filename}"
-      zipfile.add "date/Startup/#{filename}", "../src/startup/#{filename}"
+      puts "Zip to data/startup/#{filename}"
+      zipfile.add "data/startup/#{filename}", "../src/startup/#{filename}"
     end
+    puts 'Zip to data/apiproxy/apiproxy.rb'
+    zipfile.add 'data/apiproxy/apiproxy.rb', '../src/apiproxy/apiproxy.rb'
   end
 end
 

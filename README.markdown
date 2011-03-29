@@ -19,12 +19,13 @@ Windows Mobile向けのついったクライアント。とってもシンプル
 <p>Addtionally, it&apos;s most largest feature is that <b>Azurea can be highly extensible by JScript.</b></p>
 <p><b>AzureaVim</b> gives wider environment for Azurea. It&apos;s contain <b>AzureaStartup.js</b>, <b>ApiProxy.rb</b> and <b>AzureaVim.js</b>. All is published in <b>open source</b> under MIT License, so you can develop AzureaVim with us.</p>
 <p><a href="https://github.com/ne-sachirou/AzureaVim/blob/master/js/AzureaVim.js">js/AzureaVim.js</a> is our core.</p>
-<p><a href="https://github.com/ne-sachirou/AzureaVim/blob/master/js/AzureaVim.zip">js/AzureaVim.zip</a></p>
-<p><a href="https://github.com/ne-sachirou/AzureaVim/blob/master/src/install/azvm_install.js">azvm_install.js</a> is easy setup & update tool.</p>
+<p><a href="https://github.com/ne-sachirou/AzureaVim/blob/master/js/AzureaVim.zip">js/AzureaVim.zip</a> makes environment for Azurea.</p>
+<p><a href="https://github.com/ne-sachirou/AzureaVim/blob/master/js/azvm_install.js">azvm_install.js</a> is easy setup & update tool.</p>
 
 <h2>Installation</h2>
 <h3>Easy install</h3>
-<p>Download <a href="https://github.com/ne-sachirou/AzureaVim/blob/master/src/install/azvm_install.js">azvm_install.js</a> and double click it.</p>
+<p>Download <a href="https://github.com/ne-sachirou/AzureaVim/blob/master/js/azvm_install.js">azvm_install.js</a> and double click it.</p>
+<p>Install <a href="http://www.growlforwindows.com/gfw/">Growl for Windows</a> (optional).</p>
 
 <h3>Install manually</h3>
 <ol>
@@ -33,6 +34,7 @@ Windows Mobile向けのついったクライアント。とってもシンプル
   <li>Download AzureaWin and expand zip.</li>
   <li>Download AzureaVim.js</li>
   <li>Download AzureaVim.zip and expand zip.</li>
+  <li>Install <a href="http://www.growlforwindows.com/gfw/">Growl for Windows</a> (optional).</li>
 </ol>
 
 <h2>Basical usage</h2>
@@ -51,7 +53,7 @@ Windows Mobile向けのついったクライアント。とってもシンプル
   <li>setTimeout, clearTimeout, setInterval, clearInterval, setTimeevent, clearTimeevent</li>
   <li>template</li>
   <li>yank</li>
-  <li>Customizable notification using <b>Growl for Windows</b>.</li>
+  <li>Customizable notification using <b><a href="http://www.growlforwindows.com/gfw/">Growl for Windows</a></b>.</li>
 </ul>
 
 <h2>Command list</h2>

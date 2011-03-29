@@ -93,10 +93,11 @@ function isActive(application_name) { // @param Script: Process name
 
 /* ========== MAIN ========== */
 var fso = new ActiveXObject('Scripting.FileSystemObject'),
+    shell = new ActiveXObject('WScript.Shell'),
     i;
 
-new ActiveXObject('WScript.Shell').Run(APPLICATION_PATH, 1, false);
-WScript.sleep(6000);
+shell.run(APPLICATION_PATH, 1, true);
+shell.run('ruby data/apiproxy/apiproxy.rb', 1, true);
 mainloop:
     while (true) {
     updateScripts();
