@@ -1,0 +1,3 @@
+[submodule "AzureaVim.wiki"]
+	path = AzureaVim.wiki
+	url = git@github.com:ne-sachirou/AzureaVim.wiki.git
