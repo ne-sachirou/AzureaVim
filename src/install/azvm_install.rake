@@ -47,17 +47,14 @@ end
 desc 'Install or update Azurea.exe'
 task 'Azurea' do
   puts 'Updating Azurea.'
-  #open AZUREAWIN_ZIP do |zip|
-  #  unzip_file zip, '.'
-  #end
+  open AZUREAWIN_ZIP do |zip|
+    unzip_file(zip, File.exist?('Azurea.exe') ? '..' : '.')
+  end
 end
 
 desc 'Install or update AzureaVim.js'
 file 'AzureaWin/Scripts/AzureaVim.js' => 'Azurea' do |t|
   puts 'Updating AzureaVim.js'
-  #open AZUREAVIM_JS do |js|
-  #  open(t.name, 'w'){|target| target.write js.read}
-  #end
   uri = URI.parse AZUREAVIM_JS
   http = Net::HTTP.new uri.host, '443'
   http.use_ssl = true
@@ -72,7 +69,7 @@ desc 'Install or update AzureaVim environment.'
 task 'AzureaVim' => 'Azurea' do
   puts 'Updating AzureaVim.'
   open AZUREAVIM_ZIP do |zip|
-    unzip_file zip, 'AzureaWin'
+    unzip_file(zip, File.exist?('Azurea.exe') ? '.' : 'AzureaWin')
   end
 end
 

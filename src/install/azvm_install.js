@@ -2,14 +2,46 @@ var RUBY_URI = 'http://ftp.ruby-lang.org/pub/ruby/binaries/mswin32/',
     RUBY_i386 = 'ruby-1.9.2-p136-i386-mswin32.zip',
     RUBY_x64 = 'ruby-1.9.2-p0-x64-mswin64_80.zip',
     RUBY_ZIPFILE_NAME = 'ruby-1.9.2-p-mswin.zip',
-    RAKEFILE_URI = 'https://github.com/ne-sachirou/AzureaVim/raw/master/install/azvm_install.rake',
-    RAKEFILE_NAME = 'azvm_install.rake'
-    shell = new ActiveXObject('WScript.Shell'),
+    RAKEFILE_URI = 'https://github.com/ne-sachirou/AzureaVim/raw/master/install/',
+    RAKEFILE_NAME = 'azvm_install.rake';
+
+(function() {
+    var wmi = GetObject('winmgmts:\\\\.\\root\\cimv2'),
+        os = wmi.ExecQuery('SELECT * FROM Win32_OperatingSystem'),
+        osenum = new Enumerator(os),
+        item,
+        is_notXP = false,
+        key = '__uac',
+        args = WScript.Arguments,
+        i = 0, length = args.length,
+        lastArg,
+        newArgs = [],
+        shell = WScript.CreateObject('Shell.Application');
+    
+    for (; !osenum.atEnd(); osenum.moveNext()) {
+        if (osenum.item().Version.substring(0, 3) < '6.0') {
+            is_notXP = true;
+        }
+    }
+    
+    if(!is_notXP && key !== lastArg) {
+        if (length !== 0) {
+            lastArg = args(length - 1);
+        }
+        for (; i < length; ++i) {
+            newArgs.push(args(i));
+        }
+        newArgs.push(key);
+        shell.ShellExecute('wscript.exe', '"' + WScript.ScriptFullName + '" ' + newArgs.join(' '), '', 'runas', 1);
+        WScript.Quit(0);
+    }
+})();
+
+var shell = new ActiveXObject('WScript.Shell'),
     env = shell.Environment('SYSTEM'),
     path = env.item('PATH'),
     processor_architecture = env.item('PROCESSOR_ARCHITECTURE'),
     fso = new ActiveXObject('Scripting.FileSystemObject');
-
 
 // http://d.hatena.ne.jp/hetappi/20080819/1219157144
 function unzip(zipfile,    // @param String: Zipped file path
@@ -67,7 +99,7 @@ function downloadRakefile() {
     var fso = new ActiveXObject('Scripting.FileSystemObject'),
         xhr = new ActiveXObject('MSXML2.XMLHttp');
     
-    xhr.open('GET', RAKEFILE_URI, false);
+    xhr.open('GET', RAKEFILE_URI + RAKEFILE_NAME, false);
     xhr.onreadystatechange = function() {
         if (xhr.readyState === 4 && xhr.status === 200) {
             try {
