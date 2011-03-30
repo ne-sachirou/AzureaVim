@@ -117,7 +117,9 @@ function downloadRakefile() {
 
 
 if (!/\\Ruby\\bin/i.test(path)) {
+    WScript.Echo('We\'ll download Ruby!');
     downloadRuby();
+    WScript.Echo('Downdoad finished! We\'ll start install Ruby.');
     installRuby();
     fso.deleteFile(RUBY_ZIPFILE_NAME);
 }
