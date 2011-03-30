@@ -31,7 +31,7 @@ GEMS.each do |gem|
     begin
       require t.name
       sh "gem update #{t.name}"
-    rescue
+    rescue LoadError
       sh "gem install #{t.name}"
     end
   end
