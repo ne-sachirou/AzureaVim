@@ -6,23 +6,27 @@ var defaultKeyBindingHandler = [[], [], [], [], [], [], [], []],
 
 // H
 defaultKeyBindingHandler[0][0x48] = function(status_id) {
-    //System.views.scrollTo()
-}
+    
+};
 
 // J
 defaultKeyBindingHandler[0][0x4A] = function(status_id) {
+    var view = System.views.currentView,
+        status_id = view.selectedStatusId;
     
-}
+    view.scrollToStatusId('');
+    view.selectedStatusId = '';
+};
 
 // K
 defaultKeyBindingHandler[0][0x4B] = function(status_id) {
     
-}
+};
 
 // L
 defaultKeyBindingHandler[0][0x4C] = function(status_id) {
     
-}
+};
 
 // R
 defaultKeyBindingHandler[0][0x52] = function(status_id) {
@@ -34,7 +38,7 @@ defaultKeyBindingHandler[0][0x52] = function(status_id) {
     TextArea.show();
     TextArea.setFocus();
     TextArea.cursor = status_user_screen_name.length + 2;
-}
+};
 
 // T
 defaultKeyBindingHandler[0][0x54] = function(status_id) {
@@ -49,7 +53,7 @@ defaultKeyBindingHandler[0][0x54] = function(status_id) {
             TwitterService.retweet.create(status_id);
         //}
     }
-}
+};
 
 // W
 defaultKeyBindingHandler[0][0x57] = function(status_id) {
@@ -64,13 +68,13 @@ defaultKeyBindingHandler[0][0x57] = function(status_id) {
         TextArea.show();
         TextArea.setFocus();
     }
-}
+};
 
 // G
 defaultKeyBindingHandler[0][0x47] = function() {
     var handlers_list = {
         'F': function() {
-            System.views.openFavorite();
+            System.views.openView(3);
             reset();
         },
         'W': function() {
@@ -91,22 +95,22 @@ defaultKeyBindingHandler[0][0x47] = function() {
     for (key in handlers_list) {
         addKeyBindingHandler(key.charCodeAt(0), 0, handlers_list[key]);
     }
-}
+};
 
 // M
 defaultKeyBindingHandler[0][0x4D] = function() {
     System.views.callMore();
-}
+};
 
 // Space
 defaultKeyBindingHandler[0][0x20] = function() {
     System.views.callRefresh();
-}
+};
 
 // /
 defaultKeyBindingHandler[0][0xBF] = function() {
     System.views.quickFilter();
-}
+};
 
 // 0
 // F
@@ -117,22 +121,22 @@ defaultKeyBindingHandler[0][0x46] = function(status_id) {
     } else {
         TwitterService.favorite.create(status_id);
     }
-}
+};
 
 // 1
 defaultKeyBindingHandler[0][0x31] = function() {
-    System.views.openTimeline();
-}
+    System.views.openView(0);
+};
 
 // 2
 defaultKeyBindingHandler[0][0x32] = function() {
-    System.views.openMention();
-}
+    System.views.openView(1);
+};
 
 // 3
 defaultKeyBindingHandler[0][0x33] = function() {
-    System.views.openMessage();
-}
+    System.views.openView(2);
+};
 
 
 function addKeyBindingHandler(vkcode,    // @param Number:

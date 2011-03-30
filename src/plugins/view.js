@@ -14,41 +14,7 @@ AzureaUtil.mixin(AzureaVim.commands_list, {
 
 
 AzureaVim.prototype.view = function() {
-    var c1 = {
-        home: 'home',
-        timeline: 'home',
-        h: 'home',
-        
-        mention: 'mention',
-        reply: 'mention',
-        r: 'mention',
-        m: 'mention',
-        '@': 'mention',
-        
-        message: 'message',
-        dm: 'message',
-        d: 'message',
-        
-        user: 'user',
-        u: 'user',
-        
-        search: 'search',
-        
-        favorite: 'favorite',
-        fav: 'favorite',
-        f: 'favorite',
-        
-        match: 'match',
-        
-        following: 'following',
-        follow: 'following',
-        
-        followers: 'followers',
-        follower: 'followers',
-        followed: 'followers'
-    };
-    
-    switch (c1[this.command[1]]) {
+    switch (AzureaVim.prototype.view.c1[this.command[1]]) {
     case 'home':
         System.views.openView(0);
         break;
@@ -79,4 +45,37 @@ AzureaVim.prototype.view = function() {
     default:
         break;
     }
-}
+};
+AzureaVim.prototype.view.c1 = {
+    home: 'home',
+    timeline: 'home',
+    h: 'home',
+    
+    mention: 'mention',
+    reply: 'mention',
+    r: 'mention',
+    m: 'mention',
+    '@': 'mention',
+    
+    message: 'message',
+    dm: 'message',
+    d: 'message',
+    
+    user: 'user',
+    u: 'user',
+    
+    search: 'search',
+    
+    favorite: 'favorite',
+    fav: 'favorite',
+    f: 'favorite',
+    
+    match: 'match',
+    
+    following: 'following',
+    follow: 'following',
+    
+    followers: 'followers',
+    follower: 'followers',
+    followed: 'followers'
+};

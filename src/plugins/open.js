@@ -6,31 +6,34 @@ AzureaUtil.mixin(AzureaVim.commands_list, {
     'うｒｌ': 'open url'
 });
 // :open [option1 [option2]]
-// webブラウザでurlを開きます。
+// Azurea内蔵のプレビューか、webブラウザで、urlを開きます。
 // option1は、開くurlの種類（url, status, favstar等）です。
 // option1を省略した場合、指定statusがurlを含めば0番目を、含まなければ、指定statusを開きます。
 
+(function() {
 
-AzureaVim.prototype.open = function() {
-    var url,
-        c1 = {
-        status: 'status',
-        favstar: 'favstar',
-        fav: 'favstar',
-        f: 'favstar',
-        favotter: 'favotter',
-        favlook: 'favlook',
-        twistar: 'twistar',
-        favolog: 'favolog',
-        twilog: 'twilog',
-        user: 'user',
-        url: 'url'
-    },
-        _unshorten = this.unshorten ?
-                     this.unshorten.unshorten :
-                     function(url, async) {return url;};
+var unshorten = AzureaVim.prototype.unshorten ?
+                AzureaVim.prototype.unshorten.unshorten :
+                function(url, async) {return url;};
+
+
+function open(url) { // @param String: URI
+    var previewurl;
     
-    switch (c1[this.command[1]]) {
+    url = unshorten(url, true);
+    previewurl = System.getPreviewUrl(url);
+    if (previewurl) {
+        System.showPreview(url, previewurl);
+    } else {
+        System.openUrl(url);
+    }
+}
+
+
+function azvm_open() {
+    var url;
+    
+    switch (azvm_open.c1[this.command[1]]) {
     case 'status':
         url = 'https://twitter.com/' + this.screen_name + '/status/' + this.status_id;
         break;
@@ -59,15 +62,40 @@ AzureaVim.prototype.open = function() {
         if (!this.command[2]) {
             this.command[2] = 0;
         }
-        url = _unshorten(this.status_urls[this.command[2]], true);
+        url = this.status_urls[this.command[2]];
         break;
     default:
         if (this.status_urls[0]) {
-            url = _unshorten(this.status_urls[0], true);
+            url = this.status_urls[0];
         } else {
             url = 'https://twitter.com/' + this.screen_name + '/status/' + this.status_id;
         }
         break;
     }
-    System.openUrl(url);
-}
+    open(url);
+};
+azvm_open.c1 = {
+    status: 'status',
+    favstar: 'favstar',
+    fav: 'favstar',
+    f: 'favstar',
+    favotter: 'favotter',
+    favlook: 'favlook',
+    twistar: 'twistar',
+    favolog: 'favolog',
+    twilog: 'twilog',
+    user: 'user',
+    u: 'user',
+    url: 'url'
+};
+
+AzureaVim.prototype.open = azvm_open;
+
+// https://gist.github.com/802965
+System.addKeyBindingHandler(0xBE, // .
+                            0,
+                            function(status_id) {
+    TwitterService.status.update(':o', status_id);
+});
+
+})();

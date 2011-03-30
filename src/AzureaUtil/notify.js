@@ -1,8 +1,10 @@
+//{!@simple
 var notify_proxy = new ApiProxy('gntp');
 
 if (!getDbKey('NotifyUseGrowl')) {
     setDbKey('NotifyUseGrowl', '0');
 }
+//}!@simple
 
 
 function notifyNative(text) { // @param String:

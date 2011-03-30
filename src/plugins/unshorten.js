@@ -12,8 +12,7 @@ AzureaUtil.mixin(AzureaVim.commands_list, {
 // https://gist.github.com/835563
 (function() {
 
-var azvm_unshorten_services = [],
-    azvm_unshorten_cashe = {
+var azvm_unshorten_cashe = {
     'http://c4se.tk/': 'http://c4se.sakura.ne.jp/'
 };
 
@@ -38,22 +37,41 @@ function _unshorten(url,     // @param String: shortened URL
     var cashe = azvm_unshorten_cashe,
         response, result = url;
     
-    if (_isPossibleUnshorten(url)) {
-        if (cashe[url]) {
-            result = cashe[url];
-        } else if (async) {
+    if (cashe[url]) {
+        result = cache[url];
+    } else if (url.indexOf('htn.ly') !== -1) {
+        if (async) {
+            try {
+                Http.sendRequestAsync(url, false,
+                                      function(response) {
+                    AzureaVim.prototype.unshorten.cashe[url] = response.header.match(/Location: ([^\n]+)\n/)[1];
+                });
+            } catch (err) {
+            }
+        } else {
+            try {
+                response = Http.sendRequest(url, false).header.match(/Location: ([^\n]+)\n/);
+                result = response ? response[1] : url;
+                cashe[url] = result;
+            } catch (err) {
+            }
+        }
+    } else if (_isPossibleUnshorten(url)) {
+        if (async) {
             try {
                 Http.sendRequestAsync('http://untiny.me/api/1.0/extract/?url=' + url + '&format=text', false,
                                       function(response) {
                     AzureaVim.prototype.unshorten.cashe[url] = /^error/.test(response.body) ? url : response.body;
                 });
-            } catch (e) {}
+            } catch (err) {
+            }
         } else {
             try {
-                response = Http.sendRequest('http://untiny.me/api/1.0/extract/?url=' + url + '&format=text', false);
-                result = /^error/.test(response.body) ? url : response.body;
+                response = Http.sendRequest('http://untiny.me/api/1.0/extract/?url=' + url + '&format=text', false).body;
+                result = /^error/.test(response) ? url : response;
                 cashe[url] = result;
-            } catch (e) {}
+            } catch (err) {
+            }
         }
     }
     return result;
@@ -76,14 +94,16 @@ AzureaUtil.event.addEventListener('PreProcessTimelineStatus', function(status) {
     });
 });
 AzureaVim.prototype.unshorten = azvm_unshorten;
-AzureaVim.prototype.unshorten.services = [];//azvm_unshorten_services;
+AzureaVim.prototype.unshorten.services = [];
 AzureaVim.prototype.unshorten.cashe = azvm_unshorten_cashe;
 AzureaVim.prototype.unshorten.unshorten = _unshorten;
 try {
     Http.sendRequestAsync('http://untiny.me/api/1.0/services/?format=text', true,
                           function(response) { // @param HttpResponce Object:
         AzureaVim.prototype.unshorten.services = response.body.split(', ');
+        AzureaVim.prototype.unshorten.services.push('htn.ly');
     });
-} catch (e) {}
+} catch (err) {
+}
 
 })();
