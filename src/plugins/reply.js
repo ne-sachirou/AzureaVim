@@ -20,52 +20,54 @@ AzureaUtil.mixin(AzureaVim.commands_list, {
 (function() {
 
 AzureaVim.prototype.reply = function() {
-    var c1 = {
-        template: 'template',
-        all: 'all',
-        quote: 'quote',
-        qt: 'quote',
-        mrt: 'mrt',
-        masirosiki: 'mrt'
-    },
-        has_in_reply_to = this.command[3],
+    var has_in_reply_to = this.command[3] === 'true',
+        in_reply_to_status_id = this.status_id,
         expanded_template;
     
     function callback(response) {
         TextArea.text = expanded_template.text;
-        TextArea.in_reply_to_status_id = (has_in_reply_to === true ? this.status_id : 0);
+        TextArea.in_reply_to_status_id = (has_in_reply_to === true ? in_reply_to_status_id : 0);
         TextArea.show();
         TextArea.setFocus();
         TextArea.cursor = expanded_template.cursor;
     }
     
-    switch (c1[this.command[1]]) {
-    case 'template':
+    if (this.command[1] === 'template') {
         expanded_template = AzureaUtil.template.expand(this.command[2], this);
         Http.sendRequestAsync('http://google.com/', false, callback);
-        break;
-    case 'all':
-        this.command = ['reply', 'template', "@#{screen_name + (status_users.length ? ' @' +status_users.join(' @') : '')} #{}", 'true'];
-        this.reply();
-        break;
-    case 'quote':
-        this.command = ['reply', 'template', "@#{screen_name} #{} RT: #{status_text}", 'true'];
-        this.reply();
-        break;
-    case 'mrt':
-        if (this.command[2] === 'f' || this.command[2] === 'fav' || this.command[2] === 'favstar') {
-            this.command = ['reply', 'template', "#{} MRT: #{'http://favstar.fm/t/' + status_id}", 'false'];
-        } else {
-            this.command = ['reply', 'template', "#{} MRT: #{'http://twitter.com/' + screen_name + '/status/' + status_id}", 'false'];
+        //System.setTimeout(callback, 10);
+    } else {
+        redirect = this.reply.templates[this.reply.c1[this.command[1]]] ||
+                   ["@#{screen_name} #{}#{status_hashes.length ? ' ' + status_hashes.join(' ') : ''}", true];
+        if (typeof redirect === 'function') {
+            redirect = redirect.call(this);
         }
+        this.command = ['reply', 'template', redirect[0], redirect[1] ? 'true' : 'false'];
         this.reply();
-        break;
-    default:
-        this.command = ['reply', 'template', "@#{screen_name} #{}#{status_hashes.length ? ' ' + status_hashes.join(' ') : ''}", 'true'];
-        this.reply();
-        break;
     }
 }
+AzureaVim.prototype.reply.c1 = {
+    template: 'template',
+    all: 'all',
+    quote: 'quote',
+    qt: 'quote',
+    mrt: 'mrt',
+    masirosiki: 'mrt'
+};
+AzureaVim.prototype.reply.templates = {
+    all: ["@#{screen_name + (status_users.length ? ' @' +status_users.join(' @') : '')} #{}", true],
+    quote: ["@#{screen_name} #{} RT: #{status_text}", true],
+    mrt: function() {
+        var redirect;
+        
+        if (this.command[2] === 'f' || this.command[2] === 'fav' || this.command[2] === 'favstar') {
+            redirect = ['reply', 'template', "#{} MRT: #{'http://favstar.fm/t/' + status_id}", 'false'];
+        } else {
+            redirect = ['reply', 'template', "#{} MRT: #{'http://twitter.com/' + screen_name + '/status/' + status_id}", 'false'];
+        }
+        return redirect;
+    }
+};
 
 
 function reply(status_id) { // @param String:

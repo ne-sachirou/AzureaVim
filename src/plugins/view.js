@@ -14,7 +14,7 @@ AzureaUtil.mixin(AzureaVim.commands_list, {
 
 
 AzureaVim.prototype.view = function() {
-    switch (AzureaVim.prototype.view.c1[this.command[1]]) {
+    switch (this.view.c1[this.command[1]]) {
     case 'home':
         System.views.openView(0);
         break;

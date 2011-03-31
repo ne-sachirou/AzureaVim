@@ -176,7 +176,7 @@ end
 
 desc 'debug'
 task 'debug' => $DEBUG_TASKS do
-  cp "#{RELEASE_DIRECTORY}momonga.default.js", '../../Scripts/momonga.js'
+  cp "#{RELEASE_DIRECTORY}momonga.default.js", '../../Scripts/momonga.default.js'
   cp "#{RELEASE_DIRECTORY}momonga.simple.js", '../../AzureaWinSub/Scripts/momonga.simple.js'
 end
 

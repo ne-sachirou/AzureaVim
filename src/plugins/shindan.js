@@ -11,7 +11,8 @@ AzureaUtil.mixin(AzureaVim.commands_list, {
 // https://gist.github.com/831901
 AzureaVim.prototype.shindanmaker = function() {
     var url, i = -1,
-        _unshorten = this.unshorten ? this.unshorten.unshorten : function(url) {return url;};
+        _unshorten = this.unshorten ? this.unshorten.unshorten :
+                                      function(url, async) {return url;};
     
     while (url = _unshorten(this.status_urls[++i], true)) {
         if (url.match('^http://shindanmaker.com/[0-9]+')) {
@@ -20,7 +21,7 @@ AzureaVim.prototype.shindanmaker = function() {
     }
     if (url) {
         Http.postRequestAsync(url,
-                              "u=" + encodeURI(this.command[1] || TwitterService.currentUser().screen_name),
+                              'u=' + encodeURI(this.command[1] || TwitterService.currentUser.screen_name),
                               false,
                               function(response) {
             response.body.match('<textarea.*?>(.*?)</textarea>');

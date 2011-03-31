@@ -872,11 +872,13 @@ mixin(AzureaUtil.yank, {
     'get': getYank,
     'set': setYank
 });
+//{!@simple
 var notify_proxy = new ApiProxy('gntp');
 
 if (!getDbKey('NotifyUseGrowl')) {
     setDbKey('NotifyUseGrowl', '0');
 }
+//}!@simple
 
 
 function notifyNative(text) { // @param String:
@@ -1131,8 +1133,7 @@ AzureaUtil.mixin(AzureaVim.commands_list, {
 // https://gist.github.com/835563
 (function() {
 
-var azvm_unshorten_services = [],
-    azvm_unshorten_cashe = {
+var azvm_unshorten_cashe = {
     'http://c4se.tk/': 'http://c4se.sakura.ne.jp/'
 };
 
@@ -1157,22 +1158,41 @@ function _unshorten(url,     // @param String: shortened URL
     var cashe = azvm_unshorten_cashe,
         response, result = url;
     
-    if (_isPossibleUnshorten(url)) {
-        if (cashe[url]) {
-            result = cashe[url];
-        } else if (async) {
+    if (cashe[url]) {
+        result = cache[url];
+    } else if (url.indexOf('htn.ly') !== -1) {
+        if (async) {
+            try {
+                Http.sendRequestAsync(url, false,
+                                      function(response) {
+                    AzureaVim.prototype.unshorten.cashe[url] = response.header.match(/Location: ([^\n]+)\n/)[1];
+                });
+            } catch (err) {
+            }
+        } else {
+            try {
+                response = Http.sendRequest(url, false).header.match(/Location: ([^\n]+)\n/);
+                result = response ? response[1] : url;
+                cashe[url] = result;
+            } catch (err) {
+            }
+        }
+    } else if (_isPossibleUnshorten(url)) {
+        if (async) {
             try {
                 Http.sendRequestAsync('http://untiny.me/api/1.0/extract/?url=' + url + '&format=text', false,
                                       function(response) {
                     AzureaVim.prototype.unshorten.cashe[url] = /^error/.test(response.body) ? url : response.body;
                 });
-            } catch (e) {}
+            } catch (err) {
+            }
         } else {
             try {
-                response = Http.sendRequest('http://untiny.me/api/1.0/extract/?url=' + url + '&format=text', false);
-                result = /^error/.test(response.body) ? url : response.body;
+                response = Http.sendRequest('http://untiny.me/api/1.0/extract/?url=' + url + '&format=text', false).body;
+                result = /^error/.test(response) ? url : response;
                 cashe[url] = result;
-            } catch (e) {}
+            } catch (err) {
+            }
         }
     }
     return result;
@@ -1195,15 +1215,17 @@ AzureaUtil.event.addEventListener('PreProcessTimelineStatus', function(status) {
     });
 });
 AzureaVim.prototype.unshorten = azvm_unshorten;
-AzureaVim.prototype.unshorten.services = [];//azvm_unshorten_services;
+AzureaVim.prototype.unshorten.services = [];
 AzureaVim.prototype.unshorten.cashe = azvm_unshorten_cashe;
 AzureaVim.prototype.unshorten.unshorten = _unshorten;
 try {
     Http.sendRequestAsync('http://untiny.me/api/1.0/services/?format=text', true,
                           function(response) { // @param HttpResponce Object:
         AzureaVim.prototype.unshorten.services = response.body.split(', ');
+        AzureaVim.prototype.unshorten.services.push('htn.ly');
     });
-} catch (e) {}
+} catch (err) {
+}
 
 })();
 AzureaUtil.mixin(AzureaVim.commands_list, {
@@ -1214,31 +1236,34 @@ AzureaUtil.mixin(AzureaVim.commands_list, {
     'うｒｌ': 'open url'
 });
 // :open [option1 [option2]]
-// webブラウザでurlを開きます。
+// Azurea内蔵のプレビューか、webブラウザで、urlを開きます。
 // option1は、開くurlの種類（url, status, favstar等）です。
 // option1を省略した場合、指定statusがurlを含めば0番目を、含まなければ、指定statusを開きます。
 
+(function() {
 
-AzureaVim.prototype.open = function() {
-    var url,
-        c1 = {
-        status: 'status',
-        favstar: 'favstar',
-        fav: 'favstar',
-        f: 'favstar',
-        favotter: 'favotter',
-        favlook: 'favlook',
-        twistar: 'twistar',
-        favolog: 'favolog',
-        twilog: 'twilog',
-        user: 'user',
-        url: 'url'
-    },
-        _unshorten = this.unshorten ?
-                     this.unshorten.unshorten :
-                     function(url, async) {return url;};
+var unshorten = AzureaVim.prototype.unshorten ?
+                AzureaVim.prototype.unshorten.unshorten :
+                function(url, async) {return url;};
+
+
+function open(url) { // @param String: URI
+    var previewurl;
     
-    switch (c1[this.command[1]]) {
+    url = unshorten(url, true);
+    previewurl = System.getPreviewUrl(url);
+    if (previewurl) {
+        System.showPreview(url, previewurl);
+    } else {
+        System.openUrl(url);
+    }
+}
+
+
+function azvm_open() {
+    var url;
+    
+    switch (azvm_open.c1[this.command[1]]) {
     case 'status':
         url = 'https://twitter.com/' + this.screen_name + '/status/' + this.status_id;
         break;
@@ -1267,18 +1292,43 @@ AzureaVim.prototype.open = function() {
         if (!this.command[2]) {
             this.command[2] = 0;
         }
-        url = _unshorten(this.status_urls[this.command[2]], true);
+        url = this.status_urls[this.command[2]];
         break;
     default:
         if (this.status_urls[0]) {
-            url = _unshorten(this.status_urls[0], true);
+            url = this.status_urls[0];
         } else {
             url = 'https://twitter.com/' + this.screen_name + '/status/' + this.status_id;
         }
         break;
     }
-    System.openUrl(url);
-}
+    open(url);
+};
+azvm_open.c1 = {
+    status: 'status',
+    favstar: 'favstar',
+    fav: 'favstar',
+    f: 'favstar',
+    favotter: 'favotter',
+    favlook: 'favlook',
+    twistar: 'twistar',
+    favolog: 'favolog',
+    twilog: 'twilog',
+    user: 'user',
+    u: 'user',
+    url: 'url'
+};
+
+AzureaVim.prototype.open = azvm_open;
+
+// https://gist.github.com/802965
+System.addKeyBindingHandler(0xBE, // .
+                            0,
+                            function(status_id) {
+    TwitterService.status.update(':o', status_id);
+});
+
+})();
 AzureaUtil.mixin(AzureaVim.commands_list, {
     reply: 'reply',
     r: 'reply',
@@ -1301,52 +1351,54 @@ AzureaUtil.mixin(AzureaVim.commands_list, {
 (function() {
 
 AzureaVim.prototype.reply = function() {
-    var c1 = {
-        template: 'template',
-        all: 'all',
-        quote: 'quote',
-        qt: 'quote',
-        mrt: 'mrt',
-        masirosiki: 'mrt'
-    },
-        has_in_reply_to = this.command[3],
+    var has_in_reply_to = this.command[3] === 'true',
+        in_reply_to_status_id = this.status_id,
         expanded_template;
     
     function callback(response) {
         TextArea.text = expanded_template.text;
-        TextArea.in_reply_to_status_id = (has_in_reply_to === true ? this.status_id : 0);
+        TextArea.in_reply_to_status_id = (has_in_reply_to === true ? in_reply_to_status_id : 0);
         TextArea.show();
         TextArea.setFocus();
         TextArea.cursor = expanded_template.cursor;
     }
     
-    switch (c1[this.command[1]]) {
-    case 'template':
+    if (this.command[1] === 'template') {
         expanded_template = AzureaUtil.template.expand(this.command[2], this);
         Http.sendRequestAsync('http://google.com/', false, callback);
-        break;
-    case 'all':
-        this.command = ['reply', 'template', "@#{screen_name + (status_users.length ? ' @' +status_users.join(' @') : '')} #{}", 'true'];
-        this.reply();
-        break;
-    case 'quote':
-        this.command = ['reply', 'template', "@#{screen_name} #{} RT: #{status_text}", 'true'];
-        this.reply();
-        break;
-    case 'mrt':
-        if (this.command[2] === 'f' || this.command[2] === 'fav' || this.command[2] === 'favstar') {
-            this.command = ['reply', 'template', "#{} MRT: #{'http://favstar.fm/t/' + status_id}", 'false'];
-        } else {
-            this.command = ['reply', 'template', "#{} MRT: #{'http://twitter.com/' + screen_name + '/status/' + status_id}", 'false'];
+        //System.setTimeout(callback, 10);
+    } else {
+        redirect = this.reply.templates[this.reply.c1[this.command[1]]] ||
+                   ["@#{screen_name} #{}#{status_hashes.length ? ' ' + status_hashes.join(' ') : ''}", true];
+        if (typeof redirect === 'function') {
+            redirect = redirect.call(this);
         }
+        this.command = ['reply', 'template', redirect[0], redirect[1] ? 'true' : 'false'];
         this.reply();
-        break;
-    default:
-        this.command = ['reply', 'template', "@#{screen_name} #{}#{status_hashes.length ? ' ' + status_hashes.join(' ') : ''}", 'true'];
-        this.reply();
-        break;
     }
 }
+AzureaVim.prototype.reply.c1 = {
+    template: 'template',
+    all: 'all',
+    quote: 'quote',
+    qt: 'quote',
+    mrt: 'mrt',
+    masirosiki: 'mrt'
+};
+AzureaVim.prototype.reply.templates = {
+    all: ["@#{screen_name + (status_users.length ? ' @' +status_users.join(' @') : '')} #{}", true],
+    quote: ["@#{screen_name} #{} RT: #{status_text}", true],
+    mrt: function() {
+        var redirect;
+        
+        if (this.command[2] === 'f' || this.command[2] === 'fav' || this.command[2] === 'favstar') {
+            redirect = ['reply', 'template', "#{} MRT: #{'http://favstar.fm/t/' + status_id}", 'false'];
+        } else {
+            redirect = ['reply', 'template', "#{} MRT: #{'http://twitter.com/' + screen_name + '/status/' + status_id}", 'false'];
+        }
+        return redirect;
+    }
+};
 
 
 function reply(status_id) { // @param String:
@@ -1431,7 +1483,8 @@ AzureaUtil.mixin(AzureaVim.commands_list, {
 // https://gist.github.com/831901
 AzureaVim.prototype.shindanmaker = function() {
     var url, i = -1,
-        _unshorten = this.unshorten ? this.unshorten.unshorten : function(url) {return url;};
+        _unshorten = this.unshorten ? this.unshorten.unshorten :
+                                      function(url, async) {return url;};
     
     while (url = _unshorten(this.status_urls[++i], true)) {
         if (url.match('^http://shindanmaker.com/[0-9]+')) {
@@ -1440,7 +1493,7 @@ AzureaVim.prototype.shindanmaker = function() {
     }
     if (url) {
         Http.postRequestAsync(url,
-                              "u=" + encodeURI(this.command[1] || TwitterService.currentUser().screen_name),
+                              'u=' + encodeURI(this.command[1] || TwitterService.currentUser.screen_name),
                               false,
                               function(response) {
             response.body.match('<textarea.*?>(.*?)</textarea>');
@@ -1500,41 +1553,7 @@ AzureaUtil.mixin(AzureaVim.commands_list, {
 
 
 AzureaVim.prototype.view = function() {
-    var c1 = {
-        home: 'home',
-        timeline: 'home',
-        h: 'home',
-        
-        mention: 'mention',
-        reply: 'mention',
-        r: 'mention',
-        m: 'mention',
-        '@': 'mention',
-        
-        message: 'message',
-        dm: 'message',
-        d: 'message',
-        
-        user: 'user',
-        u: 'user',
-        
-        search: 'search',
-        
-        favorite: 'favorite',
-        fav: 'favorite',
-        f: 'favorite',
-        
-        match: 'match',
-        
-        following: 'following',
-        follow: 'following',
-        
-        followers: 'followers',
-        follower: 'followers',
-        followed: 'followers'
-    };
-    
-    switch (c1[this.command[1]]) {
+    switch (this.view.c1[this.command[1]]) {
     case 'home':
         System.views.openView(0);
         break;
@@ -1565,7 +1584,40 @@ AzureaVim.prototype.view = function() {
     default:
         break;
     }
-}
+};
+AzureaVim.prototype.view.c1 = {
+    home: 'home',
+    timeline: 'home',
+    h: 'home',
+    
+    mention: 'mention',
+    reply: 'mention',
+    r: 'mention',
+    m: 'mention',
+    '@': 'mention',
+    
+    message: 'message',
+    dm: 'message',
+    d: 'message',
+    
+    user: 'user',
+    u: 'user',
+    
+    search: 'search',
+    
+    favorite: 'favorite',
+    fav: 'favorite',
+    f: 'favorite',
+    
+    match: 'match',
+    
+    following: 'following',
+    follow: 'following',
+    
+    followers: 'followers',
+    follower: 'followers',
+    followed: 'followers'
+};
 AzureaUtil.mixin(AzureaVim.commands_list, {
     earthquake: 'earthquake',
     jisin: 'earthquake',
