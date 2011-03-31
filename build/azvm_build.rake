@@ -1,13 +1,8 @@
 # encode=utf-8
 
-require 'rake/clean'
-require 'json'
-require 'zip/zip'
-
-FILE_MOMONGA = '../js/momonga.js'
-FILE_RELEASE = '../js/AzureaVim.js'
-FILE_FEATURE = 'feature.js'
-FILE_ENV = '../js/AzureaVim.zip'
+RELEASE_DIRECTORY = '../js/'
+FILE_FEATURE = 'feature.json'
+FILE_ENV = 'AzureaVim.zip'
 COMPILER = 'closure'
 META = {
   'name' => 'AzureaVim',
@@ -16,44 +11,17 @@ META = {
   'license' => 'MIT License'
 }
 
-CLEAN.include(FILE_MOMONGA)
-CLOBBER.include(FILE_RELEASE, FILE_ENV)
+require 'rake/clean'
+require 'json'
+require 'zip/zip'
 
-open FILE_FEATURE do |feature_js|
-  json = feature_js.read.gsub(/(?:^.+\()|(?:\).*$)/m, '')
-  feature = JSON.parse(json)
-  feature.each do |key, value|
-    
-    desc "#{key} => #{value}"
-    task key => value do |t|
-      puts t.name
-      open FILE_MOMONGA, 'a' do |momonga_js|
-        open "../src/#{t.name}.js" do |key_js|
-          momonga_js.puts key_js.read
-        end
-      end
-    end
-    
-    desc 'Preprocess and uncompiled file.'
-    file FILE_MOMONGA => feature.keys
-    
-  end
-end
+$DEBUG_TASKS = ['clean']
+$RELEASE_TASKS = ['clobber', RELEASE_DIRECTORY + FILE_ENV]
 
-desc 'Compile and add meta info.'
-file FILE_RELEASE => ['clobber', FILE_MOMONGA] do |t|
-  case COMPILER
-  when 'closure'
-    compilation_level = 'SIMPLE_OPTIMIZATIONS' #WHITESPACE_ONLY | SIMPLE_OPTIMIZATIONS | ADVANCED_OPTIMIZATIONS
-    sh "java -jar closure-compiler/compiler.jar --compilation_level #{compilation_level} --js_output_file #{t.name} --js #{t.prerequisites[1]}"
-  when 'yui'
-    sh "java -jar yuicompressor/build/yuicompressor-2.4.2.jar --charset UFT-8 -o #{t.name} #{t.prerequisites[1]}"
-  when 'ms'
-    sh "AjaxMin/AjaxMin -enc:in UFT-8 #{t.prerequisites[1]} -out #{t.name}"
-  when 'uglify'
-    sh "uglifyjs/uglifyjs --ascii --unsafe -o #{t.name} #{t.prerequisites[1]}"
-  end
-  script = <<SCRIPTMETA
+# ex.
+#   write_meta 'AzureaVim.js'
+def write_meta filename
+    script = <<SCRIPTMETA
 // ==AzureaScript==
 // @name #{META['name']}
 // @author #{META['author']}
@@ -62,21 +30,74 @@ file FILE_RELEASE => ['clobber', FILE_MOMONGA] do |t|
 // @license #{META['license']}
 // ==/AzureaScript==
 SCRIPTMETA
-  script += IO.read(t.name)
-  open t.name, 'w' do |file|
+  script += IO.read filename
+  open filename, 'w' do |file|
     file.puts script
   end
 end
 
+# ex.
+#   compile_js 'momonga.js', 'AzureaVim.js'
+def compile_js source, dest
+  case COMPILER
+  when 'closure'
+    compilation_level = 'SIMPLE_OPTIMIZATIONS' #WHITESPACE_ONLY | SIMPLE_OPTIMIZATIONS | ADVANCED_OPTIMIZATIONS
+    sh "java -jar closure-compiler/compiler.jar --compilation_level #{compilation_level} --js_output_file #{source} --js #{dest}"
+  when 'yui'
+    sh "java -jar yuicompressor/build/yuicompressor-2.4.2.jar --charset UFT-8 -o #{source} #{dest}"
+  when 'ms'
+    sh "AjaxMin/AjaxMin -enc:in UFT-8 #{source} -out #{dest}"
+  when 'uglify'
+    sh "uglifyjs/uglifyjs --ascii --unsafe -o #{source} #{dest}"
+  end
+end
+
+def schedule_task taskname, feature
+  feature.each do |key, value|
+    
+    desc "=> #{value}"
+    task key => value do |tsk|
+      open "#{RELEASE_DIRECTORY}momonga.#{taskname}.js", 'a' do |momonga_js|
+        open("../src/#{tsk.name}.js"){|key_js| momonga_js.puts key_js.read}
+      end
+    end
+    
+  end
+  
+  desc "momonga.#{taskname}.js"
+  task "momonga_#{taskname}" => feature.keys
+  
+  desc "AzureaVim.#{taskname}.js"
+  task "build_#{taskname}" => "momonga_#{taskname}" do |tsk|
+    release_file = "#{RELEASE_DIRECTORY}AzureaVim#{taskname === 'default' ? '' : '.' + taskname}.js"
+    compile_js "#{RELEASE_DIRECTORY}momonga.#{taskname}.js", release_file
+    write_meta release_file
+  end
+  
+  $DEBUG_TASKS.push "momonga_#{taskname}"
+  $RELEASE_TASKS.push "build_#{taskname}"
+  CLEAN.include "#{RELEASE_DIRECTORY}momonga.#{taskname}.js"
+  CLOBBER.include "#{RELEASE_DIRECTORY}AzureaVim.#{taskname}.js"
+end
+
+CLOBBER.include(RELEASE_DIRECTORY + FILE_ENV)
+
+open FILE_FEATURE do |feature_js|
+  features = JSON.parse(feature_js.read)
+  features.each do |taskname, faeture|
+    schedule_task taskname, faeture
+  end
+end
+
 desc 'Deploy azvm_install.js'
-file 'azvm_install.js' do |t|
-  puts "Copy #{t.name}"
-  FileUtils.copy_file "../src/install/#{t.name}", "../js/#{t.name}"
+file 'azvm_install.js' do |tsk|
+  puts "Copy #{tsk.name}"
+  FileUtils.copy_file "../src/install/#{tsk.name}", "../js/#{tsk.name}"
 end
 
 desc 'Deploy AzureaVim.zip'
-file FILE_ENV => ['clobber', 'azvm_install.js'] do |t|
-  Zip::ZipFile.open t.name, Zip::ZipFile::CREATE do |zipfile|
+file(RELEASE_DIRECTORY + FILE_ENV => ['clobber', 'azvm_install.js']) do |tsk|
+  Zip::ZipFile.open tsk.name, Zip::ZipFile::CREATE do |zipfile|
     puts 'Zip to azvm_startup.wsf'
     zipfile.add 'azvm_startup.wsf', '../src/startup/azvm_startup.wsf'
     ['AzureaStartup.js', 'do_uac.js'].each do |filename|
@@ -88,9 +109,10 @@ file FILE_ENV => ['clobber', 'azvm_install.js'] do |t|
   end
 end
 
-task :default => [FILE_RELEASE, FILE_ENV]
-
-desc 'Deploy debugging file.'
-task 'debug' => ['clean', FILE_MOMONGA] do
-  cp FILE_MOMONGA, '../../Scripts/momonga.js'
+desc 'debug'
+task 'debug' => $DEBUG_TASKS do
+  cp "#{RELEASE_DIRECTORY}momonga.default.js", '../../Scripts/momonga.js'
 end
+
+desc 'release'
+task :default => $RELEACSE_TASKS
