@@ -48,7 +48,7 @@
         "AzureaUtil/time": ["AzureaUtil/pre", "AzureaUtil/mixin", "AzureaUtil/db", "AzureaUtil/event"],
         "AzureaUtil/template": ["AzureaUtil/pre", "AzureaUtil/mixin"],
         "AzureaUtil/yank": ["AzureaUtil/pre", "AzureaUtil/mixin", "AzureaUtil/db"],
-        "AzureaUtil/notify": ["AzureaUtil/pre", "AzureaUtil/ApiProxy"],
+        "AzureaUtil/notify": ["AzureaUtil/pre"],
         "AzureaUtil/post": ["AzureaUtil/pre",
                             "AzureaUtil/json2",
                             "AzureaUtil/mixin",

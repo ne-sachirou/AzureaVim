@@ -2,6 +2,8 @@ var RUBY_URI = 'http://ftp.ruby-lang.org/pub/ruby/binaries/mswin32/',
     RUBY_i386 = 'ruby-1.9.2-p136-i386-mswin32.zip',
     RUBY_x64 = 'ruby-1.9.2-p0-x64-mswin64_80.zip',
     RUBY_ZIPFILE_NAME = 'ruby-1.9.2-p-mswin.zip',
+    ZLIB_ZIPFILE_URI = 'http://jarp.does.notwork.org/win32/',
+    ZLIB_ZIPFILE_NAME = 'zlib-1.1.4-1-mswin32.zip',
     RAKEFILE_URI = 'https://github.com/ne-sachirou/AzureaVim/raw/master/src/install/',
     RAKEFILE_NAME = 'azvm_install.rake';
 
@@ -64,34 +66,76 @@ function unzip(zipfile,    // @param String: Zipped file path
 }
 
 
-function downloadRuby() {
+function downloadBinaryFile(uri,        // @param String:
+                            filename) { // @param String:
+                                        // @return Hash:
     var stream = new ActiveXObject('ADODB.Stream'),
-        xhr = new ActiveXObject('MSXML2.XMLHttp');
+        xhr = new ActiveXObject('MSXML2.XMLHttp'),
+        result;
     
-    xhr.open('GET', RUBY_URI + (processor_architecture === 'x86' ? RUBY_i386 : RUBY_x64), false);
+    xhr.open('GET', uri, false);
     xhr.onreadystatechange = function() {
         if (xhr.readyState === 4 && xhr.status === 200) {
             try {
                 stream.open();
                 stream.type = 1;
                 stream.write(xhr.responseBody);
-                stream.saveToFile(RUBY_ZIPFILE_NAME, 2);
+                stream.saveToFile(filename, 2);
+                result = {
+                    ok: true,
+                    uri: uri,
+                    filename: filename
+                };
             } catch (err) {
-                WScript.Echo(err.name + ':\n' + err.message);
+                result = {
+                    error: true,
+                    errormessage: err.name + ': ' + err.message,
+                    uri: uri,
+                    filename: filename
+                };
             } finally {
                 stream.close();
             }
+        } else if (xhr.readyState === 4) {
+            result = {
+               error: true,
+               errormessage: 'HttpError: Status number is ' + xhr.status,
+               uri: uri,
+               filename: filename
+            };
         }
     };
     xhr.send();
+    return result;
+}
+
+
+function downloadRuby() {
+    downloadBinaryFile(RUBY_URI + (processor_architecture === 'x86' ? RUBY_i386 : RUBY_x64),
+                       RUBY_ZIPFILE_NAME);
 }
 
 
 function installRuby() {
     unzip(RUBY_ZIPFILE_NAME, 'C:\\Ruby');
-    path = path.split(';')
+    path = path.split(';');
     path.push('C:\\Ruby\\bin');
     env.item('PATH') = path.join(';');
+}
+
+
+function downloadZlib() {
+    downloadBinaryFile(ZLIB_ZIPFILE_URI + ZLIB_ZIPFILE_NAME,
+                       ZLIB_ZIPFILE_NAME);
+}
+
+
+function installZlib() {
+    var fso = new ActiveXObject('Scripting.FileSystemObject');
+    
+    unzip(ZLIB_ZIPFILE_NAME, 'zlib-mswin32');
+    fso.copyFile('zlib-mswin32\\bin\\zlib.dll', 'C:\\Ruby\\bin\\zlib.dll');
+    fso.deleteFolder('zlib-mswin32');
 }
 
 
@@ -116,10 +160,18 @@ function downloadRakefile() {
 }
 
 
-if (!/\\Ruby\\bin/i.test(path)) {
+if (!/\\Ruby[^\\]*\\bin/i.test(path)) {
+    WScript.Echo('We\'ll download Ruby and Zlib! Please wait minutes.');
     downloadRuby();
+    WScript.Echo('Downdoad finished! We\'ll start install Ruby.');
     installRuby();
     fso.deleteFile(RUBY_ZIPFILE_NAME);
+    WScript.Echo('Install finished! Ruby OK.\nNext, we\'ll start install Zlib.');
+    downloadZlib();
+    installZlib();
+    fso.deleteFile(ZLIB_ZIPFILE_NAME);
+    WScript.Echo('Zlib OK.');
+    shell.Run('C:\\Ruby\\bin\\gem install rubyzip', 1, true);
 }
 downloadRakefile();
 shell.Run('rake -f azvm_install.rake', 1, true);
