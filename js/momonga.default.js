@@ -1142,7 +1142,7 @@ AzureaUtil.mixin(AzureaVim.commands_list, {
 // https://gist.github.com/835563
 (function() {
 
-var azvm_services,
+var azvm_unshorten_services,
     azvm_unshorten_cashe = {
     'http://c4se.tk/': 'http://c4se.sakura.ne.jp/'
 },
@@ -1151,8 +1151,8 @@ var azvm_services,
 
 
 function resits_services(response) { // @param HttpResponce Object:
-    azvm_services = response.body.split(', ');
-    azvm_services.push('htn.ly');
+    azvm_unshorten_services = response.body.split(', ');
+    azvm_unshorten_services.push('htn.ly');
 }
 try {
     Http.sendRequestAsync('http://untiny.me/api/1.0/services/?format=text', true, resits_services);
@@ -1162,7 +1162,7 @@ try {
 
 function _isPossibleUnshorten(url) { // @param String: shortend URL
                                      // @return Boolean:
-    var services = azvm_services,
+    var services = azvm_unshorten_services,
         i = -1, is_possible = false;
     
     while (services[++i]) {
@@ -1178,10 +1178,9 @@ function _isPossibleUnshorten(url) { // @param String: shortend URL
 function _unshorten(url,     // @param String: shortened URL
                     async) { // @param Boolean=false:
                              // @return String: unshortened URL
-    var cashe = azvm_unshorten_cashe,
-        response, result = url;
+    var cashe = azvm_unshorten_cashe, result = url;
     
-    function callback_htly(response) { // @param HttpResponce Object:
+    function callback_htnto(response) { // @param HttpResponce Object:
                                        // @return String:
         var result;
         
@@ -1203,10 +1202,10 @@ function _unshorten(url,     // @param String: shortened URL
     
     if (cashe[url]) {
         result = cashe[url];
-    } else if (url.indexOf('htn.ly') !== -1) {
+    } else if (url.indexOf('htn.to') !== -1) {
         if (async) {
             try {
-                Http.sendRequestAsync(url, false, callback_htly);
+                Http.sendRequestAsync(url, false, callback_htnto);
             } catch (err) {
             }
         } else {
@@ -1236,17 +1235,16 @@ function expand_postly(url,     // @param String: post.ly url
                        async) { // @param Boolean=false:
                                 // @return String: post.ly text
     var cashe = azvm_postly_cashe,
-        id = url.match(/^https?:\/\post\.ly\/(.+)$/)[1],
+        id = url.match(/^https?:\/\/post\.ly\/(.+)$/)[1],
         result = url;
     
     function callback(response) { // @param HttpResponce Object:
                                   // @return String:
-        var text = response.body.match(/<body>(.*?)</body>/)[1],
+        var text = response.body.match(/<body>([\s\S]*?)<\/body>/m)[1],
             _m;
         
-        if (_m = text.match(/<!\[CDATA\[(.*?)]]>/)) {
-            text = _m[1].replace(/<\/p|div|blockquote>/, '\n')
-                        .replace(/<.+?>/, '');
+        if (_m = text.match(/<!\[CDATA\[([\s\S]*?)\]\]>/m)) {
+            text = _m[1].replace(/<\/(?:p|div|blockquote)>/g, '\n').replace(/<[\s\S]+?>/mg, '');
         }
         text += '\n' + url;
         cashe[id] = text;
@@ -1254,7 +1252,7 @@ function expand_postly(url,     // @param String: post.ly url
     }
     
     if (cashe[id]) {
-        return cashe[id];
+        result = cashe[id];
     } else if (async) {
         try {
             Http.sendRequestAsync('http://posterous.com/api/getpost?id=' + id, false, callback);
@@ -1262,7 +1260,7 @@ function expand_postly(url,     // @param String: post.ly url
         }
     } else {
         try {
-            result =  callback(Http.sendRequest('http://posterous.com/api/getpost?id=' + id, false));
+            result = callback(Http.sendRequest('http://posterous.com/api/getpost?id=' + id, false));
         } catch (err) {
         }
     }
@@ -1275,9 +1273,9 @@ function azvm_unshorten() { // @return String: unshortened URL
         text;
     
     if (url.indexOf('post.ly') !== -1) {
-        text = expand_postly(url);
+        text = this.status_text.replace(url, expand_postly(url, false));
     } else {
-        text = _unshorten(url);
+        text = this.status_text.replace(url, _unshorten(url, false));
     }
     this.item.text = text;
 }
@@ -1286,11 +1284,14 @@ function azvm_unshorten() { // @return String: unshortened URL
 AzureaUtil.event.addEventListener('PreProcessTimelineStatus', function(status) { // @param Status Object:
     status.text = status.text.replace(/https?:\/\/[0-9A-Za-z._\-^~\/&%?]+/g,
                                       function(url) {
+        var expanded;
+        
         if (url.indexOf('post.ly') !== -1) {
-            return expand_postly(url, true);
+            expanded = expand_postly(url, true);
         } else {
-            return _unshorten(url, true);
+            expanded = _unshorten(url, true);
         }
+        return expanded;
     });
 });
 AzureaVim.prototype.unshorten = azvm_unshorten;
