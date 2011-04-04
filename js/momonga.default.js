@@ -991,10 +991,16 @@ AzureaVim = {};
 
 (function() {
 
-var azvm_commands_list = {};
+var azvm_commands_list = {},
+    view,
+    selected_item_id,
+    selected_item;
 
 
 function _focusInput(status_id) { // @param String: status id
+    selected_view = System.views.currentView;
+    selected_item_id = selected_view.selectedItemId;
+    selected_item = selected_view.getItem(selected_item_id);
     AzureaUtil.yank.set(null, TextArea.text);
     TextArea.text = ':';
     TextArea.in_reply_to_status_id = status_id;
@@ -1024,6 +1030,9 @@ function azvm_AzureaVim(status) { //@param StatusUpdate Object:
         status_id = status.in_reply_to_status_id,
         status_obj = TwitterService_status.get(status_id);
     
+    //this.view = selected_view;
+    //this.item_id = selected_item_id;
+    this.item = selected_item;
     this.command_text = status.text.slice(1);
     this.command = _pearse(this.command_text);
     this.status_id = status_id;
@@ -1133,13 +1142,27 @@ AzureaUtil.mixin(AzureaVim.commands_list, {
 // https://gist.github.com/835563
 (function() {
 
-var azvm_unshorten_cashe = {
+var azvm_services,
+    azvm_unshorten_cashe = {
     'http://c4se.tk/': 'http://c4se.sakura.ne.jp/'
+},
+    azvm_postly_cashe = {
 };
+
+
+function resits_services(response) { // @param HttpResponce Object:
+    azvm_services = response.body.split(', ');
+    azvm_services.push('htn.ly');
+}
+try {
+    Http.sendRequestAsync('http://untiny.me/api/1.0/services/?format=text', true, resits_services);
+} catch (err) {
+}
+
 
 function _isPossibleUnshorten(url) { // @param String: shortend URL
                                      // @return Boolean:
-    var services = AzureaVim.prototype.unshorten.services,
+    var services = azvm_services,
         i = -1, is_possible = false;
     
     while (services[++i]) {
@@ -1158,39 +1181,49 @@ function _unshorten(url,     // @param String: shortened URL
     var cashe = azvm_unshorten_cashe,
         response, result = url;
     
+    function callback_htly(response) { // @param HttpResponce Object:
+                                       // @return String:
+        var result;
+        
+        response = response.header.match(/Location: ([^\n]+)\n/);
+        cashe = response ? response[1] : url;
+        result = response ? response[1] : url;
+        cashe[url] = result;
+        return result;
+    }
+    
+    function callback(response) { // @param HttpResponce Object:
+                                  // @return String:
+        var result;
+        
+        result = /^error/.test(response.body) ? url : response.body;
+        cashe[url] = result;
+        return result;
+    }
+    
     if (cashe[url]) {
-        result = cache[url];
+        result = cashe[url];
     } else if (url.indexOf('htn.ly') !== -1) {
         if (async) {
             try {
-                Http.sendRequestAsync(url, false,
-                                      function(response) {
-                    AzureaVim.prototype.unshorten.cashe[url] = response.header.match(/Location: ([^\n]+)\n/)[1];
-                });
+                Http.sendRequestAsync(url, false, callback_htly);
             } catch (err) {
             }
         } else {
             try {
-                response = Http.sendRequest(url, false).header.match(/Location: ([^\n]+)\n/);
-                result = response ? response[1] : url;
-                cashe[url] = result;
+                result = callback_htly(Http.sendRequest(url, false));
             } catch (err) {
             }
         }
     } else if (_isPossibleUnshorten(url)) {
         if (async) {
             try {
-                Http.sendRequestAsync('http://untiny.me/api/1.0/extract/?url=' + url + '&format=text', false,
-                                      function(response) {
-                    AzureaVim.prototype.unshorten.cashe[url] = /^error/.test(response.body) ? url : response.body;
-                });
+                Http.sendRequestAsync('http://untiny.me/api/1.0/extract/?url=' + url + '&format=text', false, callback);
             } catch (err) {
             }
         } else {
             try {
-                response = Http.sendRequest('http://untiny.me/api/1.0/extract/?url=' + url + '&format=text', false).body;
-                result = /^error/.test(response) ? url : response;
-                cashe[url] = result;
+                result = callback(Http.sendRequest('http://untiny.me/api/1.0/extract/?url=' + url + '&format=text', false));
             } catch (err) {
             }
         }
@@ -1199,33 +1232,69 @@ function _unshorten(url,     // @param String: shortened URL
 }
 
 
+function expand_postly(url,     // @param String: post.ly url
+                       async) { // @param Boolean=false:
+                                // @return String: post.ly text
+    var cashe = azvm_postly_cashe,
+        id = url.match(/^https?:\/\post\.ly\/(.+)$/)[1],
+        result = url;
+    
+    function callback(response) { // @param HttpResponce Object:
+                                  // @return String:
+        var text = response.body.match(/<body>(.*?)</body>/)[1],
+            _m;
+        
+        if (_m = text.match(/<!\[CDATA\[(.*?)]]>/)) {
+            text = _m[1].replace(/<\/p|div|blockquote>/, '\n')
+                        .replace(/<.+?>/, '');
+        }
+        text += '\n' + url;
+        cashe[id] = text;
+        return text;
+    }
+    
+    if (cashe[id]) {
+        return cashe[id];
+    } else if (async) {
+        try {
+            Http.sendRequestAsync('http://posterous.com/api/getpost?id=' + id, false, callback);
+        } catch (err) {
+        }
+    } else {
+        try {
+            result =  callback(Http.sendRequest('http://posterous.com/api/getpost?id=' + id, false));
+        } catch (err) {
+        }
+    }
+    return result;
+}
+
+
 function azvm_unshorten() { // @return String: unshortened URL
     var url = this.status_urls[this.command[1] || 0],
-        unurl = _unshorten(url);
+        text;
     
-    System.inputBox(url, unurl, false);
-    return unurl;
+    if (url.indexOf('post.ly') !== -1) {
+        text = expand_postly(url);
+    } else {
+        text = _unshorten(url);
+    }
+    this.item.text = text;
 }
 
 
 AzureaUtil.event.addEventListener('PreProcessTimelineStatus', function(status) { // @param Status Object:
     status.text = status.text.replace(/https?:\/\/[0-9A-Za-z._\-^~\/&%?]+/g,
                                       function(url) {
-        return _unshorten(url, true);
+        if (url.indexOf('post.ly') !== -1) {
+            return expand_postly(url, true);
+        } else {
+            return _unshorten(url, true);
+        }
     });
 });
 AzureaVim.prototype.unshorten = azvm_unshorten;
-AzureaVim.prototype.unshorten.services = [];
-AzureaVim.prototype.unshorten.cashe = azvm_unshorten_cashe;
 AzureaVim.prototype.unshorten.unshorten = _unshorten;
-try {
-    Http.sendRequestAsync('http://untiny.me/api/1.0/services/?format=text', true,
-                          function(response) { // @param HttpResponce Object:
-        AzureaVim.prototype.unshorten.services = response.body.split(', ');
-        AzureaVim.prototype.unshorten.services.push('htn.ly');
-    });
-} catch (err) {
-}
 
 })();
 AzureaUtil.mixin(AzureaVim.commands_list, {
@@ -1350,7 +1419,7 @@ AzureaUtil.mixin(AzureaVim.commands_list, {
 
 (function() {
 
-AzureaVim.prototype.reply = function() {
+function azvm_reply() {
     var has_in_reply_to = this.command[3] === 'true',
         in_reply_to_status_id = this.status_id,
         expanded_template;
@@ -1377,7 +1446,8 @@ AzureaVim.prototype.reply = function() {
         this.reply();
     }
 }
-AzureaVim.prototype.reply.c1 = {
+
+azvm_reply.c1 = {
     template: 'template',
     all: 'all',
     quote: 'quote',
@@ -1385,7 +1455,8 @@ AzureaVim.prototype.reply.c1 = {
     mrt: 'mrt',
     masirosiki: 'mrt'
 };
-AzureaVim.prototype.reply.templates = {
+
+azvm_reply.templates = {
     all: ["@#{screen_name + (status_users.length ? ' @' +status_users.join(' @') : '')} #{}", true],
     quote: ["@#{screen_name} #{} RT: #{status_text}", true],
     mrt: function() {
@@ -1399,6 +1470,8 @@ AzureaVim.prototype.reply.templates = {
         return redirect;
     }
 };
+
+AzureaVim.prototype.reply = azvm_reply;
 
 
 function reply(status_id) { // @param String:

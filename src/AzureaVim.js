@@ -3,10 +3,16 @@ AzureaVim = {};
 
 (function() {
 
-var azvm_commands_list = {};
+var azvm_commands_list = {},
+    view,
+    selected_item_id,
+    selected_item;
 
 
 function _focusInput(status_id) { // @param String: status id
+    selected_view = System.views.currentView;
+    selected_item_id = selected_view.selectedItemId;
+    selected_item = selected_view.getItem(selected_item_id);
     AzureaUtil.yank.set(null, TextArea.text);
     TextArea.text = ':';
     TextArea.in_reply_to_status_id = status_id;
@@ -36,6 +42,9 @@ function azvm_AzureaVim(status) { //@param StatusUpdate Object:
         status_id = status.in_reply_to_status_id,
         status_obj = TwitterService_status.get(status_id);
     
+    //this.view = selected_view;
+    //this.item_id = selected_item_id;
+    this.item = selected_item;
     this.command_text = status.text.slice(1);
     this.command = _pearse(this.command_text);
     this.status_id = status_id;

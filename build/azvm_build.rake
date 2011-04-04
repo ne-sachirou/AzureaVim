@@ -118,7 +118,6 @@ def schedule_task taskname, feature
   file_release = "#{RELEASE_DIRECTORY}AzureaVim#{taskname === 'default' ? '' : '.' + taskname}.js"
   feature.each do |key, value|
     
-    desc "=> #{value}"
     task "#{taskname}__#{key}" => value.collect{|item| "#{taskname}__#{item}"} do |tsk|
       puts "#{file_momonga} << #{key}"
       open file_momonga, 'a' do |momonga_js|

@@ -19,7 +19,7 @@ AzureaUtil.mixin(AzureaVim.commands_list, {
 
 (function() {
 
-AzureaVim.prototype.reply = function() {
+function azvm_reply() {
     var has_in_reply_to = this.command[3] === 'true',
         in_reply_to_status_id = this.status_id,
         expanded_template;
@@ -46,7 +46,8 @@ AzureaVim.prototype.reply = function() {
         this.reply();
     }
 }
-AzureaVim.prototype.reply.c1 = {
+
+azvm_reply.c1 = {
     template: 'template',
     all: 'all',
     quote: 'quote',
@@ -54,7 +55,8 @@ AzureaVim.prototype.reply.c1 = {
     mrt: 'mrt',
     masirosiki: 'mrt'
 };
-AzureaVim.prototype.reply.templates = {
+
+azvm_reply.templates = {
     all: ["@#{screen_name + (status_users.length ? ' @' +status_users.join(' @') : '')} #{}", true],
     quote: ["@#{screen_name} #{} RT: #{status_text}", true],
     mrt: function() {
@@ -68,6 +70,8 @@ AzureaVim.prototype.reply.templates = {
         return redirect;
     }
 };
+
+AzureaVim.prototype.reply = azvm_reply;
 
 
 function reply(status_id) { // @param String:

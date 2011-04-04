@@ -174,5 +174,5 @@ if (!/\\Ruby[^\\]*\\bin/i.test(path)) {
     shell.Run('C:\\Ruby\\bin\\gem install rubyzip', 1, true);
 }
 downloadRakefile();
-shell.Run('rake -f azvm_install.rake', 1, true);
+shell.Run('rake -f ' + RAKEFILE_NAME, 1, true);
 fso.deleteFile(RAKEFILE_NAME);
