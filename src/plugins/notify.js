@@ -83,7 +83,10 @@ function azvm_notify() {
         break;
     case 'when':
         when_opt = azvm_notify.c2[this.command[2]];
-        when[when_opt] = (this.command[3] || System.inputBox(when_opt, when[when_opt])) === '0' ?
+        if (!when_opt) {
+            throw Error('plugins/notify: No such option as NotifyWhen ' + this.command[2]);
+        }
+        when[when_opt] = (this.command[3] || System.inputBox('NotifyWhen' + when_opt, when[when_opt])) === '0' ?
                           '0' :
                           '1';
         AzureaUtil.db.set('NotifyWhen' + when_opt, when[when_opt]);

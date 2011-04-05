@@ -7,6 +7,8 @@
         "AzureaUtil/mixin": ["AzureaUtil/pre"],
         "AzureaUtil/ApiProxy": ["AzureaUtil/pre"],
         "AzureaUtil/db": ["AzureaUtil/pre", "AzureaUtil/mixin"],
+        "AzureaUtil/favorite": ["AzureaUtil/pre", "AzureaUtil/mixin"],
+        "AzureaUtil/retweet": ["AzureaUtil/pre", "AzureaUtil/mixin"],
         "AzureaUtil/event": ["AzureaUtil/pre", "AzureaUtil/mixin"],
         "AzureaUtil/time": ["AzureaUtil/pre", "AzureaUtil/mixin", "AzureaUtil/db", "AzureaUtil/event"],
         "AzureaUtil/template": ["AzureaUtil/pre", "AzureaUtil/mixin"],
@@ -17,6 +19,8 @@
                             "AzureaUtil/mixin",
                             "AzureaUtil/ApiProxy",
                             "AzureaUtil/db",
+                            "AzureaUtil/favorite",
+                            "AzureaUtil/retweet",
                             "AzureaUtil/event",
                             "AzureaUtil/time",
                             "AzureaUtil/template",
@@ -35,7 +39,8 @@
         "plugins/earthquake": ["AzureaVim"],
         "plugins/delay": ["AzureaVim"],
         "plugins/yank": ["AzureaVim"],
-        "plugins/notify": ["AzureaVim"]
+        "plugins/notify": ["AzureaVim"],
+        "plugins/tumblr": ["AzureaVim"]
     },
     "simple": {
         "AzureaVim": ["AzureaUtil/post"],
@@ -44,6 +49,8 @@
         "AzureaUtil/json2": ["AzureaUtil/pre"],
         "AzureaUtil/mixin": ["AzureaUtil/pre"],
         "AzureaUtil/db": ["AzureaUtil/pre", "AzureaUtil/mixin"],
+        "AzureaUtil/favorite": ["AzureaUtil/pre", "AzureaUtil/mixin"],
+        "AzureaUtil/retweet": ["AzureaUtil/pre", "AzureaUtil/mixin"],
         "AzureaUtil/event": ["AzureaUtil/pre", "AzureaUtil/mixin"],
         "AzureaUtil/time": ["AzureaUtil/pre", "AzureaUtil/mixin", "AzureaUtil/db", "AzureaUtil/event"],
         "AzureaUtil/template": ["AzureaUtil/pre", "AzureaUtil/mixin"],
@@ -53,6 +60,8 @@
                             "AzureaUtil/json2",
                             "AzureaUtil/mixin",
                             "AzureaUtil/db",
+                            "AzureaUtil/favorite",
+                            "AzureaUtil/retweet",
                             "AzureaUtil/event",
                             "AzureaUtil/time",
                             "AzureaUtil/template",
@@ -70,6 +79,7 @@
         "plugins/earthquake": ["AzureaVim"],
         "plugins/delay": ["AzureaVim"],
         "plugins/yank": ["AzureaVim"],
-        "plugins/notify": ["AzureaVim"]
+        "plugins/notify": ["AzureaVim"],
+        "plugins/tumblr": ["AzureaVim"]
     }
 }

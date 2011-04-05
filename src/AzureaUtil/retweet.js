@@ -57,6 +57,38 @@ function retweet_create(status_id) { // @param String; status id
 }
 
 
+System.addKeyBindingHandler(0x54, // VK_T
+                            0,
+                            function(status_id) {
+    var status = TwitterService.status.get(status_id);
+    
+    if (System.settings.getValue('Misc', 'UseQT')) {
+        TextArea.text = 'RT @' + status.user.screen_name + ': ' + status.text;
+        TextArea.show();
+        TextArea.setFocus();
+    } else {
+        if (System.showMessage('確認', '選択項目をリツイートします。よろしいですか？', 0)) {
+            retweet_create(status_id);
+        }
+    }
+});
+
+System.addKeyBindingHandler(0x57, // VK_W
+                            0,
+                            function(status_id) {
+    var status = TwitterService.status.get(status_id);
+    
+    if (System.settings.getValue('Misc', 'UseQT')) {
+        if (System.showMessage('確認', '選択項目をリツイートします。よろしいですか？', 0)) {
+            retweet_create(status_id);
+        }
+    } else {
+        TextArea.text = 'RT @' + status.user.screen_name + ': ' + status.text;
+        TextArea.show();
+        TextArea.setFocus();
+    }
+});
+
 mixin(AzureaUtil.retweet, {
     addEventListener: retweet_addEventListener,
     removeEventListener: retweet_removeEventListener,

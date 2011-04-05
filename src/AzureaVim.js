@@ -4,14 +4,13 @@ AzureaVim = {};
 (function() {
 
 var azvm_commands_list = {},
-    view,
-    selected_item_id,
     selected_item;
 
 
 function _focusInput(status_id) { // @param String: status id
-    selected_view = System.views.currentView;
-    selected_item_id = selected_view.selectedItemId;
+    var selected_view = System.views.currentView,
+        selected_item_id = selected_view.selectedItemId;
+    
     selected_item = selected_view.getItem(selected_item_id);
     AzureaUtil.yank.set(null, TextArea.text);
     TextArea.text = ':';
@@ -21,6 +20,21 @@ function _focusInput(status_id) { // @param String: status id
     TextArea.cursor = 1;
 }
 
+
+function _focusInputBox(status_id) { // @param String: status id
+    var command_text = System.inputBox('command', '', true),
+        azvm,
+        selected_view = System.views.currentView,
+        selected_item_id = selected_view.selectedItemId;
+    
+    selected_item = selected_view.getItem(selected_item_id);
+    AzureaUtil.yank.set(null, command_text);
+    azvm = new azvm_AzureaVim({
+        text: ':' + command_text,
+        in_reply_to_status_id: status_id || selected_view.selectedStatusId
+    });
+    azvm.run();
+}
 
 function _pearse(text) { // @reply String: command text
                         // @return Array:
@@ -42,8 +56,6 @@ function azvm_AzureaVim(status) { //@param StatusUpdate Object:
         status_id = status.in_reply_to_status_id,
         status_obj = TwitterService_status.get(status_id);
     
-    //this.view = selected_view;
-    //this.item_id = selected_item_id;
     this.item = selected_item;
     this.command_text = status.text.slice(1);
     this.command = _pearse(this.command_text);
@@ -77,17 +89,12 @@ function azvm_run() {
 
 
 System.addKeyBindingHandler(0xBA, // VK_OEM_1 (:)
-                            0, _focusInput);
-System.addContextMenuHandler(':vim', 0, function() {
-    var command_text = System.inputBox('command', '', true), azvm;
-    
-    AzureaUtil.yank.set(null, command_text);
-    azvm = new azvm_AzureaVim({
-        text: ':' + command_text,
-        in_reply_to_status_id: System.views.currentView.selectedStatusId
-    });
-    azvm.run();
-});
+                            0,
+                            _focusInput);
+System.addKeyBindingHandler(0xBA, // VK_OEM_1 (:)
+                            2, // Ctrl
+                            _focusInputBox);
+System.addContextMenuHandler(':vim', 0, _focusInputBox);
 AzureaUtil.event.addEventListener('PreSendUpdateStatus', function(status) { // @param StatusUpdate Object:
     var azvm, do_notpost = false;
     

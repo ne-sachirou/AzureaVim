@@ -8,5 +8,5 @@ AzureaUtil.mixin(AzureaVim.commands_list, {
 
 
 AzureaVim.prototype.retweet = function() {
-    TwitterService.retweet.create(this.status_id);
+    AzureaUtil.retweet.create(this.status_id);
 }

@@ -27,7 +27,7 @@ function favorite_addEventListener(eventname,  // @param String: preCreateFavori
 }
 
 
-function favorite_removeEventListener(eventname,  // @param String: preCreateRetweet
+function favorite_removeEventListener(eventname, // @param String: preCreateRetweet
                                                  //                postCreateRetweet
                                      callback) { // @param Function:
     var events_list = favorite_events_list[eventname],
@@ -81,6 +81,16 @@ function favorite_destroy(status_id) { // @param String; status id
     }
 }
 
+
+System.addKeyBindingHandler(0x46, // VK_F
+                            0,
+                            function(status_id) {
+    if (TwitterService.status.get(status_id).favorite) {
+        favorite_destroy(status_id);
+    } else {
+        favorite_create(status_id);
+    }
+});
 
 mixin(AzureaUtil.favorite, {
     addEventListener: favorite_addEventListener,

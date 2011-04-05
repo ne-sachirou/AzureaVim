@@ -22,7 +22,8 @@ AzureaUtil.mixin(AzureaVim.commands_list, {
 function azvm_reply() {
     var has_in_reply_to = this.command[3] === 'true',
         in_reply_to_status_id = this.status_id,
-        expanded_template;
+        expanded_template,
+        redirect;
     
     function callback(response) {
         TextArea.text = expanded_template.text;
@@ -37,13 +38,13 @@ function azvm_reply() {
         Http.sendRequestAsync('http://google.com/', false, callback);
         //System.setTimeout(callback, 10);
     } else {
-        redirect = this.reply.templates[this.reply.c1[this.command[1]]] ||
+        redirect = azvm_reply.templates[azvm_reply.c1[this.command[1]]] ||
                    ["@#{screen_name} #{}#{status_hashes.length ? ' ' + status_hashes.join(' ') : ''}", true];
         if (typeof redirect === 'function') {
             redirect = redirect.call(this);
         }
         this.command = ['reply', 'template', redirect[0], redirect[1] ? 'true' : 'false'];
-        this.reply();
+        azvm_reply();
     }
 }
 
