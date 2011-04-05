@@ -3,6 +3,8 @@ AzureaUtil = {
     mixin: {},
     ApiProxy: {},
     db: {},
+    retweet: {},
+    favorite: {},
     event: {},
     time: {},
     template: {},
