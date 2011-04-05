@@ -49,28 +49,8 @@ function setMatchRegex(pattern,  // @param String='':
 }
 
 
-AzureaVim.prototype.notify = function() {
-    var pattern, option, when,
-        c1 = {
-        pattern: 'pattern',
-        when: 'when',
-        growl: 'growl',
-        gntp: 'growl'
-    },
-        c2 = {
-        faved: 'Faved',
-        fav: 'Faved',
-        f: 'Faved',
-        
-        mention: 'Mention',
-        reply: 'Mention',
-        r: 'Mention',
-        '@': 'Mention',
-        
-        matched: 'Matched',
-        match: 'Matched',
-        m: 'Matched'
-    };
+function azvm_notify() {
+    var pattern, option, when_opt;
     
     function _parse(pattern) { // @param String:
                                // @return Array: [pattern:String, option:String]
@@ -83,7 +63,7 @@ AzureaVim.prototype.notify = function() {
         return [pattern, option];
     }
     
-    switch (c1[this.command[1]]) {
+    switch (azvm_notify.c1[this.command[1]]) {
     case 'pattern':
         pattern = this.command.slice(2).join(' ');
         if (pattern) {
@@ -102,11 +82,11 @@ AzureaVim.prototype.notify = function() {
         setMatchRegex(pattern, option);
         break;
     case 'when':
-        when = c2[this.command[2]];
-        AzureaUtil.db.set('NotifyWhen' + when,
-                          (this.command[3] || System.inputBox(when, AzureaUtil.db.get('NotifyWhen' + when), true)) === '0' ?
+        when_opt = azvm_notify.c2[this.command[2]];
+        when[when_opt] = (this.command[3] || System.inputBox(when_opt, when[when_opt])) === '0' ?
                           '0' :
-                          '1');
+                          '1';
+        AzureaUtil.db.set('NotifyWhen' + when_opt, when[when_opt]);
         break;
     case 'growl':
         AzureaUtil.db.set('NotifyUseGrowl',
@@ -115,7 +95,31 @@ AzureaVim.prototype.notify = function() {
                           '1');
         break;
     }
+}
+
+azvm_notify.c1 = {
+    pattern: 'pattern',
+    when: 'when',
+    growl: 'growl',
+    gntp: 'growl'
 };
+
+azvm_notify.c2 = {
+    faved: 'Faved',
+    fav: 'Faved',
+    f: 'Faved',
+    
+    mention: 'Mention',
+    reply: 'Mention',
+    r: 'Mention',
+    '@': 'Mention',
+    
+    matched: 'Matched',
+    match: 'Matched',
+    m: 'Matched'
+};
+
+AzureaVim.prototype.notify = azvm_notify;
 
 AzureaUtil.event.addEventListener('ReceiveFavorite',
                                   function(source,          // @param User Object:
@@ -124,7 +128,7 @@ AzureaUtil.event.addEventListener('ReceiveFavorite',
     if (when.faved) {
         AzureaUtil.notify('Favs@' + source.screen_name + ': ' + target_object.text,
                           'Favs - AzureaVim',
-                          source.profile_image_url,//source.screen_name,
+                          source.profile_image_url,
                           false);
     }
 });
@@ -138,13 +142,13 @@ AzureaUtil.event.addEventListener('PreFilterProcessTimelineStatus',
     if (_when.mention && text.indexOf(TwitterService.currentUser.screen_name) !== -1) {
         AzureaUtil.notify('Mention@' + user.screen_name + ': ' + text,
                           'Mention - AzureaVim',
-                          user.profile_image_url,//user.screen_name,
+                          user.profile_image_url,
                           false);
     }
     if (_when.matched && regex && regex.test(text)) {
         AzureaUtil.notify('Matches@' + user.screen_name + ': ' + text,
                           'Matched - AzureaVim',
-                          user.profile_image_url,//user.screen_name,
+                          user.profile_image_url,
                           false);
     }
 });
