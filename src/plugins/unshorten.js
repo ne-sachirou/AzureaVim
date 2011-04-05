@@ -22,7 +22,7 @@ var azvm_unshorten_services,
 
 function resits_services(response) { // @param HttpResponce Object:
     azvm_unshorten_services = response.body.split(', ');
-    azvm_unshorten_services.push('htn.ly');
+    azvm_unshorten_services.push('htn.to');
 }
 try {
     Http.sendRequestAsync('http://untiny.me/api/1.0/services/?format=text', true, resits_services);

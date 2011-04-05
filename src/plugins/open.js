@@ -33,44 +33,14 @@ function open(url) { // @param String: URI
 function azvm_open() {
     var url;
     
-    switch (azvm_open.c1[this.command[1]]) {
-    case 'status':
-        url = 'https://twitter.com/' + this.screen_name + '/status/' + this.status_id;
-        break;
-    case 'favstar':
-        url = 'http://favstar.fm/t/' + this.status_id;
-        break;
-    case 'favotter':
-        url = 'http://favotter.net/status.php?id=' + this.status_id;
-        break;
-    case 'favlook':
-        url = 'http://favlook.osa-p.net/status.html?status_id=' + this.status_id;
-        break;
-    case 'twistar':
-        url = 'http://twistar.cc/' + this.screen_name + '/status/' + this.status_id;
-        break;
-    case 'favolog':
-        url = 'http://favolog.org/' + (this.command[2] || this.screen_name);
-        break;
-    case 'twilog':
-        url = 'http://twilog.org/' + (this.command[2] || this.screen_name);
-        break;
-    case 'user':
-        url = 'http://twitter.com/' + (this.command[2] || this.screen_name);
-        break;
-    case 'url':
-        if (!this.command[2]) {
-            this.command[2] = 0;
-        }
-        url = this.status_urls[this.command[2]];
-        break;
-    default:
+    if (azvm_open.c1[this.command[1]]) {
+        url = azvm_open.addresses[azvm_open.c1[this.command[1]]].call(this);
+    } else {
         if (this.status_urls[0]) {
             url = this.status_urls[0];
         } else {
             url = 'https://twitter.com/' + this.screen_name + '/status/' + this.status_id;
         }
-        break;
     }
     open(url);
 };
@@ -87,6 +57,16 @@ azvm_open.c1 = {
     user: 'user',
     u: 'user',
     url: 'url'
+};
+azvm_open.addresses = {
+    status: function() {return 'https://twitter.com/' + this.screen_name + '/status/' + this.status_id;},
+    favstar: function() {return 'http://favstar.fm/t/' + this.status_id;},
+    favotter: function() {return 'http://favotter.net/status.php?id=' + this.status_id;},
+    favlook: function() {return 'http://favlook.osa-p.net/status.html?status_id=' + this.status_id;},
+    twistar: function() {return 'http://twistar.cc/' + this.screen_name + '/status/' + this.status_id;},
+    twilog: function() {return 'http://twilog.org/' + (this.command[2] || this.screen_name);},
+    user: function() {return 'http://twitter.com/' + (this.command[2] || this.screen_name);},
+    url: function() {return this.status_urls[this.command[2] || 0];}
 };
 
 AzureaVim.prototype.open = azvm_open;

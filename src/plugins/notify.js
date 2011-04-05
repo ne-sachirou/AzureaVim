@@ -104,11 +104,15 @@ AzureaVim.prototype.notify = function() {
     case 'when':
         when = c2[this.command[2]];
         AzureaUtil.db.set('NotifyWhen' + when,
-                          (this.command[3] || System.inputBox(when, AzureaUtil.db.get('NotifyWhen' + when), true)) ? '1' : '0');
+                          (this.command[3] || System.inputBox(when, AzureaUtil.db.get('NotifyWhen' + when), true)) === '0' ?
+                          '0' :
+                          '1');
         break;
     case 'growl':
         AzureaUtil.db.set('NotifyUseGrowl',
-                          (this.command[2] || System.inputBox('NotifyUseGrowl', AzureaUtil.db.get('NotifyUseGrowl'), true)) ? '1' : '0');
+                          (this.command[2] || System.inputBox('NotifyUseGrowl', AzureaUtil.db.get('NotifyUseGrowl'), true)) === '0' ?
+                          '0' :
+                          '1');
         break;
     }
 };

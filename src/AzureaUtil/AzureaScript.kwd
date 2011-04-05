@@ -5,15 +5,6 @@ Geo
 GeoLocation
 Http
 HttpResponce 
-PostFilterProcessTimelineStatus
-PostProcessTimelineStatus
-PostProcessTimelineStatuses
-PostSendUpdateStatus
-PreFilterProcessTimelineStatus
-PreProcessTimelineStatus
-PreProcessTimelineStatuses
-PreSendUpdateStatus
-ReceiveFavorite
 Status 
 StatusUpdate 
 System
