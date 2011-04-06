@@ -20,7 +20,7 @@ AzureaUtil.mixin(AzureaVim.commands_list, {
 (function() {
 
 function azvm_reply() {
-    var has_in_reply_to = this.command[3] === 'true',
+    var has_in_reply_to,
         in_reply_to_status_id = this.status_id,
         expanded_template,
         redirect;
@@ -34,6 +34,7 @@ function azvm_reply() {
     }
     
     if (this.command[1] === 'template') {
+        has_in_reply_to = this.command[3] === 'true';
         expanded_template = AzureaUtil.template.expand(this.command[2], this);
         Http.sendRequestAsync('http://google.com/', false, callback);
         //System.setTimeout(callback, 10);
@@ -44,7 +45,7 @@ function azvm_reply() {
             redirect = redirect.call(this);
         }
         this.command = ['reply', 'template', redirect[0], redirect[1] ? 'true' : 'false'];
-        azvm_reply();
+        azvm_reply.call(this);
     }
 }
 
@@ -64,9 +65,9 @@ azvm_reply.templates = {
         var redirect;
         
         if (this.command[2] === 'f' || this.command[2] === 'fav' || this.command[2] === 'favstar') {
-            redirect = ['reply', 'template', "#{} MRT: #{'http://favstar.fm/t/' + status_id}", 'false'];
+            redirect = ["#{} MRT: #{'http://favstar.fm/t/' + status_id}", false];
         } else {
-            redirect = ['reply', 'template', "#{} MRT: #{'http://twitter.com/' + screen_name + '/status/' + status_id}", 'false'];
+            redirect = ["#{} MRT: #{'http://twitter.com/' + screen_name + '/status/' + status_id}", false];
         }
         return redirect;
     }
