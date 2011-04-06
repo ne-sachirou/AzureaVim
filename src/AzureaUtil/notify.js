@@ -45,7 +45,7 @@ function notify(text,     // @param String:
                 title,    // @param String:
                 icon,     // @param String: screen_name|profile_image_url
                 sticky) { // @param Boolean=false:
-    var use_growl = /*{!@simple*/ (System.systemInfo <= 2) && getDbKey('NotifyUseGrowl'); /*}!@simple*/
+    var use_growl = /*{!@simple*/ (System.systemInfo <= 2) && getDbKey('NotifyUseGrowl') !== '0'; /*}!@simple*/
                     /*{@simple*/ false; /*}@simple*/
     
     try {
