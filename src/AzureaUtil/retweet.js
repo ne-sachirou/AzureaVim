@@ -1,6 +1,6 @@
 var retweet_events_list = {
     preCreateRetweet: [],
-    posCreatetRetweet: []
+    postCreateRetweet: []
 };
 
 
@@ -40,7 +40,7 @@ function retweet_removeEventListener(eventname,  // @param String: preCreateRetw
 function retweet_create(status_id) { // @param String; status id
     var status = TwitterService.status.get(status_id),
         pre_create_list = retweet_events_list.preCreateRetweet,
-        post_create_list = retweet_events_list.posCreatetRetweet,
+        post_create_list = retweet_events_list.postCreateRetweet,
         is_create_rt = false,
         i = -1;
     
@@ -67,7 +67,7 @@ System.addKeyBindingHandler(0x54, // VK_T
         TextArea.show();
         TextArea.setFocus();
     } else {
-        if (System.showMessage('確認', '選択項目をリツイートします。よろしいですか？', 0)) {
+        if (System.showMessage('選択項目をリツイートします。よろしいですか？', '確認', 4) === 6) { // MB_YESNO = 4
             retweet_create(status_id);
         }
     }
@@ -79,7 +79,7 @@ System.addKeyBindingHandler(0x57, // VK_W
     var status = TwitterService.status.get(status_id);
     
     if (System.settings.getValue('Misc', 'UseQT')) {
-        if (System.showMessage('確認', '選択項目をリツイートします。よろしいですか？', 0)) {
+        if (System.showMessage('選択項目をリツイートします。よろしいですか？', '確認', 4) === 6) { // MB_YESNO = 4
             retweet_create(status_id);
         }
     } else {

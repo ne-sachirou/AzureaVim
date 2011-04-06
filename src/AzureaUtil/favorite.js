@@ -27,8 +27,8 @@ function favorite_addEventListener(eventname,  // @param String: preCreateFavori
 }
 
 
-function favorite_removeEventListener(eventname, // @param String: preCreateRetweet
-                                                 //                postCreateRetweet
+function favorite_removeEventListener(eventname, // @param String: preCreateFavorite
+                                                 //                postCreateFavorite
                                      callback) { // @param Function:
     var events_list = favorite_events_list[eventname],
         i = -1;
@@ -45,7 +45,7 @@ function favorite_removeEventListener(eventname, // @param String: preCreateRetw
 function favorite_create(status_id) { // @param String; status id
     var status = TwitterService.status.get(status_id),
         pre_create_list = favorite_events_list.preCreateFavorite,
-        post_create_list = favorite_events_list.posCreatetFavorite,
+        post_create_list = favorite_events_list.postCreateFavorite,
         is_create_fav = false,
         i = -1;
     
@@ -65,7 +65,7 @@ function favorite_create(status_id) { // @param String; status id
 function favorite_destroy(status_id) { // @param String; status id
     var status = TwitterService.status.get(status_id),
         pre_destroy_list = favorite_events_list.preDestroyFavorite,
-        post_destroy_list = favorite_events_list.posDestroyFavorite,
+        post_destroy_list = favorite_events_list.postDestroyFavorite,
         is_destroy_fav = false,
         i = -1;
     
@@ -85,7 +85,7 @@ function favorite_destroy(status_id) { // @param String; status id
 System.addKeyBindingHandler(0x46, // VK_F
                             0,
                             function(status_id) {
-    if (TwitterService.status.get(status_id).favorite) {
+    if (TwitterService.status.get(status_id).favorited) {
         favorite_destroy(status_id);
     } else {
         favorite_create(status_id);

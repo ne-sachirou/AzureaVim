@@ -3,6 +3,8 @@ AzureaUtil = {
     mixin: {},
     ApiProxy: {},
     db: {},
+    retweet: {},
+    favorite: {},
     event: {},
     time: {},
     template: {},
@@ -607,6 +609,202 @@ mixin(AzureaUtil.db, {
     'del': deleteDbKey,
     'keys': dbKeys
 });
+var favorite_events_list = {
+    preCreateFavorite: [],
+    postCreateFavorite: [],
+    preDestroyFavorite: [],
+    postDestroyFavorite: []
+};
+
+
+function favorite_addEventListener(eventname,  // @param String: preCreateFavorite
+                                               //                postCreateFavorite
+                                               //                preDestroyFavorite
+                                               //                postDestroyFavorite
+                                   callback) { // @param Function: callback(Status Object)
+                                               //                  When return true in preCreateRetweet or preDestroyFavorite,
+                                               //                      stop to create or destroy favorite.
+    var events_list = favorite_events_list[eventname],
+        i = -1;
+    
+    if (events_list) {
+        while (events_list[++i]) {
+            if (events_list[i] === callback) {
+                events_list.splice(i, 1);
+            }
+        }
+        events_list.push(callback);
+    }
+}
+
+
+function favorite_removeEventListener(eventname, // @param String: preCreateFavorite
+                                                 //                postCreateFavorite
+                                     callback) { // @param Function:
+    var events_list = favorite_events_list[eventname],
+        i = -1;
+    
+    while (events_list[++i]) {
+        if (events_list[i] === callback) {
+            events_list.splice(i, 1);
+            break;
+        }
+    }
+}
+
+
+function favorite_create(status_id) { // @param String; status id
+    var status = TwitterService.status.get(status_id),
+        pre_create_list = favorite_events_list.preCreateFavorite,
+        post_create_list = favorite_events_list.postCreateFavorite,
+        is_create_fav = false,
+        i = -1;
+    
+    while (pre_create_list[++i]) {
+        is_create_fav = pre_create_list[i](status) || is_create_fav;
+    }
+    if (!is_create_fav) {
+        TwitterService.favorite.create(status_id);
+        i = -1;
+        while (post_create_list[++i]) {
+            post_create_list[i](status);
+        }
+    }
+}
+
+
+function favorite_destroy(status_id) { // @param String; status id
+    var status = TwitterService.status.get(status_id),
+        pre_destroy_list = favorite_events_list.preDestroyFavorite,
+        post_destroy_list = favorite_events_list.postDestroyFavorite,
+        is_destroy_fav = false,
+        i = -1;
+    
+    while (pre_destroy_list[++i]) {
+        is_destroy_fav = pre_destroy_list[i](status) || is_destroy_fav;
+    }
+    if (!is_destroy_fav) {
+        TwitterService.favorite.destroy(status_id);
+        i = -1;
+        while (post_destroy_list[++i]) {
+            post_destroy_list[i](status);
+        }
+    }
+}
+
+
+System.addKeyBindingHandler(0x46, // VK_F
+                            0,
+                            function(status_id) {
+    if (TwitterService.status.get(status_id).favorited) {
+        favorite_destroy(status_id);
+    } else {
+        favorite_create(status_id);
+    }
+});
+
+mixin(AzureaUtil.favorite, {
+    addEventListener: favorite_addEventListener,
+    removeEventListener: favorite_removeEventListener,
+    create: favorite_create,
+    destroy: favorite_destroy
+});
+var retweet_events_list = {
+    preCreateRetweet: [],
+    postCreateRetweet: []
+};
+
+
+function retweet_addEventListener(eventname,  // @param String: preCreateRetweet
+                                              //                postCreateRetweet
+                                  callback) { // @param Function: callback(Status Object)
+                                              //                  When return true in preCreateRetweet, stop to create retweet.
+    var events_list = retweet_events_list[eventname],
+        i = -1;
+    
+    if (events_list) {
+        while (events_list[++i]) {
+            if (events_list[i] === callback) {
+                events_list.splice(i, 1);
+            }
+        }
+        events_list.push(callback);
+    }
+}
+
+
+function retweet_removeEventListener(eventname,  // @param String: preCreateRetweet
+                                                 //                postCreateRetweet
+                                     callback) { // @param Function:
+    var events_list = retweet_events_list[eventname],
+        i = -1;
+    
+    while (events_list[++i]) {
+        if (events_list[i] === callback) {
+            events_list.splice(i, 1);
+            break;
+        }
+    }
+}
+
+
+function retweet_create(status_id) { // @param String; status id
+    var status = TwitterService.status.get(status_id),
+        pre_create_list = retweet_events_list.preCreateRetweet,
+        post_create_list = retweet_events_list.postCreateRetweet,
+        is_create_rt = false,
+        i = -1;
+    
+    while (pre_create_list[++i]) {
+        is_create_rt = pre_create_list[i](status) || is_create_rt;
+    }
+    if (!is_create_rt) {
+        TwitterService.retweet.create(status_id);
+        i = -1;
+        while (post_create_list[++i]) {
+            post_create_list[i](status);
+        }
+    }
+}
+
+
+System.addKeyBindingHandler(0x54, // VK_T
+                            0,
+                            function(status_id) {
+    var status = TwitterService.status.get(status_id);
+    
+    if (System.settings.getValue('Misc', 'UseQT')) {
+        TextArea.text = 'RT @' + status.user.screen_name + ': ' + status.text;
+        TextArea.show();
+        TextArea.setFocus();
+    } else {
+        if (System.showMessage('選択項目をリツイートします。よろしいですか？', '確認', 4) === 6) { // MB_YESNO = 4
+            retweet_create(status_id);
+        }
+    }
+});
+
+System.addKeyBindingHandler(0x57, // VK_W
+                            0,
+                            function(status_id) {
+    var status = TwitterService.status.get(status_id);
+    
+    if (System.settings.getValue('Misc', 'UseQT')) {
+        if (System.showMessage('選択項目をリツイートします。よろしいですか？', '確認', 4) === 6) { // MB_YESNO = 4
+            retweet_create(status_id);
+        }
+    } else {
+        TextArea.text = 'RT @' + status.user.screen_name + ': ' + status.text;
+        TextArea.show();
+        TextArea.setFocus();
+    }
+});
+
+mixin(AzureaUtil.retweet, {
+    addEventListener: retweet_addEventListener,
+    removeEventListener: retweet_removeEventListener,
+    create: retweet_create
+});
 var events_list = {
     PreProcessTimelineStatuses: [],
     PreProcessTimelineStatus: [],
@@ -881,9 +1079,10 @@ if (!getDbKey('NotifyUseGrowl')) {
 //}!@simple
 
 
-function notifyNative(text) { // @param String:
+function notifyNative(title,  // @param String:
+                      text) { // @param String:
     System.isActive ? System.showNotice(text) :
-                      System.showMessage(text, text, 0x100000);
+                      System.showMessage(title, text, 0x100000);
 }
 
 
@@ -905,10 +1104,10 @@ function notifyGrowl(title,    // @param String:
             var re = JSON.parse(response.body);
             
             if (re.error) {
-                notifyNative(re.request.text);
+                notifyNative(null, re.request.text);
             }
         } catch (err) {
-            notifyNative(err.message + response.body);
+            notifyNative(null, err.message + response.body);
         }
     });
 }
@@ -918,16 +1117,17 @@ function notify(text,     // @param String:
                 title,    // @param String:
                 icon,     // @param String: screen_name|profile_image_url
                 sticky) { // @param Boolean=false:
-    var use_growl = (System.systemInfo <= 2) && getDbKey('NotifyUseGrowl');
+    var use_growl = /*{!@simple*/ (System.systemInfo <= 2) && getDbKey('NotifyUseGrowl') !== '0'; /*}!@simple*/
+                    
     
     try {
         if (use_growl) {
             notifyGrowl(title, text, icon, sticky);
         } else {
-            notifyNative(text);
+            notifyNative(title, text);
         }
     } catch (err) {
-        notifyNative(text);
+        notifyNative(title, text);
     }
 }
 
@@ -992,14 +1192,13 @@ AzureaVim = {};
 (function() {
 
 var azvm_commands_list = {},
-    view,
-    selected_item_id,
     selected_item;
 
 
 function _focusInput(status_id) { // @param String: status id
-    selected_view = System.views.currentView;
-    selected_item_id = selected_view.selectedItemId;
+    var selected_view = System.views.currentView,
+        selected_item_id = selected_view.selectedItemId;
+    
     selected_item = selected_view.getItem(selected_item_id);
     AzureaUtil.yank.set(null, TextArea.text);
     TextArea.text = ':';
@@ -1007,6 +1206,22 @@ function _focusInput(status_id) { // @param String: status id
     TextArea.show();
     TextArea.setFocus();
     TextArea.cursor = 1;
+}
+
+
+function _focusInputBox(status_id) { // @param String: status id
+    var command_text = System.inputBox('command', '', true),
+        azvm,
+        selected_view = System.views.currentView,
+        selected_item_id = selected_view.selectedItemId;
+    
+    selected_item = selected_view.getItem(selected_item_id);
+    AzureaUtil.yank.set(null, command_text);
+    azvm = new azvm_AzureaVim({
+        text: ':' + command_text,
+        in_reply_to_status_id: status_id || selected_view.selectedStatusId
+    });
+    azvm.run();
 }
 
 
@@ -1030,13 +1245,13 @@ function azvm_AzureaVim(status) { //@param StatusUpdate Object:
         status_id = status.in_reply_to_status_id,
         status_obj = TwitterService_status.get(status_id);
     
-    //this.view = selected_view;
-    //this.item_id = selected_item_id;
     this.item = selected_item;
     this.command_text = status.text.slice(1);
     this.command = _pearse(this.command_text);
     this.status_id = status_id;
+    this.user = status_obj.user;
     this.screen_name = status_obj.user.screen_name;
+    this.status = status_obj;
     this.status_text = status_obj.text;
     this.status_urls = [];
     this.status_hashes = [];
@@ -1065,17 +1280,12 @@ function azvm_run() {
 
 
 System.addKeyBindingHandler(0xBA, // VK_OEM_1 (:)
-                            0, _focusInput);
-System.addContextMenuHandler(':vim', 0, function() {
-    var command_text = System.inputBox('command', '', true), azvm;
-    
-    AzureaUtil.yank.set(null, command_text);
-    azvm = new azvm_AzureaVim({
-        text: ':' + command_text,
-        in_reply_to_status_id: System.views.currentView.selectedStatusId
-    });
-    azvm.run();
-});
+                            0,
+                            _focusInput);
+System.addKeyBindingHandler(0xBA, // VK_OEM_1 (:)
+                            2, // Ctrl
+                            _focusInputBox);
+System.addContextMenuHandler(':vim', 0, _focusInputBox);
 AzureaUtil.event.addEventListener('PreSendUpdateStatus', function(status) { // @param StatusUpdate Object:
     var azvm, do_notpost = false;
     
@@ -1086,8 +1296,6 @@ AzureaUtil.event.addEventListener('PreSendUpdateStatus', function(status) { // @
                 TextArea.text = AzureaUtil.yank.get(null);
                 TextArea.show();
             }, 0);
-            //status.text = '';
-            //TextArea.text = AzureaUtil.yank.get(null);
         }else if (/^(?::|：)/.test(status.text)) {
             do_notpost = true;
             AzureaUtil.yank.set(null, status.text);
@@ -1152,7 +1360,7 @@ var azvm_unshorten_services,
 
 function resits_services(response) { // @param HttpResponce Object:
     azvm_unshorten_services = response.body.split(', ');
-    azvm_unshorten_services.push('htn.ly');
+    azvm_unshorten_services.push('htn.to');
 }
 try {
     Http.sendRequestAsync('http://untiny.me/api/1.0/services/?format=text', true, resits_services);
@@ -1333,44 +1541,14 @@ function open(url) { // @param String: URI
 function azvm_open() {
     var url;
     
-    switch (azvm_open.c1[this.command[1]]) {
-    case 'status':
-        url = 'https://twitter.com/' + this.screen_name + '/status/' + this.status_id;
-        break;
-    case 'favstar':
-        url = 'http://favstar.fm/t/' + this.status_id;
-        break;
-    case 'favotter':
-        url = 'http://favotter.net/status.php?id=' + this.status_id;
-        break;
-    case 'favlook':
-        url = 'http://favlook.osa-p.net/status.html?status_id=' + this.status_id;
-        break;
-    case 'twistar':
-        url = 'http://twistar.cc/' + this.screen_name + '/status/' + this.status_id;
-        break;
-    case 'favolog':
-        url = 'http://favolog.org/' + (this.command[2] || this.screen_name);
-        break;
-    case 'twilog':
-        url = 'http://twilog.org/' + (this.command[2] || this.screen_name);
-        break;
-    case 'user':
-        url = 'http://twitter.com/' + (this.command[2] || this.screen_name);
-        break;
-    case 'url':
-        if (!this.command[2]) {
-            this.command[2] = 0;
-        }
-        url = this.status_urls[this.command[2]];
-        break;
-    default:
+    if (azvm_open.c1[this.command[1]]) {
+        url = azvm_open.addresses[azvm_open.c1[this.command[1]]].call(this);
+    } else {
         if (this.status_urls[0]) {
             url = this.status_urls[0];
         } else {
             url = 'https://twitter.com/' + this.screen_name + '/status/' + this.status_id;
         }
-        break;
     }
     open(url);
 };
@@ -1387,6 +1565,16 @@ azvm_open.c1 = {
     user: 'user',
     u: 'user',
     url: 'url'
+};
+azvm_open.addresses = {
+    status: function() {return 'https://twitter.com/' + this.screen_name + '/status/' + this.status_id;},
+    favstar: function() {return 'http://favstar.fm/t/' + this.status_id;},
+    favotter: function() {return 'http://favotter.net/status.php?id=' + this.status_id;},
+    favlook: function() {return 'http://favlook.osa-p.net/status.html?status_id=' + this.status_id;},
+    twistar: function() {return 'http://twistar.cc/' + this.screen_name + '/status/' + this.status_id;},
+    twilog: function() {return 'http://twilog.org/' + (this.command[2] || this.screen_name);},
+    user: function() {return 'http://twitter.com/' + (this.command[2] || this.screen_name);},
+    url: function() {return this.status_urls[this.command[2] || 0];}
 };
 
 AzureaVim.prototype.open = azvm_open;
@@ -1421,9 +1609,10 @@ AzureaUtil.mixin(AzureaVim.commands_list, {
 (function() {
 
 function azvm_reply() {
-    var has_in_reply_to = this.command[3] === 'true',
+    var has_in_reply_to,
         in_reply_to_status_id = this.status_id,
-        expanded_template;
+        expanded_template,
+        redirect;
     
     function callback(response) {
         TextArea.text = expanded_template.text;
@@ -1434,17 +1623,18 @@ function azvm_reply() {
     }
     
     if (this.command[1] === 'template') {
+        has_in_reply_to = this.command[3] === 'true';
         expanded_template = AzureaUtil.template.expand(this.command[2], this);
         Http.sendRequestAsync('http://google.com/', false, callback);
         //System.setTimeout(callback, 10);
     } else {
-        redirect = this.reply.templates[this.reply.c1[this.command[1]]] ||
+        redirect = azvm_reply.templates[azvm_reply.c1[this.command[1]]] ||
                    ["@#{screen_name} #{}#{status_hashes.length ? ' ' + status_hashes.join(' ') : ''}", true];
         if (typeof redirect === 'function') {
             redirect = redirect.call(this);
         }
         this.command = ['reply', 'template', redirect[0], redirect[1] ? 'true' : 'false'];
-        this.reply();
+        azvm_reply.call(this);
     }
 }
 
@@ -1464,9 +1654,9 @@ azvm_reply.templates = {
         var redirect;
         
         if (this.command[2] === 'f' || this.command[2] === 'fav' || this.command[2] === 'favstar') {
-            redirect = ['reply', 'template', "#{} MRT: #{'http://favstar.fm/t/' + status_id}", 'false'];
+            redirect = ["#{} MRT: #{'http://favstar.fm/t/' + status_id}", false];
         } else {
-            redirect = ['reply', 'template', "#{} MRT: #{'http://twitter.com/' + screen_name + '/status/' + status_id}", 'false'];
+            redirect = ["#{} MRT: #{'http://twitter.com/' + screen_name + '/status/' + status_id}", false];
         }
         return redirect;
     }
@@ -1503,7 +1693,7 @@ AzureaUtil.mixin(AzureaVim.commands_list, {
 
 
 AzureaVim.prototype.retweet = function() {
-    TwitterService.retweet.create(this.status_id);
+    AzureaUtil.retweet.create(this.status_id);
 }
 AzureaUtil.mixin(AzureaVim.commands_list, {
     settings: 'settings',
@@ -1888,9 +2078,9 @@ var pattern = AzureaUtil.db.get('NotifyPattern'),
     option = AzureaUtil.db.get('NotifyPatternOption'),
     regex = null,
     when = {
-    faved: AzureaUtil.db.get('NotifyWhenFaved'),
-    mention: AzureaUtil.db.get('NotifyWhenMention'),
-    matched: AzureaUtil.db.get('NotifyWhenMatched')
+    Faved: AzureaUtil.db.get('NotifyWhenFaved'),
+    Mention: AzureaUtil.db.get('NotifyWhenMention'),
+    Matched: AzureaUtil.db.get('NotifyWhenMatched')
 };
 
 if (pattern) {
@@ -1912,28 +2102,8 @@ function setMatchRegex(pattern,  // @param String='':
 }
 
 
-AzureaVim.prototype.notify = function() {
-    var pattern, option, when,
-        c1 = {
-        pattern: 'pattern',
-        when: 'when',
-        growl: 'growl',
-        gntp: 'growl'
-    },
-        c2 = {
-        faved: 'Faved',
-        fav: 'Faved',
-        f: 'Faved',
-        
-        mention: 'Mention',
-        reply: 'Mention',
-        r: 'Mention',
-        '@': 'Mention',
-        
-        matched: 'Matched',
-        match: 'Matched',
-        m: 'Matched'
-    };
+function azvm_notify() {
+    var pattern, option, when_opt;
     
     function _parse(pattern) { // @param String:
                                // @return Array: [pattern:String, option:String]
@@ -1946,7 +2116,7 @@ AzureaVim.prototype.notify = function() {
         return [pattern, option];
     }
     
-    switch (c1[this.command[1]]) {
+    switch (azvm_notify.c1[this.command[1]]) {
     case 'pattern':
         pattern = this.command.slice(2).join(' ');
         if (pattern) {
@@ -1965,25 +2135,56 @@ AzureaVim.prototype.notify = function() {
         setMatchRegex(pattern, option);
         break;
     case 'when':
-        when = c2[this.command[2]];
-        AzureaUtil.db.set('NotifyWhen' + when,
-                          (this.command[3] || System.inputBox(when, AzureaUtil.db.get('NotifyWhen' + when), true)) ? '1' : '0');
+        when_opt = azvm_notify.c2[this.command[2]];
+        if (!when_opt) {
+            throw Error('plugins/notify: No such option as NotifyWhen ' + this.command[2]);
+        }
+        when[when_opt] = (this.command[3] || System.inputBox('NotifyWhen' + when_opt, when[when_opt], true)) === '0' ?
+                          '0' :
+                          '1';
+        AzureaUtil.db.set('NotifyWhen' + when_opt, when[when_opt]);
         break;
     case 'growl':
         AzureaUtil.db.set('NotifyUseGrowl',
-                          (this.command[2] || System.inputBox('NotifyUseGrowl', AzureaUtil.db.get('NotifyUseGrowl'), true)) ? '1' : '0');
+                          (this.command[2] || System.inputBox('NotifyUseGrowl', AzureaUtil.db.get('NotifyUseGrowl'), true)) === '0' ?
+                          '0' :
+                          '1');
         break;
     }
+}
+
+azvm_notify.c1 = {
+    pattern: 'pattern',
+    when: 'when',
+    growl: 'growl',
+    gntp: 'growl'
 };
+
+azvm_notify.c2 = {
+    faved: 'Faved',
+    fav: 'Faved',
+    f: 'Faved',
+    
+    mention: 'Mention',
+    reply: 'Mention',
+    r: 'Mention',
+    '@': 'Mention',
+    
+    matched: 'Matched',
+    match: 'Matched',
+    m: 'Matched'
+};
+
+AzureaVim.prototype.notify = azvm_notify;
 
 AzureaUtil.event.addEventListener('ReceiveFavorite',
                                   function(source,          // @param User Object:
                                            target,          // @param User Object:
                                            target_object) { // @param Status Object:
-    if (when.faved) {
+    if (when.Faved) {
         AzureaUtil.notify('Favs@' + source.screen_name + ': ' + target_object.text,
                           'Favs - AzureaVim',
-                          source.profile_image_url,//source.screen_name,
+                          source.profile_image_url,
                           false);
     }
 });
@@ -1994,18 +2195,181 @@ AzureaUtil.event.addEventListener('PreFilterProcessTimelineStatus',
         text = status.text,
         user = status.user;
     
-    if (_when.mention && text.indexOf(TwitterService.currentUser.screen_name) !== -1) {
+    if (_when.Mention && text.indexOf(TwitterService.currentUser.screen_name) !== -1) {
         AzureaUtil.notify('Mention@' + user.screen_name + ': ' + text,
                           'Mention - AzureaVim',
-                          user.profile_image_url,//user.screen_name,
+                          user.profile_image_url,
                           false);
     }
-    if (_when.matched && regex && regex.test(text)) {
+    if (_when.Matched && regex && regex.test(text)) {
         AzureaUtil.notify('Matches@' + user.screen_name + ': ' + text,
                           'Matched - AzureaVim',
-                          user.profile_image_url,//user.screen_name,
+                          user.profile_image_url,
                           false);
     }
 });
+
+})();
+AzureaUtil.mixin(AzureaVim.commands_list, {
+    tumblr: 'tumblr',
+    'つｍｂｌｒ': 'tumblr'
+});
+// :tumblr [(when [(favorite | retweet) [option3]]) | (email [option2]) | (password [option2]) | (tags [option2])]
+//
+
+(function() {
+
+var email = AzureaUtil.db.get('TumblrEmail'),
+    password = AzureaUtil.db.get('TumblrPassword'),
+    when = {
+    Favorite: AzureaUtil.db.get('TumblrWhenFavorite'),
+    Retweet: AzureaUtil.db.get('TumblrWhenRetweet')
+},
+    tags = AzureaUtil.db.get('TumblrTags'),
+    authenticated = false,
+    AzureaUtil_favorite_addEventListener = AzureaUtil.favorite.addEventListener,
+    AzureaUtil_favorite_removeEventListener = AzureaUtil.favorite.removeEventListener,
+    AzureaUtil_retweet_addEventListener = AzureaUtil.retweet.addEventListener,
+    AzureaUtil_retweet_removeEventListener = AzureaUtil.retweet.removeEventListener;
+
+
+function authenticate_tumblr(email,      // @param String:
+                             password) { // @param String:
+    function callback(response) {
+        if (200 <= response.statusCode || response.statusCode < 300) {
+            authenticated = true;
+        } else {
+            authenticated = false;
+        }
+    }
+    
+    Http.postRequestAsync('https://www.tumblr.com/api/authenticate',
+                          'email=' + email +
+                          '&password=' + password,
+                          false,
+                          callback);
+}
+authenticate_tumblr(email, password);
+
+
+function write_tumblr(email,      // @param String:
+                      password,   // @param String:
+                      type,       // @param String:
+                      post,       // @param Hash:
+                      option,     // @param Hash=null:
+                      callback) { // @param Function: callback(HttpResponce Object)
+    function hash_to_poststring(hash) { // @param Hash:
+                                        // @return String:
+        var key, result = [];
+        
+        for (key in hash) {
+            if (hash.hasOwnProperty(key)) {
+                result.push(key + '=' + encodeURI(hash[key]));
+            }
+        }
+        return result.join('&');
+    }
+    
+    Http.postRequestAsync('https://www.tumblr.com/api/write',
+                          'email=' + email +
+                          '&password=' + password +
+                          '&type=' + type +
+                          '&' + hash_to_poststring(post) +
+                          (option ? '&' + hash_to_poststring(option) : ''),
+                          false,
+                          callback);
+}
+
+
+function write_status_to_tumblr(status) { // @param Status Object:
+    if (!status.user.protected_) {
+        write_tumblr(email, password, 'quote',
+                     {quote: status.text,
+                      source: '<a href="http://twitter.com/' + status.user.screen_name + '/' + status.id + '">Twitter:' + status.user.screen_name + '</a>'},
+                     {generator: 'AzureaVim',
+                      tags: tags},
+                     function(response) {
+            if (response.statusCode < 200 && 300 <= response.statusCode) {
+                throw Error('plugins/tumblr: Cannot create post. (statusCode=' + response.statusCode + ')');
+            }
+        });
+    } else {
+        throw Error('plugins/tumblr: ' + status.user.screen_name + ' is protected_.');
+    }
+}
+
+
+if (when.Favorite) {
+    AzureaUtil_favorite_addEventListener('postCreateFavorite', write_status_to_tumblr);
+}
+if (when.Retweet) {
+    AzureaUtil_retweet_addEventListener('postRetweetFavorite', write_status_to_tumblr);
+}
+
+
+function azvm_tumblr() {
+    var when_opt;
+    
+    switch (azvm_tumblr.c1[this.command[1]]) {
+    case 'when':
+        when_opt = azvm_tumblr.c2[this.command[2]];
+        if (!when_opt) {
+            throw Error('plugins/tumblr: No such option as TumblrWhen ' + this.command[2]);
+        }
+        when[when_opt] = (this.command[3] || System.inputBox('TumblrWhen' + when_opt, when[when_opt], true)) === '0' ?
+                          '0' :
+                          '1';
+        AzureaUtil.db.set('TumblrWhen' + when_opt, when[when_opt]);
+        if (when.Favorite !== '0') {
+            AzureaUtil_favorite_addEventListener('postCreateFavorite', write_status_to_tumblr);
+        } else {
+            AzureaUtil_favorite_removeEventListener('postCreateFavorite', write_status_to_tumblr);
+        }
+        if (when.Retweet !== '0') {
+            AzureaUtil_retweet_addEventListener('postCreateRetweet', write_status_to_tumblr);
+        } else {
+            AzureaUtil_retweet_removeEventListener('postCreateRetweet', write_status_to_tumblr);
+        }
+        break;
+    case 'email':
+        email = this.command[2] || System.inputBox('TumblrEmail', email, true);
+        AzureaUtil.db.set('TumblrEmail', email);
+        authenticate_tumblr(email, password);
+        break;
+    case 'password':
+        password = this.command[2] || System.inputBox('TumblrPassword', password, true);
+        AzureaUtil.db.set('TumblrPassword', password);
+        authenticate_tumblr(email, password);
+        break;
+    case 'tags':
+        tags = this.command[2] || System.inputBox('TumblrTags', tags, false);
+        AzureaUtil.db.set('TumblrTags', tags);
+        break;
+    default:
+        if (!authenticated) {
+            throw Error('plugins/tumblr: Authenticate your email & password.');
+        }
+        write_status_to_tumblr(this.status);
+        break;
+    }
+}
+
+azvm_tumblr.c1 = {
+    when: 'when',
+    email: 'email',
+    password: 'password',
+    tags: 'tags',
+    tag: 'tags'
+};
+
+azvm_tumblr.c2 = {
+    favorite: 'Favorite',
+    fav: 'Favorite',
+    f: 'Favorite',
+    retweet: 'Retweet',
+    rt: 'Retweet'
+};
+
+AzureaVim.prototype.tumblr = azvm_tumblr;
 
 })();

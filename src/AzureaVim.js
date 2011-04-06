@@ -36,6 +36,7 @@ function _focusInputBox(status_id) { // @param String: status id
     azvm.run();
 }
 
+
 function _pearse(text) { // @reply String: command text
                         // @return Array:
     var command = [], match, regex = /[^\s"]+|\s+|"[^\\"]*(?:\\.[^\\"]*)*"/g; //"
@@ -60,7 +61,9 @@ function azvm_AzureaVim(status) { //@param StatusUpdate Object:
     this.command_text = status.text.slice(1);
     this.command = _pearse(this.command_text);
     this.status_id = status_id;
+    this.user = status_obj.user;
     this.screen_name = status_obj.user.screen_name;
+    this.status = status_obj;
     this.status_text = status_obj.text;
     this.status_urls = [];
     this.status_hashes = [];
@@ -105,8 +108,6 @@ AzureaUtil.event.addEventListener('PreSendUpdateStatus', function(status) { // @
                 TextArea.text = AzureaUtil.yank.get(null);
                 TextArea.show();
             }, 0);
-            //status.text = '';
-            //TextArea.text = AzureaUtil.yank.get(null);
         }else if (/^(?::|：)/.test(status.text)) {
             do_notpost = true;
             AzureaUtil.yank.set(null, status.text);

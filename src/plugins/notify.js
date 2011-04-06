@@ -25,9 +25,9 @@ var pattern = AzureaUtil.db.get('NotifyPattern'),
     option = AzureaUtil.db.get('NotifyPatternOption'),
     regex = null,
     when = {
-    faved: AzureaUtil.db.get('NotifyWhenFaved'),
-    mention: AzureaUtil.db.get('NotifyWhenMention'),
-    matched: AzureaUtil.db.get('NotifyWhenMatched')
+    Faved: AzureaUtil.db.get('NotifyWhenFaved'),
+    Mention: AzureaUtil.db.get('NotifyWhenMention'),
+    Matched: AzureaUtil.db.get('NotifyWhenMatched')
 };
 
 if (pattern) {
@@ -86,7 +86,7 @@ function azvm_notify() {
         if (!when_opt) {
             throw Error('plugins/notify: No such option as NotifyWhen ' + this.command[2]);
         }
-        when[when_opt] = (this.command[3] || System.inputBox('NotifyWhen' + when_opt, when[when_opt])) === '0' ?
+        when[when_opt] = (this.command[3] || System.inputBox('NotifyWhen' + when_opt, when[when_opt], true)) === '0' ?
                           '0' :
                           '1';
         AzureaUtil.db.set('NotifyWhen' + when_opt, when[when_opt]);
@@ -128,7 +128,7 @@ AzureaUtil.event.addEventListener('ReceiveFavorite',
                                   function(source,          // @param User Object:
                                            target,          // @param User Object:
                                            target_object) { // @param Status Object:
-    if (when.faved) {
+    if (when.Faved) {
         AzureaUtil.notify('Favs@' + source.screen_name + ': ' + target_object.text,
                           'Favs - AzureaVim',
                           source.profile_image_url,
@@ -142,13 +142,13 @@ AzureaUtil.event.addEventListener('PreFilterProcessTimelineStatus',
         text = status.text,
         user = status.user;
     
-    if (_when.mention && text.indexOf(TwitterService.currentUser.screen_name) !== -1) {
+    if (_when.Mention && text.indexOf(TwitterService.currentUser.screen_name) !== -1) {
         AzureaUtil.notify('Mention@' + user.screen_name + ': ' + text,
                           'Mention - AzureaVim',
                           user.profile_image_url,
                           false);
     }
-    if (_when.matched && regex && regex.test(text)) {
+    if (_when.Matched && regex && regex.test(text)) {
         AzureaUtil.notify('Matches@' + user.screen_name + ': ' + text,
                           'Matched - AzureaVim',
                           user.profile_image_url,
