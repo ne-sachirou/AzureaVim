@@ -10,8 +10,8 @@ AzureaUtil.mixin(AzureaVim.commands_list, {
 var email = AzureaUtil.db.get('TumblrEmail'),
     password = AzureaUtil.db.get('TumblrPassword'),
     when = {
-    Favorite: AzureaUtil.db.get('TumblrWhenFavorite'),
-    Retweet: AzureaUtil.db.get('TumblrWhenRetweet')
+    Favorite: AzureaUtil.db.get('TumblrWhenFavorite') || '0',
+    Retweet: AzureaUtil.db.get('TumblrWhenRetweet') || '0'
 },
     tags = AzureaUtil.db.get('TumblrTags'),
     authenticated = false,
@@ -73,7 +73,10 @@ function write_status_to_tumblr(status) { // @param Status Object:
     if (!status.user.protected_) {
         write_tumblr(email, password, 'quote',
                      {quote: status.text,
-                      source: '<a href="http://twitter.com/' + status.user.screen_name + '/' + status.id + '">Twitter:' + status.user.screen_name + '</a>'},
+                      source: '<a href="http://twitter.com/' +
+                              status.user.screen_name + '/status/' +
+                              status.id +'">Twitter/@' +
+                              status.user.name + ': </a>'},
                      {generator: 'AzureaVim',
                       tags: tags},
                      function(response) {
@@ -87,10 +90,10 @@ function write_status_to_tumblr(status) { // @param Status Object:
 }
 
 
-if (when.Favorite) {
+if (when.Favorite === '1') {
     AzureaUtil_favorite_addEventListener('postCreateFavorite', write_status_to_tumblr);
 }
-if (when.Retweet) {
+if (when.Retweet === '1') {
     AzureaUtil_retweet_addEventListener('postRetweetFavorite', write_status_to_tumblr);
 }
 
@@ -104,16 +107,16 @@ function azvm_tumblr() {
         if (!when_opt) {
             throw Error('plugins/tumblr: No such option as TumblrWhen ' + this.command[2]);
         }
-        when[when_opt] = (this.command[3] || System.inputBox('TumblrWhen' + when_opt, when[when_opt], true)) === '0' ?
-                          '0' :
-                          '1';
+        when[when_opt] = (this.command[3] || System.inputBox('TumblrWhen' + when_opt, when[when_opt], true)) === '1' ?
+                          '1' :
+                          '0';
         AzureaUtil.db.set('TumblrWhen' + when_opt, when[when_opt]);
-        if (when.Favorite !== '0') {
+        if (when.Favorite === '1') {
             AzureaUtil_favorite_addEventListener('postCreateFavorite', write_status_to_tumblr);
         } else {
             AzureaUtil_favorite_removeEventListener('postCreateFavorite', write_status_to_tumblr);
         }
-        if (when.Retweet !== '0') {
+        if (when.Retweet === '1') {
             AzureaUtil_retweet_addEventListener('postCreateRetweet', write_status_to_tumblr);
         } else {
             AzureaUtil_retweet_removeEventListener('postCreateRetweet', write_status_to_tumblr);
