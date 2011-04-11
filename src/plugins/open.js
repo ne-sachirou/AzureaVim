@@ -78,4 +78,4 @@ System.addKeyBindingHandler(0xBE, // .
     TwitterService.status.update(':o', status_id);
 });
 
-})();
+}());

@@ -1,4 +1,7 @@
-var API_PROKY_SERVER = 'http://localhost:80/';
+var API_PROKY_SERVER = 'http://localhost:80/',
+    apiproxy_events_list = {
+    ready: []
+};
 
 function ApiProxy(mountpoint) { // @param String='':
                                 // @return ApiProxy Object:
@@ -19,7 +22,7 @@ ApiProxy.prototype = {
             poststring = [], key;
         
         for (key in data) {
-            if (data[key]) {
+            if (data.hasOwnProperty(key) && data[key]) {
                 poststring.push(key + '=' + data[key]);
             }
         }
@@ -51,4 +54,59 @@ ApiProxy.prototype = {
     }
 };
 
+
+function apiProxy_addEventListener(eventname,  // @param String: ready
+                                   callback) { // @param Function:
+    var events_list = apiproxy_events_list[eventname],
+        i = events_list.length;
+    
+    if (events_list) {
+        while (i--) {
+            if (events_list[i] === callback) {
+                events_list.splice(i, 1);
+            }
+        }
+        events_list.push(callback);
+    }
+}
+
+
+function apiProxy_removeEventListener(eventname,  // @param String: ready
+                                      callback) { // @param Function:
+    var events_list = apiproxy_events_list[eventname],
+        i = events_list.length;
+    
+    while (i--) {
+        if (events_list[i] === callback) {
+            events_list.splice(i, 1);
+            break;
+        }
+    }
+}
+
+
+(function() {
+    function callback(response) {
+        var events_list, i;
+        
+        if (200 <= response.statusCode && response.statusCode < 300) {
+            events_list = apiproxy_events_list.ready;
+            i = events_list.length;
+            while (i--) {
+                events_list[i]();
+            }
+            apiproxy_events_list.ready = [];
+        } else {
+            System.setTimeout(function() {
+                Http.sendRequestAsync(API_PROKY_SERVER, false, callback);
+            }, 100);
+        }
+    }
+    Http.sendRequestAsync(API_PROKY_SERVER, false, callback);
+}());
+
 AzureaUtil.ApiProxy = ApiProxy;
+mixin(AzureaUtil.ApiProxy, {
+    addEventListener: apiProxy_addEventListener,
+    removeEventListener: apiProxy_removeEventListener
+});

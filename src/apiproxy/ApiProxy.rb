@@ -106,6 +106,128 @@ class GrowlServlet < WEBrick::HTTPServlet::AbstractServlet
   end
 end
 
+# Read Azurea.ini file.
+class IniServlet < WEBrick::HTTPServlet::AbstractServlet
+  def do_GET req, res
+    ini = {
+      :Twitter => {
+        :ActiveProfileId => '0'
+      },
+      :Proxy => {
+        :UserName =>'',
+        :Password => '',
+        :Address => '',
+        :UseProxy => '0',
+        :UseIESetting => '1',
+        :Port => '8080'
+      },
+      :Matches => {},
+      :Searches => {},
+      :Filters => {},
+      :Profile0 => {
+        :Caption => 'Default',
+        :UserName => '',
+        :Password => '',
+        :oauth_token => '',
+        :oauth_token_secret => '',
+        :Highlight => ''
+      },
+      :Misc => {
+        :SimpleMode => '0',
+        :ExpandAll => '0',
+        :UseQT => '0',
+        :BackgroundImage => '0',
+        :FontFace => '',
+        :FontSize => '0',
+        :UseSystemColor => '0',
+        :TextColor => '0',
+        :AskBeforePost => '0',
+        :Interval => '1',
+        :ReadCount => '40',
+        :InitialRefresh => '1',
+        :NoPictures => '0',
+        :EnableAutoRefresh => '0',
+        :FitToIconheight => '0',
+        :Language => '1041',
+        :ColorSchemeFile => 'Default.txt',
+        :ShowComposeAlways => '0',
+        :EnableAutoScroll => '0',
+        :ScrollToTop => '1',
+        :ScrollInterval => '30000',
+        :DisableUnreadManagement => '0',
+        :NoRefreshAfterPosted => '0',
+        :ShowExitConfirmation => '0',
+        :SaveLogData => '0',
+        :ExpandComposeAreaSipOpend => '0',
+        :Browser => '',
+        :EnableFlick => '0',
+        :UnlockLimitation => '0',
+        :BackgroundTiling => '0',
+        :EnableFavotterClient => '0',
+        :IconSize => '48',
+        :AutoAppendHashtag => '0',
+        :PictureDirectory => '0',
+        :RetweetFormat => 'RT @%u: %s',
+        :IgnoreSinceId => '0',
+        :TimelineLogMax => '200',
+        :EnableShake => '0',
+        :TextAreaFontSize => '',
+        :TextAreaToBottom => '0',
+        :TextAreaMultiline => '0',
+        :UseSecredConnection => '0',
+        :AllowMultipleInstance => '0'
+      },
+      :Sound => {
+        :NewMessage => '',
+        :NewReply => '',
+        :VibrateNewMessage => '0',
+        :VibrateNewReply => '0',
+        :VibrateId => '1'
+      },
+      :Location => {
+        :UseCellTowerInfo => '0',
+        :DisableGPS => '0'
+      },
+      :Movapic => {
+        username: ''
+      },
+      :HashTags => {},
+      :UserStream => {
+        :replies => '',
+        :Enabled => '1',
+        :track => ''
+      },
+      :UrlHooks => {},
+      :Scripting => {
+        :AllowActiveXObject => '0'
+      },
+      :'WindowMetrics.MainWindow' => {
+        :Top => '-2147483648',
+        :Left => '-2147483648',
+        :Width => '-2147483648',
+        :Height => '-2147483648'
+      },
+      :'WindowMetrics.ImagePreviewWindow' => {
+        :Top => '-2147483648',
+        :Left => '-2147483648',
+        :Width => '-2147483648',
+        :Height => '-2147483648'
+      }
+    }
+    IO.foreach '../../Azurea.ini' do |line|
+      line.sub!(/(?<!\\)(?:;|#).*$/, '')
+      if line =~ /^\[(.+)\]$/
+        processing_section = Regexp.last_match(1)
+        ini[processing_section] = Hash.new unless ini.key? processing_section
+      elsif line =~ /^([^=]+)=(.+)$/
+        ini[processing_section][Regexp.last_match(1)] = Regexp.last_match(2)
+      end
+    end
+    res = ini.to_json
+  end
+end
+
+# Shutdown this server.
 class ExitServlet < WEBrick::HTTPServlet::AbstractServlet
   def do_GET req, res
     res['Content-Type'] = 'text/plain'
@@ -116,6 +238,7 @@ end
 
 $apiproxy_server = WEBrick::HTTPServer.new OPTION
 $apiproxy_server.mount '/gntp', GrowlServlet
+$apiproxy_server.mount '/ini', IniServlet
 $apiproxy_server.mount '/exit', ExitServlet
 
 ['TERM', 'INT'].each do |signal|

@@ -1,5 +1,4 @@
-var setTimeout = System.setTimeout,
-    clearTimeout = System.clearTimeout,
+var timeout_list = {},// {id: [time, fun]}
     interval_list = {};// {id: [time, fun, interval]}
     timeevent_list = (function() { // {id: [time, fun, i]}
     var timeevent_list = {},
@@ -20,6 +19,12 @@ function attainSchedule() {
     var now = new Date().getTime(),
         id;
     
+    for (id in timeout_list) {
+        if (timeout_list[id][0] <= now) {
+            timeout_list[id][1]();
+            delete timeout_list[id];
+        }
+    }
     for (id in interval_list) {
         if (interval_list[id][0] <= now) {
             interval_list[id][0] = now + interval_list[id][2];
@@ -42,6 +47,21 @@ addEventListener('ReceiveFavorite', attainSchedule);
 //attainSchedule();
 
 
+function setTimeout(fun,  // @param Function:
+                    ms) { // @param Number:
+                          // @return Strings:
+    var id = Math.floor(Math.random() * new Date().getTime()).toString(36);
+    
+    timeout_list[id] = [new Date().getTime() + ms, fun];
+    return id;
+}
+
+
+function clearTimeout(id) { // @param Strings:
+    delete timeout_list[id];
+}
+
+
 function setInterval(fun,  // @param Function:
                      ms) { // @param Number:
                            // @return Strings:
@@ -50,14 +70,7 @@ function setInterval(fun,  // @param Function:
     timeinterval_list[id] = [new Date().getTime() + ms, fun, ms];
     return id;
 }
-function setInterval(fun,  // @param Function:
-                     ms) { // @param Number:
-                           // @return Number:
-    return setTimeout(function() {
-        fun();
-        setTimeout(fun, ms);
-    }, ms)
-}
+
 
 function clearInterval(id) { // @param Strings:
     delete timeinterval_list[id];
@@ -85,8 +98,8 @@ function clearTimeevent(id) { // @param Strings:
 
 
 mixin(AzureaUtil.time, {
-    'setTimeout': System.setTimeout,
-    'clearTimeout': System.clearTimeout,
+    'setTimeout': setTimeout,
+    'clearTimeout': clearTimeout,
     'setInterval': setInterval,
     'clearInterval': clearInterval,
     'setTimeevent': setTimeevent,

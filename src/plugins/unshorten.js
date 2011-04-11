@@ -12,7 +12,7 @@ AzureaUtil.mixin(AzureaVim.commands_list, {
 // https://gist.github.com/835563
 (function() {
 
-var azvm_unshorten_services,
+var azvm_unshorten_services = [],
     azvm_unshorten_cashe = {
     'http://c4se.tk/': 'http://c4se.sakura.ne.jp/'
 },
@@ -33,9 +33,9 @@ try {
 function _isPossibleUnshorten(url) { // @param String: shortend URL
                                      // @return Boolean:
     var services = azvm_unshorten_services,
-        i = -1, is_possible = false;
+        i = services.length, is_possible = false;
     
-    while (services[++i]) {
+    while (i--) {
         if (url.indexOf(services[i]) !== -1) {
             is_possible = true;
             break;
@@ -76,24 +76,24 @@ function _unshorten(url,     // @param String: shortened URL
         if (async) {
             try {
                 Http.sendRequestAsync(url, false, callback_htnto);
-            } catch (err) {
+            } catch (err0) {
             }
         } else {
             try {
                 result = callback_htly(Http.sendRequest(url, false));
-            } catch (err) {
+            } catch (err1) {
             }
         }
     } else if (_isPossibleUnshorten(url)) {
         if (async) {
             try {
                 Http.sendRequestAsync('http://untiny.me/api/1.0/extract/?url=' + url + '&format=text', false, callback);
-            } catch (err) {
+            } catch (err2) {
             }
         } else {
             try {
                 result = callback(Http.sendRequest('http://untiny.me/api/1.0/extract/?url=' + url + '&format=text', false));
-            } catch (err) {
+            } catch (err3) {
             }
         }
     }
@@ -126,12 +126,12 @@ function expand_postly(url,     // @param String: post.ly url
     } else if (async) {
         try {
             Http.sendRequestAsync('http://posterous.com/api/getpost?id=' + id, false, callback);
-        } catch (err) {
+        } catch (err0) {
         }
     } else {
         try {
             result = callback(Http.sendRequest('http://posterous.com/api/getpost?id=' + id, false));
-        } catch (err) {
+        } catch (err1) {
         }
     }
     return result;
@@ -151,7 +151,7 @@ function azvm_unshorten() { // @return String: unshortened URL
 }
 
 
-AzureaUtil.event.addEventListener('PreProcessTimelineStatus', function(status) { // @param Status Object:
+TwitterService.addEventListener('preProcessTimelineStatus', function(status) { // @param Status Object:
     status.text = status.text.replace(/https?:\/\/[0-9A-Za-z._\-^~\/&%?]+/g,
                                       function(url) {
         var expanded;
@@ -167,4 +167,4 @@ AzureaUtil.event.addEventListener('PreProcessTimelineStatus', function(status) {
 AzureaVim.prototype.unshorten = azvm_unshorten;
 AzureaVim.prototype.unshorten.unshorten = _unshorten;
 
-})();
+}());

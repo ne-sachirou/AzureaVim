@@ -61,7 +61,7 @@ AzureaVim.prototype.delay = function() {
                       function() {});
     } else {
         if (type === 1) {
-            AzureaUtil.time.setTimeout((function(obj) {
+            System.setTimeout((function(obj) {
                 return function() {
                     TwitterService.status.update(obj.command[2], obj.status_id);
                 }
@@ -74,4 +74,4 @@ AzureaVim.prototype.delay = function() {
     }
 }
 
-})();
+}());

@@ -37,7 +37,7 @@ var RUBY_URI = 'http://ftp.ruby-lang.org/pub/ruby/binaries/mswin32/',
         shell.ShellExecute('wscript.exe', '"' + WScript.ScriptFullName + '" ' + newArgs.join(' '), '', 'runas', 1);
         WScript.Quit(0);
     }
-})();
+}());
 
 var shell = new ActiveXObject('WScript.Shell'),
     env = shell.Environment('SYSTEM'),

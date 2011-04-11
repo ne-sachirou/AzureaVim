@@ -98,16 +98,16 @@ System.addKeyBindingHandler(0xBA, // VK_OEM_1 (:)
                             2, // Ctrl
                             _focusInputBox);
 System.addContextMenuHandler(':vim', 0, _focusInputBox);
-AzureaUtil.event.addEventListener('PreSendUpdateStatus', function(status) { // @param StatusUpdate Object:
+TwitterService.addEventListener('preSendUpdateStatus', function(status) { // @param StatusUpdate Object:
     var azvm, do_notpost = false;
     
     try {
         if (status.text === ':') {
             do_notpost = true;
-            AzureaUtil.time.setTimeout(function() {
+            System.setTimeout(function() {
                 TextArea.text = AzureaUtil.yank.get(null);
                 TextArea.show();
-            }, 0);
+            }, 10);
         }else if (/^(?::|：)/.test(status.text)) {
             do_notpost = true;
             AzureaUtil.yank.set(null, status.text);
@@ -130,4 +130,4 @@ AzureaVim.prototype = {
     run: azvm_run
 };
 
-})();
+}());

@@ -124,10 +124,10 @@ azvm_notify.c2 = {
 
 AzureaVim.prototype.notify = azvm_notify;
 
-AzureaUtil.event.addEventListener('ReceiveFavorite',
-                                  function(source,          // @param User Object:
-                                           target,          // @param User Object:
-                                           target_object) { // @param Status Object:
+TwitterService.addEventListener('receiveFavorite',
+                                function(source,          // @param User Object:
+                                         target,          // @param User Object:
+                                         target_object) { // @param Status Object:
     if (when.Faved) {
         AzureaUtil.notify('Favs@' + source.screen_name + ': ' + target_object.text,
                           'Favs - AzureaVim',
@@ -136,8 +136,8 @@ AzureaUtil.event.addEventListener('ReceiveFavorite',
     }
 });
 
-AzureaUtil.event.addEventListener('PreFilterProcessTimelineStatus',
-                                  function(status) { // @param Ststus Object:
+TwitterService.addEventListener('preFilterProcessTimelineStatus',
+                                function(status) { // @param Ststus Object:
     var _when = when,
         text = status.text,
         user = status.user;
@@ -156,4 +156,4 @@ AzureaUtil.event.addEventListener('PreFilterProcessTimelineStatus',
     }
 });
 
-})();
+}());

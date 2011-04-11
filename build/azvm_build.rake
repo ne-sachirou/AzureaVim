@@ -85,13 +85,13 @@ def paste_parts filename, featurename
     text = file.read
     text.gsub!(%r{
       (?:
-        (?://\{@((?!#{featurename}).+?)\n)|
-        (?:/\*\{@((?!#{featurename}).+?)\*/)
+        (?://\{@(?!#{featurename})(.+?)\n)|
+        (?:/\*\{@(?!#{featurename})(.+?)\*/)
       )
       .*?
       (?:
-        (?://\}@(?!\1).+?\n)|
-        (?:/\*\}@(?!\1).+?\*/)
+        (?://\}@\1\n)|
+        (?:/\*\}@\2\*/)
       )
     }xm, '')
     text.gsub!(%r{

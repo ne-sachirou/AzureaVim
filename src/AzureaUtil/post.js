@@ -1,6 +1,6 @@
-})();
+}());
 
-
+/*
 //function PreProcessTimelineStatuses() {}
 function PreProcessTimelineStatus(status) {
     var listener = AzureaUtil.event.PreProcessTimelineStatus,
@@ -51,3 +51,4 @@ function ReceiveFavorite(source,
         listener[i](source, target, target_object);
     }
 }
+*/

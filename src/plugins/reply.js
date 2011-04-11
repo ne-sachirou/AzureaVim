@@ -36,8 +36,7 @@ function azvm_reply() {
     if (this.command[1] === 'template') {
         has_in_reply_to = this.command[3] === 'true';
         expanded_template = AzureaUtil.template.expand(this.command[2], this);
-        Http.sendRequestAsync('http://google.com/', false, callback);
-        //System.setTimeout(callback, 10);
+        System.setTimeout(callback, 10);
     } else {
         redirect = azvm_reply.templates[azvm_reply.c1[this.command[1]]] ||
                    ["@#{screen_name} #{}#{status_hashes.length ? ' ' + status_hashes.join(' ') : ''}", true];
@@ -93,4 +92,4 @@ System.addKeyBindingHandler(0x52, // VK_R
                             0,
                             reply);
 
-})();
+}());

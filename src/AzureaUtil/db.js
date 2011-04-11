@@ -38,6 +38,16 @@ function dbKeys(regex) { // @param RegExp|String='':
 }
 
 
+/*(function() {
+    var iniproxy = new ApiProxy('ini');
+    
+    apiProxy_addEventListener('ready', function() {
+        iniproxy.submit(null, null, function(response) { // @param HttpResponse Object:
+            mixin(db_cashe, JSON.parse(response.body), false);
+        });
+    });
+}());*/
+
 mixin(AzureaUtil.db, {
     'get': getDbKey,
     'set': setDbKey,

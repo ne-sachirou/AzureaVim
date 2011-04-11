@@ -13,6 +13,210 @@ AzureaUtil = {
 };
 
 (function() {
+// @description Define ES5 Array.prototype
+// @author ne_Sachirou http://c4se.sakura.ne.jp/profile/ne.html
+// @date 2011
+// @license Public Domain
+
+Array.isArray || (Array.isArray = function(obj) { // @param Object:
+                                                  // @param Boolean: obj is an Array or not
+    return Object.prototype.toString.call(obj) === '[object Array]';
+});
+
+Array.prototype.every || (
+Array.prototype.every = function(fun,   // @param Function:
+                                 obj) { // @param Object: this in fun
+                                        // @return Boolean:
+    var i = this.length;
+    
+    while (i--) {
+        if (typeof this[i] !== 'undefined' &&
+            !fun.call(obj, this[i], i, this)) {
+            return false;
+        }
+    }
+    return true;
+});
+
+Array.prototype.filter || (Array.prototype.filter = function(fun,   // @param Function:
+                                                             obj) { // @param Object: this in fun
+                                                                    // @return Array:
+    var arr = [],
+        i = 0,
+        len = this.length;
+    
+    for (; i < len; ++i) {
+        if (typeof this[i] !== 'undefined' &&
+            fun.call(obj, this[i], i, this)) {
+            arr.push(this[i]);
+        }
+    }
+    return arr;
+});
+
+Array.prototype.forEach || (Array.prototype.forEach = function(fun,   // @param Function:
+                                                               obj) { // @param Object: this in fun
+                                                                      // @return Array: this
+    var i = this.length;
+    
+    while (i--) {
+        if (typeof this[i] !== 'undefined') {
+            fun.call(obj, this[i], i, this);
+        }
+    }
+    return this;
+});
+
+Array.prototype.indexOf || (Array.prototype.indexOf = function (val,   // @param Object:
+                                                                num) { // @param Number=0:
+                                                                       // @return Number: not found = -1
+    var i,
+        len = this.length;
+    
+    num = num || 0;
+    while (num < 0) {
+        num += len - 1;
+    }
+    for(i = num; i < len; ++i) {
+        if (this[i] === val) {
+            return i;
+        }
+    }
+    return -1;
+});
+
+Array.prototype.lastIndexOf || (Array.prototype.lastIndexOf = function(val,   // @param Object:
+                                                                       num) { // @param Number=(this.length-1):
+                                                                              // @return Number: not found = -1
+    var i,
+        len = this.length;
+    
+    if (typeof num === 'undefined') {
+        num = len - 1;
+    }
+    while (num < 0) {
+        num += len - 1;
+    }
+    i = num;
+    for (; i >= 0; --i) {
+        if (this[i] === val) {
+            return i;
+        }
+    }
+    return -1;
+});
+
+Array.prototype.map || (Array.prototype.map = function(fun,   // @param Function:
+                                                       obj) { // @param Object: this in fun
+                                                              // @return Array:
+    var i = this.length,
+        arr = new Array(i);
+    
+    while (i--) {
+        if (typeof this[i] !== 'undefined') {
+            arr[i] = fun.call(obj, this[i], i, this);
+        }
+    }
+    return arr;
+});
+
+Array.prototype.reduce || (Array.prototype.reduce = function(fun,   // @param Function:
+                                                             val) { // @param Object:
+                                                                    // @return Object:
+    var i = 0,
+        len = this.length;
+    
+    if (typeof val === 'undefined') {
+        val = this[0];
+        i = 1;
+    }
+    for (; i < len; ++i) {
+        if (typeof this[i] !== 'undefined') {
+            val = fun.call(null, val, this[i], i, this);
+        }
+    }
+    return val;
+});
+
+Array.prototype.reduceRight || (Array.prototype.reduceRight = function(fun,   // @param Function:
+                                                                       val) { // @param Object:
+                                                                              // @return Object:
+    var i = this.length;
+    
+    if (typeof val !== 'undefined') {
+        val = this[i];
+        --i;
+    }
+    while (i--) {
+        if (typeof this[i] !== 'undefined') {
+            val = fun.call(null, val, this[i], i, this);
+        }
+    }
+    return val;
+});
+
+Array.prototype.some || (Array.prototype.some = function(fun,   // @param Function:
+                                                         obj) { // @param Object:
+                                                                // @return Boolean:
+    var i = this.length;
+    
+    while (i--) {
+        if (typeof this[i] !== 'undefined' &&
+            fun.call(obj, this[i], i, this)) {
+            return true;
+        }
+    }
+    return false;
+});
+
+
+// http://blog.stevenlevithan.com/archives/faster-trim-javascript
+String.prototype.trim || (String.prototype.trim = function() { // @return String:
+    var str = this.replace(/^\s\s*/, ''),
+        ws = /\s/,
+        i = str.length;
+    
+    while (ws.test(str.charAt(--i))) {
+    };
+    return str.slice(0, i + 1);
+});
+
+
+Object.keys || (Object.keys = function(obj) { // @param Object:
+                                              // @return Array[String]:
+    var key, result = [];
+    
+    for (key in obj) {
+        if (obj.hasOwnProperty(key)) {
+            result.push(key);
+        }
+    }
+    return result;
+});
+
+
+Date.now || (
+Date.now = function() {
+    return new Date().getTime();
+});
+
+function toISOString() {
+    return (this.getUTCFullYear() < 1000 ?
+            this.getUTCFullYear() < 100 ?
+            this.getUTCFullYear() < 10 ?
+            '000' :
+            '00' :
+            '0' :
+            '') + this.getUTCFullYear() + '-' +
+           (this.getUTCMonth() + 1 < 10 ? '0' : '') + (this.getUTCMonth() + 1) + '-' +
+           (this.getUTCDate() < 10 ? '0' : '') + this.getUTCDate() + 'T' +
+           (this.getUTCHours() < 10 ? '0' : '') + this.getUTCHours() + ':' +
+           (this.getUTCMinutes() < 10 ? '0' : '') + this.getUTCMinutes() + ':' +
+           (this.getUTCSeconds() < 10 ? '0' : '') + this.getUTCSeconds() + 'Z';
+}
+//{!@test
+Date.prototype.toISOString || (Date.prototype.toISOString = toISOString);
+//}!@test
 /*
     http://www.JSON.org/json2.js
     2011-02-23
@@ -509,7 +713,10 @@ function mixin(hash1,       // @param Hash:
 }
 
 AzureaUtil.mixin = mixin;
-var API_PROKY_SERVER = 'http://localhost:80/';
+var API_PROKY_SERVER = 'http://localhost:80/',
+    apiproxy_events_list = {
+    ready: []
+};
 
 function ApiProxy(mountpoint) { // @param String='':
                                 // @return ApiProxy Object:
@@ -530,7 +737,7 @@ ApiProxy.prototype = {
             poststring = [], key;
         
         for (key in data) {
-            if (data[key]) {
+            if (data.hasOwnProperty(key) && data[key]) {
                 poststring.push(key + '=' + data[key]);
             }
         }
@@ -562,7 +769,62 @@ ApiProxy.prototype = {
     }
 };
 
+
+function apiProxy_addEventListener(eventname,  // @param String: ready
+                                   callback) { // @param Function:
+    var events_list = apiproxy_events_list[eventname],
+        i = events_list.length;
+    
+    if (events_list) {
+        while (i--) {
+            if (events_list[i] === callback) {
+                events_list.splice(i, 1);
+            }
+        }
+        events_list.push(callback);
+    }
+}
+
+
+function apiProxy_removeEventListener(eventname,  // @param String: ready
+                                      callback) { // @param Function:
+    var events_list = apiproxy_events_list[eventname],
+        i = events_list.length;
+    
+    while (i--) {
+        if (events_list[i] === callback) {
+            events_list.splice(i, 1);
+            break;
+        }
+    }
+}
+
+
+(function() {
+    function callback(response) {
+        var events_list, i;
+        
+        if (200 <= response.statusCode && response.statusCode < 300) {
+            events_list = apiproxy_events_list.ready;
+            i = events_list.length;
+            while (i--) {
+                events_list[i]();
+            }
+            apiproxy_events_list.ready = [];
+        } else {
+            System.setTimeout(function() {
+                Http.sendRequestAsync(API_PROKY_SERVER, false, callback);
+            }, 100);
+        }
+    }
+    Http.sendRequestAsync(API_PROKY_SERVER, false, callback);
+}());
+
 AzureaUtil.ApiProxy = ApiProxy;
+mixin(AzureaUtil.ApiProxy, {
+    addEventListener: apiProxy_addEventListener,
+    removeEventListener: apiProxy_removeEventListener
+});
 var db_cashe = {};
 
 function setDbKey(key,     // @param String:
@@ -602,6 +864,16 @@ function dbKeys(regex) { // @param RegExp|String='':
     return keys;
 }
 
+
+/*(function() {
+    var iniproxy = new ApiProxy('ini');
+    
+    apiProxy_addEventListener('ready', function() {
+        iniproxy.submit(null, null, function(response) { // @param HttpResponse Object:
+            mixin(db_cashe, JSON.parse(response.body), false);
+        });
+    });
+}());*/
 
 mixin(AzureaUtil.db, {
     'get': getDbKey,
@@ -805,62 +1077,8 @@ mixin(AzureaUtil.retweet, {
     removeEventListener: retweet_removeEventListener,
     create: retweet_create
 });
-var events_list = {
-    PreProcessTimelineStatuses: [],
-    PreProcessTimelineStatus: [],
-    PreFilterProcessTimelineStatus: [],
-    PostFilterProcessTimelineStatus: [],
-    PostProcessTimelineStatus: [],
-    PostProcessTimelineStatuses: [],
-    PreSendUpdateStatus: [],
-    PostSendUpdateStatus: [],
-    ReceiveFavorite: []
-};
-
-function addEventListener(eventname, // @param String:
-                          fun) {     // @param Function:
-    var listener = events_list[eventname],
-        i = -1;
-    
-    while (listener[++i]) {
-        if (listener[i] === fun) {
-            listener.splice(i, 1);
-        }
-    }
-    listener.push(fun);
-}
-
-
-function removeEventListener(eventname, // @param String:
-                             fun) {     // @param Function:
-    var listener = events_list[eventname],
-        i = -1;
-    
-    while (listener[++i]) {
-        if (listener[i] === fun) {
-            listener.splice(i, 1);
-            break;
-        }
-    }
-}
-
-
-mixin(AzureaUtil.event, {
-    'PreProcessTimelineStatuses': events_list.PreProcessTimelineStatuses,
-    'PreProcessTimelineStatus': events_list.PreProcessTimelineStatus,
-    'PreFilterProcessTimelineStatus': events_list.PreFilterProcessTimelineStatus,
-    'PostFilterProcessTimelineStatus': events_list.PostFilterProcessTimelineStatus,
-    'PostProcessTimelineStatus': events_list.PostProcessTimelineStatus,
-    'PostProcessTimelineStatuses': events_list.PostProcessTimelineStatuses,
-    'PreSendUpdateStatus': events_list.PreSendUpdateStatus,
-    'PostSendUpdateStatus': events_list.PostSendUpdateStatus,
-    'ReceiveFavorite': events_list.ReceiveFavorite,
-    'addEventListener': addEventListener,
-    'removeEventListener': removeEventListener
-});
-var timeout_list = {},// {id: [time, fun]}
-    interval_list = {};// {id: [time, fun, interval]}
-    timeevent_list = (function() { // {id: [time, fun, i]}
+var interval_list = {};// {id: true}
+    /*timeevent_list = (function() { // {id: [time, fun, i]}
     var timeevent_list = {},
         timeevent, i = -1;
     
@@ -872,65 +1090,25 @@ var timeout_list = {},// {id: [time, fun]}
         ];
     }
     return timeevent_list;
-})();
-
-
-function attainSchedule() {
-    var now = new Date().getTime(),
-        id;
-    
-    for (id in timeout_list) {
-        if (timeout_list[id][0] <= now) {
-            timeout_list[id][1]();
-            delete timeout_list[id];
-        }
-    }
-    for (id in interval_list) {
-        if (interval_list[id][0] <= now) {
-            interval_list[id][0] = now + interval_list[id][2];
-            interval_list[id][1]();
-        }
-    }
-    for (id in timeevent_list) {
-        if (timeevent_list[id][0] <= now) {
-            timeevent_list[id][1]();
-            deleteDbKey('TimeEvent' + timeevent_list[id][2]);
-            delete timeevent_list[id];
-        }
-    }
-}
-
-
-addEventListener('PreProcessTimelineStatus', attainSchedule);
-addEventListener('PostSendUpdateStatus', attainSchedule);
-addEventListener('ReceiveFavorite', attainSchedule);
-//attainSchedule();
-
-
-function setTimeout(fun,  // @param Function:
-                    ms) { // @param Number:
-                          // @return Strings:
-    var id = Math.floor(Math.random() * new Date().getTime()).toString(36);
-    
-    timeout_list[id] = [new Date().getTime() + ms, fun];
-    return id;
-}
-
-
-function clearTimeout(id) { // @param Strings:
-    delete timeout_list[id];
-}
+}());*/
 
 
 function setInterval(fun,  // @param Function:
                      ms) { // @param Number:
-                           // @return Strings:
-    var id = Math.floor(Math.random() * new Date().getTime()).toString(36);
+                           // @return Number:
+    var id;
     
-    timeinterval_list[id] = [new Date().getTime() + ms, fun, ms];
+    function callback() {
+        if (interval_list[id]) {
+            fun();
+            System.setTimeout(fun, ms);
+        }
+    }
+    
+    id = System.setTimeout(callback, ms);
+    interval_list[id] = true;
     return id;
 }
-
 
 function clearInterval(id) { // @param Strings:
     delete timeinterval_list[id];
@@ -940,30 +1118,42 @@ function clearInterval(id) { // @param Strings:
 function setTimeevent(fun,  // @param String: Function = eval(String)
                       ms) { // @param Number: Date().getTime()
                             // @return Strings:
-    var id = Math.floor(Math.random() * new Date().getTime()).toString(36),
-        i = -1;
+    var id, i = -1;
+    
+    function callback() {
+        if (new RegExp('^' + id + ':').test(getDbKey('TimeEvent' + i))) {
+            fun();
+            deleteDbKey('TimeEvent' + i);
+        }
+    }
     
     while (getDbKey('TimeEvent' + (++i))) {
     }
+    id = System.setTimeout(callback, ms - Date.getTime());
     setDbKey('TimeEvent' + i, id + ':' + ms + '|' + fun);
-    timeevent_list[id] = [ms, eval('(function(){return ' + fun + '})()'), i];
     return id;
 }
 
 
 function clearTimeevent(id) { // @param Strings:
-    deleteDbKey('TimeEvent' + timeevent_list[id][2]);
-    delete timeevent_list[id];
+    var timeevent_list = dbKeys(/^TimeEvent\d+/),
+        timeevent, i = -1;
+    
+    while (timeevent = timeevent_list[++i]) {
+        if (new RegExp('^' + id + ':').test(getDbKey(timeevent))) {
+            deleteDbKey('TimeEvent' + timeevent_list[id][1]);
+        }
+    }
 }
 
 
 mixin(AzureaUtil.time, {
-    'setTimeout': setTimeout,
-    'clearTimeout': clearTimeout,
+    'setTimeout': function(callback, ms) {return System.setTimeout(callback, ms);},
+    'clearTimeout': function(timer_id) {return System.clearTimeout(timer_id);},
     'setInterval': setInterval,
-    'clearInterval': clearInterval,
+    'clearInterval': clearInterval/*,
     'setTimeevent': setTimeevent,
-    'clearTimeevent': clearTimeevent
+    'clearTimeevent': clearTimeevent*/
 });
 function expandTemplate(template, // @param String: template
                         view) {   // @param Object: view
@@ -1133,9 +1323,9 @@ function notify(text,     // @param String:
 
 
 AzureaUtil.notify = notify;
-})();
+}());
 
-
+/*
 //function PreProcessTimelineStatuses() {}
 function PreProcessTimelineStatus(status) {
     var listener = AzureaUtil.event.PreProcessTimelineStatus,
@@ -1186,6 +1376,7 @@ function ReceiveFavorite(source,
         listener[i](source, target, target_object);
     }
 }
+*/
 //https://gist.github.com/833567
 AzureaVim = {};
 
@@ -1286,16 +1477,16 @@ System.addKeyBindingHandler(0xBA, // VK_OEM_1 (:)
                             2, // Ctrl
                             _focusInputBox);
 System.addContextMenuHandler(':vim', 0, _focusInputBox);
-AzureaUtil.event.addEventListener('PreSendUpdateStatus', function(status) { // @param StatusUpdate Object:
+TwitterService.addEventListener('preSendUpdateStatus', function(status) { // @param StatusUpdate Object:
     var azvm, do_notpost = false;
     
     try {
         if (status.text === ':') {
             do_notpost = true;
-            AzureaUtil.time.setTimeout(function() {
+            System.setTimeout(function() {
                 TextArea.text = AzureaUtil.yank.get(null);
                 TextArea.show();
-            }, 0);
+            }, 10);
         }else if (/^(?::|：)/.test(status.text)) {
             do_notpost = true;
             AzureaUtil.yank.set(null, status.text);
@@ -1318,7 +1509,7 @@ AzureaVim.prototype = {
     run: azvm_run
 };
 
-})();
+}());
 AzureaUtil.mixin(AzureaVim.commands_list, {
     eval: '_evaluate'
 });
@@ -1350,7 +1541,7 @@ AzureaUtil.mixin(AzureaVim.commands_list, {
 // https://gist.github.com/835563
 (function() {
 
-var azvm_unshorten_services,
+var azvm_unshorten_services = [],
     azvm_unshorten_cashe = {
     'http://c4se.tk/': 'http://c4se.sakura.ne.jp/'
 },
@@ -1371,9 +1562,9 @@ try {
 function _isPossibleUnshorten(url) { // @param String: shortend URL
                                      // @return Boolean:
     var services = azvm_unshorten_services,
-        i = -1, is_possible = false;
+        i = services.length, is_possible = false;
     
-    while (services[++i]) {
+    while (i--) {
         if (url.indexOf(services[i]) !== -1) {
             is_possible = true;
             break;
@@ -1414,24 +1605,24 @@ function _unshorten(url,     // @param String: shortened URL
         if (async) {
             try {
                 Http.sendRequestAsync(url, false, callback_htnto);
-            } catch (err) {
+            } catch (err0) {
             }
         } else {
             try {
                 result = callback_htly(Http.sendRequest(url, false));
-            } catch (err) {
+            } catch (err1) {
             }
         }
     } else if (_isPossibleUnshorten(url)) {
         if (async) {
             try {
                 Http.sendRequestAsync('http://untiny.me/api/1.0/extract/?url=' + url + '&format=text', false, callback);
-            } catch (err) {
+            } catch (err2) {
             }
         } else {
             try {
                 result = callback(Http.sendRequest('http://untiny.me/api/1.0/extract/?url=' + url + '&format=text', false));
-            } catch (err) {
+            } catch (err3) {
             }
         }
     }
@@ -1464,12 +1655,12 @@ function expand_postly(url,     // @param String: post.ly url
     } else if (async) {
         try {
             Http.sendRequestAsync('http://posterous.com/api/getpost?id=' + id, false, callback);
-        } catch (err) {
+        } catch (err0) {
         }
     } else {
         try {
             result = callback(Http.sendRequest('http://posterous.com/api/getpost?id=' + id, false));
-        } catch (err) {
+        } catch (err1) {
         }
     }
     return result;
@@ -1489,7 +1680,7 @@ function azvm_unshorten() { // @return String: unshortened URL
 }
 
 
-AzureaUtil.event.addEventListener('PreProcessTimelineStatus', function(status) { // @param Status Object:
+TwitterService.addEventListener('preProcessTimelineStatus', function(status) { // @param Status Object:
     status.text = status.text.replace(/https?:\/\/[0-9A-Za-z._\-^~\/&%?]+/g,
                                       function(url) {
         var expanded;
@@ -1505,7 +1696,7 @@ AzureaUtil.event.addEventListener('PreProcessTimelineStatus', function(status) {
 AzureaVim.prototype.unshorten = azvm_unshorten;
 AzureaVim.prototype.unshorten.unshorten = _unshorten;
 
-})();
+}());
 AzureaUtil.mixin(AzureaVim.commands_list, {
     open: 'open',
     o: 'open',
@@ -1586,7 +1777,7 @@ System.addKeyBindingHandler(0xBE, // .
     TwitterService.status.update(':o', status_id);
 });
 
-})();
+}());
 AzureaUtil.mixin(AzureaVim.commands_list, {
     reply: 'reply',
     r: 'reply',
@@ -1625,8 +1816,7 @@ function azvm_reply() {
     if (this.command[1] === 'template') {
         has_in_reply_to = this.command[3] === 'true';
         expanded_template = AzureaUtil.template.expand(this.command[2], this);
-        Http.sendRequestAsync('http://google.com/', false, callback);
-        //System.setTimeout(callback, 10);
+        System.setTimeout(callback, 10);
     } else {
         redirect = azvm_reply.templates[azvm_reply.c1[this.command[1]]] ||
                    ["@#{screen_name} #{}#{status_hashes.length ? ' ' + status_hashes.join(' ') : ''}", true];
@@ -1682,7 +1872,7 @@ System.addKeyBindingHandler(0x52, // VK_R
                             0,
                             reply);
 
-})();
+}());
 AzureaUtil.mixin(AzureaVim.commands_list, {
     retweet: 'retweet',
     rt: 'retweet',
@@ -1960,7 +2150,7 @@ System.addKeyBindingHandler(0x28, // VK_DOWN ↓
     TwitterService.status.update(':earthquake', 0);
 });
 
-})();
+}());
 AzureaUtil.mixin(AzureaVim.commands_list, {
     delay: 'delay',
     'でぁｙ': 'delay'
@@ -2024,7 +2214,7 @@ AzureaVim.prototype.delay = function() {
                       function() {});
     } else {
         if (type === 1) {
-            AzureaUtil.time.setTimeout((function(obj) {
+            System.setTimeout((function(obj) {
                 return function() {
                     TwitterService.status.update(obj.command[2], obj.status_id);
                 }
@@ -2037,7 +2227,7 @@ AzureaVim.prototype.delay = function() {
     }
 }
 
-})();
+}());
 AzureaUtil.mixin(AzureaVim.codelist, {
 });
 //
@@ -2177,10 +2367,10 @@ azvm_notify.c2 = {
 
 AzureaVim.prototype.notify = azvm_notify;
 
-AzureaUtil.event.addEventListener('ReceiveFavorite',
-                                  function(source,          // @param User Object:
-                                           target,          // @param User Object:
-                                           target_object) { // @param Status Object:
+TwitterService.addEventListener('receiveFavorite',
+                                function(source,          // @param User Object:
+                                         target,          // @param User Object:
+                                         target_object) { // @param Status Object:
     if (when.Faved) {
         AzureaUtil.notify('Favs@' + source.screen_name + ': ' + target_object.text,
                           'Favs - AzureaVim',
@@ -2189,8 +2379,8 @@ AzureaUtil.event.addEventListener('ReceiveFavorite',
     }
 });
 
-AzureaUtil.event.addEventListener('PreFilterProcessTimelineStatus',
-                                  function(status) { // @param Ststus Object:
+TwitterService.addEventListener('preFilterProcessTimelineStatus',
+                                function(status) { // @param Ststus Object:
     var _when = when,
         text = status.text,
         user = status.user;
@@ -2209,7 +2399,7 @@ AzureaUtil.event.addEventListener('PreFilterProcessTimelineStatus',
     }
 });
 
-})();
+}());
 AzureaUtil.mixin(AzureaVim.commands_list, {
     tumblr: 'tumblr',
     'つｍｂｌｒ': 'tumblr'
@@ -2222,8 +2412,8 @@ AzureaUtil.mixin(AzureaVim.commands_list, {
 var email = AzureaUtil.db.get('TumblrEmail'),
     password = AzureaUtil.db.get('TumblrPassword'),
     when = {
-    Favorite: AzureaUtil.db.get('TumblrWhenFavorite'),
-    Retweet: AzureaUtil.db.get('TumblrWhenRetweet')
+    Favorite: AzureaUtil.db.get('TumblrWhenFavorite') || '0',
+    Retweet: AzureaUtil.db.get('TumblrWhenRetweet') || '0'
 },
     tags = AzureaUtil.db.get('TumblrTags'),
     authenticated = false,
@@ -2285,7 +2475,10 @@ function write_status_to_tumblr(status) { // @param Status Object:
     if (!status.user.protected_) {
         write_tumblr(email, password, 'quote',
                      {quote: status.text,
-                      source: '<a href="http://twitter.com/' + status.user.screen_name + '/' + status.id + '">Twitter:' + status.user.screen_name + '</a>'},
+                      source: '<a href="http://twitter.com/' +
+                              status.user.screen_name + '/status/' +
+                              status.id +'">Twitter/@' +
+                              status.user.name + ': </a>'},
                      {generator: 'AzureaVim',
                       tags: tags},
                      function(response) {
@@ -2299,10 +2492,10 @@ function write_status_to_tumblr(status) { // @param Status Object:
 }
 
 
-if (when.Favorite) {
+if (when.Favorite === '1') {
     AzureaUtil_favorite_addEventListener('postCreateFavorite', write_status_to_tumblr);
 }
-if (when.Retweet) {
+if (when.Retweet === '1') {
     AzureaUtil_retweet_addEventListener('postRetweetFavorite', write_status_to_tumblr);
 }
 
@@ -2316,16 +2509,16 @@ function azvm_tumblr() {
         if (!when_opt) {
             throw Error('plugins/tumblr: No such option as TumblrWhen ' + this.command[2]);
         }
-        when[when_opt] = (this.command[3] || System.inputBox('TumblrWhen' + when_opt, when[when_opt], true)) === '0' ?
-                          '0' :
-                          '1';
+        when[when_opt] = (this.command[3] || System.inputBox('TumblrWhen' + when_opt, when[when_opt], true)) === '1' ?
+                          '1' :
+                          '0';
         AzureaUtil.db.set('TumblrWhen' + when_opt, when[when_opt]);
-        if (when.Favorite !== '0') {
+        if (when.Favorite === '1') {
             AzureaUtil_favorite_addEventListener('postCreateFavorite', write_status_to_tumblr);
         } else {
             AzureaUtil_favorite_removeEventListener('postCreateFavorite', write_status_to_tumblr);
         }
-        if (when.Retweet !== '0') {
+        if (when.Retweet === '1') {
             AzureaUtil_retweet_addEventListener('postCreateRetweet', write_status_to_tumblr);
         } else {
             AzureaUtil_retweet_removeEventListener('postCreateRetweet', write_status_to_tumblr);
@@ -2372,4 +2565,4 @@ azvm_tumblr.c2 = {
 
 AzureaVim.prototype.tumblr = azvm_tumblr;
 
-})();
+}());

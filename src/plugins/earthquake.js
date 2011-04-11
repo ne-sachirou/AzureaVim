@@ -76,4 +76,4 @@ System.addKeyBindingHandler(0x28, // VK_DOWN ↓
     TwitterService.status.update(':earthquake', 0);
 });
 
-})();
+}());

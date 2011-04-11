@@ -29,4 +29,4 @@ if(is_notXP && key !== lastArg) {
     WScript.Quit(0);
 }
 
-})();
+}());

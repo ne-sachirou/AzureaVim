@@ -1,6 +1,5 @@
-var timeout_list = {},// {id: [time, fun]}
-    interval_list = {};// {id: [time, fun, interval]}
-    timeevent_list = (function() { // {id: [time, fun, i]}
+var interval_list = {};// {id: true}
+    /*timeevent_list = (function() { // {id: [time, fun, i]}
     var timeevent_list = {},
         timeevent, i = -1;
     
@@ -12,65 +11,25 @@ var timeout_list = {},// {id: [time, fun]}
         ];
     }
     return timeevent_list;
-})();
-
-
-function attainSchedule() {
-    var now = new Date().getTime(),
-        id;
-    
-    for (id in timeout_list) {
-        if (timeout_list[id][0] <= now) {
-            timeout_list[id][1]();
-            delete timeout_list[id];
-        }
-    }
-    for (id in interval_list) {
-        if (interval_list[id][0] <= now) {
-            interval_list[id][0] = now + interval_list[id][2];
-            interval_list[id][1]();
-        }
-    }
-    for (id in timeevent_list) {
-        if (timeevent_list[id][0] <= now) {
-            timeevent_list[id][1]();
-            deleteDbKey('TimeEvent' + timeevent_list[id][2]);
-            delete timeevent_list[id];
-        }
-    }
-}
-
-
-addEventListener('PreProcessTimelineStatus', attainSchedule);
-addEventListener('PostSendUpdateStatus', attainSchedule);
-addEventListener('ReceiveFavorite', attainSchedule);
-//attainSchedule();
-
-
-function setTimeout(fun,  // @param Function:
-                    ms) { // @param Number:
-                          // @return Strings:
-    var id = Math.floor(Math.random() * new Date().getTime()).toString(36);
-    
-    timeout_list[id] = [new Date().getTime() + ms, fun];
-    return id;
-}
-
-
-function clearTimeout(id) { // @param Strings:
-    delete timeout_list[id];
-}
+}());*/
 
 
 function setInterval(fun,  // @param Function:
                      ms) { // @param Number:
-                           // @return Strings:
-    var id = Math.floor(Math.random() * new Date().getTime()).toString(36);
+                           // @return Number:
+    var id;
     
-    timeinterval_list[id] = [new Date().getTime() + ms, fun, ms];
+    function callback() {
+        if (interval_list[id]) {
+            fun();
+            System.setTimeout(fun, ms);
+        }
+    }
+    
+    id = System.setTimeout(callback, ms);
+    interval_list[id] = true;
     return id;
 }
-
 
 function clearInterval(id) { // @param Strings:
     delete timeinterval_list[id];
@@ -80,28 +39,40 @@ function clearInterval(id) { // @param Strings:
 function setTimeevent(fun,  // @param String: Function = eval(String)
                       ms) { // @param Number: Date().getTime()
                             // @return Strings:
-    var id = Math.floor(Math.random() * new Date().getTime()).toString(36),
-        i = -1;
+    var id, i = -1;
+    
+    function callback() {
+        if (new RegExp('^' + id + ':').test(getDbKey('TimeEvent' + i))) {
+            fun();
+            deleteDbKey('TimeEvent' + i);
+        }
+    }
     
     while (getDbKey('TimeEvent' + (++i))) {
     }
+    id = System.setTimeout(callback, ms - Date.getTime());
     setDbKey('TimeEvent' + i, id + ':' + ms + '|' + fun);
-    timeevent_list[id] = [ms, eval('(function(){return ' + fun + '})()'), i];
     return id;
 }
 
 
 function clearTimeevent(id) { // @param Strings:
-    deleteDbKey('TimeEvent' + timeevent_list[id][2]);
-    delete timeevent_list[id];
+    var timeevent_list = dbKeys(/^TimeEvent\d+/),
+        timeevent, i = -1;
+    
+    while (timeevent = timeevent_list[++i]) {
+        if (new RegExp('^' + id + ':').test(getDbKey(timeevent))) {
+            deleteDbKey('TimeEvent' + timeevent_list[id][1]);
+        }
+    }
 }
 
 
 mixin(AzureaUtil.time, {
-    'setTimeout': setTimeout,
-    'clearTimeout': clearTimeout,
+    'setTimeout': function(callback, ms) {return System.setTimeout(callback, ms);},
+    'clearTimeout': function(timer_id) {return System.clearTimeout(timer_id);},
     'setInterval': setInterval,
-    'clearInterval': clearInterval,
+    'clearInterval': clearInterval/*,
     'setTimeevent': setTimeevent,
-    'clearTimeevent': clearTimeevent
+    'clearTimeevent': clearTimeevent*/
 });

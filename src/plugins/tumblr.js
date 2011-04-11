@@ -163,4 +163,4 @@ azvm_tumblr.c2 = {
 
 AzureaVim.prototype.tumblr = azvm_tumblr;
 
-})();
+}());
