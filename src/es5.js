@@ -1,4 +1,4 @@
-// @description Define ES5 Array.prototype
+// @description Define ES5 extention by ES3
 // @author ne_Sachirou http://c4se.sakura.ne.jp/profile/ne.html
 // @date 2011
 // @license Public Domain
@@ -180,12 +180,11 @@ Object.keys || (Object.keys = function(obj) { // @param Object:
 });
 
 
-Date.now || (
-Date.now = function() {
+Date.now || (Date.now = function() {
     return new Date().getTime();
 });
 
-function toISOString() {
+Date.prototype.toISOString || (Date.prototype.toISOString = function toISOString() {
     return (this.getUTCFullYear() < 1000 ?
             this.getUTCFullYear() < 100 ?
             this.getUTCFullYear() < 10 ?
@@ -198,24 +197,4 @@ function toISOString() {
            (this.getUTCHours() < 10 ? '0' : '') + this.getUTCHours() + ':' +
            (this.getUTCMinutes() < 10 ? '0' : '') + this.getUTCMinutes() + ':' +
            (this.getUTCSeconds() < 10 ? '0' : '') + this.getUTCSeconds() + 'Z';
-}
-//{!@test
-Date.prototype.toISOString || (Date.prototype.toISOString = toISOString);
-//}!@test
-//{@test
-(function() {
-    var i = 100000;
-    while (--i) {
-        var num = Math.floor(Math.random() * Date.now()),
-            sgn = Math.floor(Math.random() * 2) ? 1 : -1,
-            d = new Date(sgn * num),
-            s1 = toISOString.call(d),
-            s2 = d.toISOString();
-        
-        if (s1 !== s2) {
-            throw Error(s1 + '!==' + s2);
-        }
-    }
-    return true;
-}());
-//}@test
+});

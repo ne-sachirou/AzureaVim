@@ -1,4 +1,0 @@
-<job>
-  <script language="JScript" src="data/Startup/do_uac.js"/>
-  <script language="JScript" src="data/Startup/AzureaStartup.js"/>
-</job>
