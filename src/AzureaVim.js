@@ -81,6 +81,8 @@ AzureaVim.prototype = {
         if (command_name.indexOf(' ') !== -1) {
             command.shift();
             command = command_name.split(' ').concat(command);
+        } else {
+            command[0] = command_name;
         }
         return this[command[0]](command.slice(1), input);
     }
