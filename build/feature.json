@@ -1,0 +1,13 @@
+{
+    "default": {
+        "Util/pre": [],
+        "Util/mixin": ["Util/pre"],
+        "Util/post": ["Util/pre",
+                      "Util/mixin"],
+
+        "es5": ["Util/post"],
+        "AzureaVim": ["Util/post", "es5"],
+
+        "plugins/test": ["AzureaVim"]
+    }
+}
