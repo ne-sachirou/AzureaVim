@@ -1,13 +1,33 @@
 {
     "default": {
-        "Util/pre": [],
+        "Util/es5": [],
+
+        "Util/pre": ["Util/es5"],
         "Util/mixin": ["Util/pre"],
+        "Util/url": ["Util/pre"],
         "Util/post": ["Util/pre",
-                      "Util/mixin"],
+                      "Util/mixin",
+                      "Util/url"],
 
-        "es5": ["Util/post"],
-        "AzureaVim": ["Util/post", "es5"],
+        "AzureaVim": ["Util/post"],
 
-        "plugins/test": ["AzureaVim"]
+        "plugins/unshorten": ["AzureaVim"]
+    },
+    "debug": {
+        "Util/es5": [],
+
+        "Util/pre": ["Util/es5"],
+        "Util/debug": ["Util/pre"],
+        "Util/mixin": ["Util/pre"],
+        "Util/url": ["Util/pre"],
+        "Util/post": ["Util/pre",
+                      "Util/debug",
+                      "Util/mixin",
+                      "Util/url"],
+
+        "AzureaVim": ["Util/post"],
+
+        "plugins/test": ["AzureaVim"],
+        "plugins/unshorten": ["AzureaVim"]
     }
 }
