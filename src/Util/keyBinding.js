@@ -33,14 +33,15 @@ var _keyBinding_VKCODE = {
         },
 
         'w': function(status_id) {
+            ui_show_viewmenu();
         }
     },
 
     'f': function(status_id) {
         if (TwitterService.status.get(status_id).favorited) {
-            TwitterService.favorite.destroy(status_id);
+            favorite_destroy(status_id);
         } else {
-            TwitterService.favorite.create(status_id);
+            favorite_create(status_id);
         }
     },
 
@@ -53,7 +54,7 @@ var _keyBinding_VKCODE = {
             TextArea.setFocus();
         } else {
             if (System.showMessage('選択項目をリツイートします。よろしいですか？', '確認', 4) === 6) { // MB_YESNO = 4
-                TwitterService.retweet.create(status_id);
+                retweet_create(status_id);
             }
         }
     },
@@ -63,7 +64,7 @@ var _keyBinding_VKCODE = {
 
         if (System.settings.getValue('Misc', 'UseQT')) {
             if (System.showMessage('選択項目をリツイートします。よろしいですか？', '確認', 4) === 6) { // MB_YESNO = 4
-                TwitterService.retweet.create(status_id);
+                retweet_create(status_id);
             }
         } else {
             TextArea.text = 'RT @' + status.user.screen_name + ': ' + status.text;
@@ -72,7 +73,7 @@ var _keyBinding_VKCODE = {
         }
     },
 
-    'c ctrl': function(status_id) {
+    'ctrl c': function(status_id) {
         System.clipbord = TwitterService.status.get(status_id).text;
     }
     },

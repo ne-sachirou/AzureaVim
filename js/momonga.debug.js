@@ -430,7 +430,11 @@ function AzureaVim(status) { // @param Hash: fake StatusUpdate Object
     this.commands = _parse(status.text);
     this.target_status = target_status;
     this.target_view = _env.target_view;
-    this.target_item = this.target_view.getItemByStatusId(status_id);
+    if (status_id !== '0') {
+         this.target_item = this.target_view.getItemByStatusId(status_id);
+    } else {
+        this.target_item = null;
+    }
     this.target_status_text = target_status.text;
     this.target_user = target_status.user;
     TwitterService_status.getUrls(status_id, this.target_status_urls = []);
