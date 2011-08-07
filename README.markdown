@@ -1,3 +1,5 @@
+<b>Important: This project has closed! This's outdated.</b>
+
 <h1>Include</h1>
 Closure Compiler - 2009 Google Inc. Apache License, Version 2.0
 
